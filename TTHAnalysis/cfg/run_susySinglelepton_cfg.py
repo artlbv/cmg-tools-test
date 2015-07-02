@@ -114,12 +114,11 @@ treeProducer = cfg.Analyzer(
 # -- new 74X samples
 from CMGTools.TTHAnalysis.samples.samples_13TeV_74X import *
 
-
 selectedComponents = [
 #TTJets,
 #TTJets_50ns
 TTJets_LO,
-#TTJets_LO_50ns
+TTJets_LO_50ns
 ]
 
 
@@ -134,7 +133,7 @@ sequence = cfg.Sequence(susyCoreSequence+[
 
 
 #-------- HOW TO RUN
-test = 1
+test = "data"
 if test==1:
 	# test a single component, using a single thread.
 	comp = TTJets
@@ -151,6 +150,16 @@ elif test==3:
 	# run all components (1 thread per component).
 	for comp in selectedComponents:
 		comp.splitFactor = len(comp.files)
+
+elif test=="data":
+	from CMGTools.TTHAnalysis.samples.samples_13TeV_Data import *
+	selectedComponents = [ privEGamma2015A ]
+
+	for comp in selectedComponents:
+		comp.splitFactor = 1
+		comp.fineSplitFactor = 1
+		comp.files = comp.files[:1]
+
 
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
