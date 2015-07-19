@@ -158,19 +158,6 @@ QCD_Pt3200toInf_50ns
 
 ### ----------------------------- Zero Tesla run  ----------------------------------------
 
-dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"  # use environmental variable, useful for instance to run on CRAB
-json=dataDir+'/json/Cert_246908-248005_13TeV_PromptReco_Collisions15_ZeroTesla_JSON.txt'
-#lumi: delivered= 4.430 (/nb) recorded= 4.013 (/nb)
-
-jetHT_0T = cfg.DataComponent(
-    name = 'jetHT_0T',
-    files = kreator.getFilesFromEOS('jetHT_0T',
-                                    'firstData_JetHT_v2',
-                                    '/store/user/pandolf/MINIAOD/%s'),
-    intLumi = 4.0,
-    triggers = [],
-    json = None #json
-    )
 
 ### ----------------------------- summary ----------------------------------------
 
@@ -180,9 +167,8 @@ mcSamples_Asymptotic50ns = [ TTJets_50ns, TTJets_LO_50ns, WJetsToLNu_50ns, DYJet
 
 mcSamples = RelVals740 + mcSamples_Asymptotic25ns + mcSamples_Asymptotic50ns
 
-dataSamples = [jetHT_0T]
 
-samples = mcSamples + dataSamples
+samples = mcSamples 
 
 ### ---------------------------------------------------------------------
 
@@ -198,10 +184,6 @@ for comp in mcSamples:
     comp.puFileData=dataDir+"/puProfile_Data12.root"
     comp.efficiency = eff2012
 
-for comp in dataSamples:
-    comp.splitFactor = 1000
-    comp.isMC = False
-    comp.isData = True
 
 if __name__ == "__main__":
    import sys
