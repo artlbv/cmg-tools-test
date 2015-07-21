@@ -25,7 +25,7 @@ else
 fi
 
 LUMI=$2
-OUTDIR="RCScards_lumi$2"
+OUTDIR="RCS_Allcards_lumi$2"
 OPTIONS=" -P $T -j $J -l $LUMI -f --s2v --tree treeProducerSusySingleLepton --od $OUTDIR  --asimov"
 
 # Get current plotter dir
@@ -85,6 +85,9 @@ function makeCard_1l {
 	HT01) GO="${GO} -R ht500 ht5001250 HT>500&&HT<1250" ;;
 	HT12) GO="${GO} -R ht500 ht750 HT>750" ;;
 	HT012) GO="${GO} -R ht500 ht500 HT>500" ;;
+
+	HT01a) GO="${GO} -R ht500 ht5001000 HT>500&&HT<1000" ;;  
+	HT2a) GO="${GO} -R ht500 ht1000 HT>1000" ;;  
     esac;
 
     if [[ "$PRETEND" == "1" ]]; then
@@ -143,17 +146,17 @@ if [[ "$1" == "1l-makeCards" ]]; then
 
     echo "Making individual datacards"
 #45 jets, CR cards
-    for ST in ST1SR ST2SR ST3SR ST4SR ST1CR ST2CR ST3CR ST4CR; do for nJ in 45j; do for nB in 1B 2B 3B; do for HT in HT012; do 
+    for ST in ST1SR ST2SR ST3SR ST4SR ST1CR ST2CR ST3CR ST4CR; do for nJ in 45j; do for nB in 1B 2B 3B 123B 23B; do for HT in HT012 HT01a HT2a HT0 HT1 HT2; do 
         echo " --- CnC2015X_${nB}_${ST}_${nJ}_${HT} ---"
         makeCard_1l $CnC_expr $CnC_bins $SYSTS CnC2015X_${nB}_${ST}_${nJ}_${HT} "$OPTIONS";
 
                 done; done; done; done
 
-    for ST in ST1SR ST2SR ST3SR ST4SR ST1CR ST2CR ST3CR ST4CR; do for nJ in 45j; do for nB in 123B; do for HT in HT012; do 
+    for ST in ST1SR ST2SR ST34SR ST3SR ST4SR ST1CR ST2CR ST34CR ST3CR ST4CR; do for nJ in 45j; do for nB in 1B 23B; do for HT in HT012 HT0 HT1 HT2 HT01 HT12; do 
         echo " --- CnC2015X_${nB}_${ST}K_${nJ}_${HT} ---"
         makeCard_1l $CnC_expr $CnC_bins $SYSTS CnC2015X_${nB}_${ST}K_${nJ}_${HT} "$OPTIONS";
-
                 done; done; done; done
+
 #make kappa factor regions 
     for ST in ST1SR ST1CR; do for nJ in 68j ; do for nB in 123B; do for HT in HT0 HT12; do 
         echo " --- CnC2015X_${nB}_${ST}K_${nJ}_${HT} ---"
