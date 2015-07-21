@@ -69,8 +69,112 @@ def _getYieldsFromInput(inargs):
 
     return (binName,[nTT, nTTErr, nTT_SemiLep, nTTErr_SemiLep, nTT_DiLep, nTTErr_DiLep, nTT_FullHad, nTTErr_FullHad,nSingleT, nSingleTErr, nTTV, nTTVErr, nWJets,  nWJetsErr, nQCD, nQCDErr, nDY, nDYErr])
 
+def makeTable(yieldDict, yieldDict2, format = "text", option = "CRSR"):
+
+    # sort by bin name
+    ykeys = sorted(yieldDict.keys())
+    #print 'KEYS', sorted(ykeys)
+
+    if format == "text":
+
+        # Print yields
+        print 80*'#'
+        print "Yields with zero selected"
+        print "Bin: | TT | SingleT | TTV | WJets | QCD | DY | allbkg | sig"
+
+        for bin in ykeys:#yieldDict:
+
+            (nTT, nTTErr, nTT_SemiLep, nTTErr_SemiLep, nTT_DiLep, nTTErr_DiLep, nTT_FullHad, nTTErr_FullHad, nSingleT, nSingleTErr, nTTV, nTTVErr, nWJets,  nWJetsErr, nQCD, nQCDErr, nDY, nDYErr) = yieldDict[bin]
+            (nTT2, nTTErr2, nTT_SemiLep2, nTTErr_SemiLep2, nTT_DiLep2, nTTErr_DiLep2, nTT_FullHad2, nTTErr_FullHad2, nSingleT2, nSingleTErr2, nTTV2, nTTVErr2, nWJets2,  nWJetsErr2, nQCD2, nQCDErr2, nDY2, nDYErr2) = yieldDict2[bin]
+            
+            allbkg = nTT + nSingleT + nTTV + nWJets + nQCD + nDY
+            if allbkg > 0.5:
+                print "%s:|%2.2f +/- %2.2f|%2.2f +/- %2.2f|%2.2f +/- %2.2f|%2.2f +/- %2.2f|%2.2f +/- %2.2f|%2.2f +/- %2.2f " % ( bin, nTT, nTTErr, nSingleT, nSingleTErr, nTTV, nTTVErr, nWJets,  nWJetsErr, nQCD, nQCDErr, nDY, nDYErr , allbkg1)
+            else:
+                print "%s:|%2.2f +/- %2.2f|%2.2f +/- %2.2f|%2.2f +/- %2.2f|%2.2f +/- %2.2f|%2.2f +/- %2.2f|%2.2f +/- %2.2f  COMBINE" % ( bin, nTT, nTTErr, nSingleT, nSingleTErr, nTTV, nTTVErr, nWJets,  nWJetsErr, nQCD, nQCDErr, nDY, nDYErr , allbkg)
+#                print bin, "| | | | | | | %2.2f | %2.2f +/- %2.2f " % (allbkg, nSig,nSigErr)
+
+    if format == "latex":
+        print '%',80*'#'
+        print '%Going to print out LaTeX tables'
+        print '%',80*'#'
+
+        nColumns = 11
+        if option == "ratio":
+            nColumns = 16
+        if option == "CRSR":
+            nColumns = 12
+
+        print "\\begin{table}[!hbtp]"
+        print "\\begin{center}"
+        print "\\scriptsize"
+        print "\\caption{}"
+#        print "\\caption{Expected event yields for search bins as defined in Table~\\ref{tab:1b_sigreg_3fb}. The \\DF is adjusted for each \\ST bin.}"
+        print "\\label{tab:qcdYieldsHTbin}"
+        print "\\begin{tabular}{|l|"+(nColumns-1)*'c|'+"}"
+
+        print "\\hline"
+        if option == "ratio":
+            print "Bin                 &  \multicolumn{ 1 } {c} {      TT (2l)   }  & \multicolumn{ 1 } {c} {      TT (rest)   } & \multicolumn{ 1 } {c} {      frac dilep SR  } & \multicolumn{ 1 } {c} {      frac semil SR  }  & \multicolumn{ 1 } {c} {      TT (2l)   } &  \multicolumn{ 1 } {c} {      TT (rest)    }  & \multicolumn{ 1 } {c} {      frac dilep CR   \
+ }& \multicolumn{ 1 } {c} {      frac semil CR  } & \multicolumn{ 1 } {c} {      RCS   }\\\ "
+        elif option == "CRSR":
+            print "Bin                 &  \multicolumn{ 1 } {c} {      TT (2l) SR  }  & \multicolumn{ 1 } {c} {      TT (rest)SR   } & \multicolumn{ 1 } {c} {      Rest SR   } & \multicolumn{ 1 } {c} {    AllBkg SR }   &  \multicolumn{ 1 } {c} {      TT (2l) CR   }  & \multicolumn{ 1 } {c} {      TT (rest) CR   } & \multicolumn{ 1 } {c} {      Rest CR  } & \multicolumn{ 1 } {c} {    AllBkg CR} & \multicolumn{ 1 } {c} {      RCSall }\\\ "
+        else:
+            print "Bin                 &  \multicolumn{ 1 } {c} {      TT (2l)   }  & \multicolumn{ 1 } {c} {      TT (rest)   } & \multicolumn{ 1 } {c} {      Single top   } & \multicolumn{ 1 } {c} {      TTV    } & \multicolumn{ 1 } {c} {     WJets  } & \multicolumn{ 1 } {c} {   QCD } & \multicolumn{ 1 } {c} {      DY   } & \multicolumn{ 1 } {c} {    ALL BKG } \\\ "
+        print "\\hline"
+        print "\\hline"
+
+        for bin in ykeys:#yieldDict:
+            (nTT, nTTErr, nTT_SemiLep, nTTErr_SemiLep, nTT_DiLep, nTTErr_DiLep, nTT_FullHad, nTTErr_FullHad, nSingleT, nSingleTErr, nTTV, nTTVErr, nWJets,  nWJetsErr, nQCD, nQCDErr, nDY, nDYErr) = yieldDict[bin]
+            (nTT2, nTTErr2, nTT_SemiLep2, nTTErr_SemiLep2, nTT_DiLep2, nTTErr_DiLep2, nTT_FullHad2, nTTErr_FullHad2, nSingleT2, nSingleTErr2, nTTV2, nTTVErr2, nWJets2,  nWJetsErr2, nQCD2, nQCDErr2, nDY2, nDYErr2) = yieldDict2[bin]
+            
+            allbkg = nTT + nSingleT + nTTV + nWJets + nQCD + nDY
+            allbkgErr = math.sqrt(nTTErr*nTTErr + nSingleTErr*nSingleTErr +nTTVErr*nTTVErr+ nWJetsErr*nWJetsErr +nQCDErr*nQCDErr+nDYErr*nDYErr)
+
+            allbkg2 = nTT2 + nSingleT2 + nTTV2 + nWJets2 + nQCD2 + nDY2
+            allbkgErr2 = math.sqrt(nTTErr2*nTTErr2 + nSingleTErr2*nSingleTErr2 +nTTVErr2*nTTVErr2+ nWJetsErr2*nWJetsErr2 +nQCDErr2*nQCDErr2+nDYErr2*nDYErr2)
+
+            allbkgNoTT = nSingleT + nTTV + nWJets + nQCD + nDY
+            allbkgErrNoTT = math.sqrt(nSingleTErr*nSingleTErr +nTTVErr*nTTVErr+ nWJetsErr*nWJetsErr +nQCDErr*nQCDErr+nDYErr*nDYErr)
+
+            allbkgNoTT2 = nSingleT2 + nTTV2 + nWJets2 + nQCD2 + nDY2
+            allbkgErrNoTT2 = math.sqrt(nSingleTErr2*nSingleTErr2 +nTTVErr2*nTTVErr2+ nWJetsErr2*nWJetsErr2 +nQCDErr2*nQCDErr2+nDYErr2*nDYErr2)
+            bin = bin.replace('_', ' $;$ ')
+
+            RCSall = 0
+            if (allbkg2)>0:
+                RCSall = (allbkg)/(allbkg2)
+            if option == "CRSR":
+
+                print "%s & %2.2f & %2.2f &%2.2f  & %2.2f  & %2.2f  & %2.2f  & %2.2f  & %2.2f & %2.4f  \\\ " % ( bin, nTT_DiLep,nTT_SemiLep, allbkgNoTT, allbkg, nTT_DiLep2,nTT_SemiLep2, allbkgNoTT2, allbkg2, RCSall)
+#            print "%s & %2.2f & %2.2f &%2.2f  & %2.2f  & %2.2f  & %2.2f  & %2.2f  & %2.2f  \\\ " % ( bin, nTT_DiLep,nTT_SemiLep, nSingleT,  nTTV, nWJets,  nQCD,  nDY, allbkgNoTT)
+            RCS = 0
+            if (nTT_SemiLep+nTT_DiLep)>0:
+                RCS = (nTT_SemiLep+nTT_DiLep)/(nTT_SemiLep2+nTT_DiLep2)
+            fSemilep = 0
+            fDilep = 0
+            fSemilep2 = 0
+            fDilep2 = 0
+            if nTT_SemiLep+nTT_DiLep >0 :
+                fSemilep = nTT_SemiLep/(nTT_DiLep+nTT_SemiLep)
+                fDilep = nTT_DiLep/(nTT_DiLep+nTT_SemiLep)
+            if nTT_SemiLep2+nTT_DiLep2 >0 :
+                fSemilep2 = nTT_SemiLep2/(nTT_DiLep2+nTT_SemiLep2)
+                fDilep2 = nTT_DiLep2/(nTT_DiLep2+nTT_SemiLep2)
+#            print "%s & %2.2f & %2.2f &%2.2f  & %2.2f &  %2.2f & %2.2f &%2.2f  & %2.2f & %2.4f\\\ " % ( bin, nTT_DiLep,nTT_SemiLep, fDilep, fSemilep, nTT_DiLep2,nTT_SemiLep2, fDilep2, fSemilep2, RCS)
+#            print nTT, nTT_DiLep, nTT_SemiLep, nTT_FullHad
+        print "\\hline"
+        print "\end{tabular}"
+        print"\\end{center}"
+
+        print "\\end{table}"
+
+
+    return 1
+
 def makeRCS(yieldDictSR, yieldDictCR):
     RCSval={}
+    print "                                                          "
     print "bin | Nsignal +/- Err| NControl +/- Err |  RCS +/- Err| "
     
     ykeys = sorted(yieldDictSR.keys())
@@ -83,11 +187,19 @@ def makeRCS(yieldDictSR, yieldDictCR):
 #        allBkgSRErr = math.sqrt(nTTSRErr*nTTSRErr + nSingleTSRErr*nSingleTSRErr +nTTVSRErr*nTTVSRErr+ nWJetsSRErr*nWJetsSRErr +nQCDSRErr*nQCDSRErr+nDYSRErr*nDYSRErr)
         allBkgSR = nTTSR + nSingleTSR + nTTVSR + nWJetsSR + nDYSR
         allBkgSRErr = math.sqrt(nTTSRErr*nTTSRErr + nSingleTSRErr*nSingleTSRErr +nTTVSRErr*nTTVSRErr+ nWJetsSRErr*nWJetsSRErr+nDYSRErr*nDYSRErr)
+#        allBkgSR = 1
+#        if nTTSR_DiLep>0.01:
+#            allBkgSR = nTTSR_DiLep
+
         
-#        allBkgCR = nTTCR + nSingleTCR + nTTVCR + nWJetsCR + nQCDCR + nDYCR
-#        allBkgCRErr = math.sqrt(nTTCRErr*nTTCRErr + nSingleTCRErr*nSingleTCRErr +nTTVCRErr*nTTVCRErr+ nWJetsCRErr*nWJetsCRErr +nQCDCRErr*nQCDCRErr+nDYCRErr*nDYCRErr) 
-        allBkgCR = nTTCR + nSingleTCR + nTTVCR + nWJetsCR + nDYCR
+        allBkgCR = nTTCR + nSingleTCR + nTTVCR + nWJetsCR + nQCDCR + nDYCR
         allBkgCRErr = math.sqrt(nTTCRErr*nTTCRErr + nSingleTCRErr*nSingleTCRErr +nTTVCRErr*nTTVCRErr+ nWJetsCRErr*nWJetsCRErr +nDYCRErr*nDYCRErr) 
+#        allBkgCRErr = math.sqrt(nTTCRErr*nTTCRErr + nSingleTCRErr*nSingleTCRErr +nTTVCRErr*nTTVCRErr+ nWJetsCRErr*nWJetsCRErr +nQCDCRErr*nQCDCRErr+nDYCRErr*nDYCRErr) 
+#        allBkgCR = nTTCR + nSingleTCR + nTTVCR + nWJetsCR + nDYCR
+#        allBkgCR = 1
+#        if nTTCR_DiLep>0.01:
+#            allBkgCR = nTTCR_DiLep
+ 
         
         RCS = allBkgSR/allBkgCR
         RCS_Err = RCS * math.sqrt(allBkgSRErr/allBkgSR*allBkgSRErr/allBkgSR + allBkgCRErr/allBkgCR*allBkgCRErr/allBkgCR)
@@ -182,8 +294,12 @@ if __name__ == "__main__":
     cardNames = [(name.replace(cardPattern+'_','')).replace('.input.root','') for name in cardNames]
 
     SB = '45j'
-    cardNamesSR_SB = [name for name in cardNames if name.find('SR_' + SB) > 0]
-    cardNamesCR_SB = [name for name in cardNames if name.find('CR_' + SB) > 0]
+    cardNamesSR_SB = [name for name in cardNames if name.find('SR_' + SB) > 0 and (name.find('a') <0 and name.find('012') <0)]
+    cardNamesCR_SB = [name for name in cardNames if name.find('CR_' + SB) > 0 and (name.find('a') <0 and name.find('012') <0)]
+
+    SB = '45j'
+    cardNamesSR_SBa = [name for name in cardNames if name.find('SR_' + SB) > 0 and (name.find('a') >0 or name.find('012') >0)]
+    cardNamesCR_SBa = [name for name in cardNames if name.find('CR_' + SB) > 0 and (name.find('a') >0 or name.find('012') >0)]
 
     nj68 = '68j'
     cardNamesSR_nj68 = [name for name in cardNames if name.find('SR_' + nj68) > 0]
@@ -207,6 +323,12 @@ if __name__ == "__main__":
     pool = Pool(nJobs)
     yieldDictSR_SB = dict(pool.map(_getYieldsFromInput, argTupleSR_SB))             
     yieldDictCR_SB = dict(pool.map(_getYieldsFromInput, argTupleCR_SB))                   
+
+    argTupleSR_SBa = [(commondir, cardDirectory, name, ratDict) for name in cardNamesSR_SBa]
+    argTupleCR_SBa = [(commondir, cardDirectory, name, ratDict) for name in cardNamesCR_SBa]
+    pool = Pool(nJobs)
+    yieldDictSR_SBa = dict(pool.map(_getYieldsFromInput, argTupleSR_SBa))             
+    yieldDictCR_SBa = dict(pool.map(_getYieldsFromInput, argTupleCR_SBa))                   
 
     argTupleSR_nj68 = [(commondir, cardDirectory, name, ratDict) for name in cardNamesSR_nj68]
     argTupleCR_nj68 = [(commondir, cardDirectory, name, ratDict) for name in cardNamesCR_nj68]
@@ -241,7 +363,15 @@ if __name__ == "__main__":
     RCS_SB_K = makeRCS(yieldDictSR_SB_K,yieldDictCR_SB_K)
 
 
-    printRCSfunction(RCS_SB)
-#    print RCS_SB.keys(), RCS_nj68, RCS_nj9Inf
+    makeTable(yieldDictSR_SB,yieldDictCR_SB,"latex")
+    makeTable(yieldDictSR_SBa,yieldDictCR_SBa,"latex")
+    makeTable(yieldDictSR_K,yieldDictCR_K,"latex")
+    makeTable(yieldDictSR_nj68,yieldDictCR_nj68,"latex")
+    makeTable(yieldDictSR_nj9Inf,yieldDictCR_nj9Inf,"latex")
+
+
+
+#    printRCSfunction(RCS_SB)
+
     
-    makeKfactor(RCS_SB_K, RCS_K)
+#    makeKfactor(RCS_SB_K, RCS_K)
