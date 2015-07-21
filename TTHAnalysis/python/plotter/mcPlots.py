@@ -100,7 +100,7 @@ def doTinyCmsPrelim(textLeft="_default_",textRight="_default_",hasExpo=False,tex
         doSpam(textLeft, (.28 if hasExpo else .17)+xoffs, .955, .60+xoffs, .995, align=12, textSize=textSize)
     if textRight not in ['', None]:
         if "%(lumi)" in textRight: 
-            textRight = textRight % { 'lumi':lumi }
+            textRight = textRight % { 'lumi':lumi*1000 }
         doSpam(textRight,.68+xoffs, .955, .99+xoffs, .995, align=32, textSize=textSize)
 
 def printExtraLabel(labeltext, legPosition):
@@ -548,6 +548,7 @@ class PlotMaker:
                 stack = ROOT.THStack(pspec.name+"_stack",pspec.name)
                 hists = [v for k,v in pmap.iteritems() if k != 'data']
                 total = hists[0].Clone(pspec.name+"_total"); total.Reset()
+                totalscale = hists[0].Clone(pspec.name+"_totalscale"); total.Reset()
                 totalSyst = hists[0].Clone(pspec.name+"_totalSyst"); totalSyst.Reset()
                 if self._options.plotmode == "norm": 
                     if 'data' in pmap:
@@ -568,6 +569,9 @@ class PlotMaker:
                         if plot.Integral() <= 0: continue
                         if mca.isSignal(p): plot.Scale(options.signalPlotScale)
                         if mca.isSignal(p) and options.noStackSig == True: continue 
+
+                        if options.scaleMCtoData:
+                            plot.Scale(options.scaleMCtoData)
                         if self._options.plotmode == "stack":
                             stack.Add(plot)
                             total.Add(plot)
@@ -768,7 +772,7 @@ def addPlotMakerOptions(parser):
     parser.add_option("--ss",  "--scale-signal", dest="signalPlotScale", default=1.0, type="float", help="scale the signal in the plots by this amount");
     #parser.add_option("--lspam", dest="lspam",   type="string", default="CMS Simulation", help="Spam text on the right hand side");
     parser.add_option("--lspam", dest="lspam",   type="string", default="CMS Preliminary", help="Spam text on the right hand side");
-    parser.add_option("--rspam", dest="rspam",   type="string", default="#sqrt{s} = 13 TeV, L = %(lumi).1f fb^{-1}", help="Spam text on the right hand side");
+    parser.add_option("--rspam", dest="rspam",   type="string", default="#sqrt{s} = 13 TeV, L = %(lumi).1f pb^{-1}", help="Spam text on the right hand side");
     parser.add_option("--extraLabel", dest="extraLabel", default = "", help="print extra text next to the legend (several lines in case string contains \\n )")
     parser.add_option("--print", dest="printPlots", type="string", default="png,pdf,txt", help="print out plots in this format or formats (e.g. 'png,pdf,txt')");
     parser.add_option("--pdir", "--print-dir", dest="printDir", type="string", default="plots", help="print out plots in this directory");
@@ -794,6 +798,8 @@ def addPlotMakerOptions(parser):
     parser.add_option("--legendTextSize", dest="legendTextSize", type="float", default=0.035, help="Textsize used in the legend (if no ratio plot is done)")
     parser.add_option("--flagDifferences", dest="flagDifferences", action="store_true", default=False, help="Flag plots that are different (when using only two processes, and plotmode nostack")
     parser.add_option("--pseudoData", dest="pseudoData", type="string", default=None, help="If set to 'background' or 'all', it will plot also a pseudo-dataset made from background (or signal+background) with Poisson fluctuations in each bin.")
+
+    parser.add_option("--scaleMCtoData", dest="scaleMCtoData", type="float", default=False, help="Scale stack by factor")
 
 if __name__ == "__main__":
     from optparse import OptionParser
