@@ -1,0 +1,14 @@
+#Background
+TT 	 : TTJets_LO_50ns : xsec ; FillColor=ROOT.kBlue-2, Label="t\#bar{t}", NormSystematic=0.5
+
+SingleT  :TToLeptons_tch_50ns	 : xsec ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}", NormSystematic=0.5
+SingleT  :TBar_tWch_50ns   	 : xsec ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}", NormSystematic=0.5
+SingleT  :T_tWch_50ns            : xsec ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}", NormSystematic=0.5
+
+WJets    : WJetsToLNu_50ns :  xsec  ; Label="W+jets", FillColor=ROOT.kGreen-2, NormSystematic=0.5
+
+DY       : DYJetsToLL_M50_50n :  xsec; Label="DY+jets", FillColor=ROOT.kRed-6, NormSystematic=0.5
+
+# DATA
+#data: SingleElectron_Run2015B
+#data: SingleMuon_Run2015B
