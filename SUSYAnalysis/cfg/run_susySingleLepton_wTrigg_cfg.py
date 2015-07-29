@@ -23,19 +23,19 @@ lepAna.packedCandidates = 'packedPFCandidates'
 isolation = "miniIso"
 
 if isolation == "miniIso":
-        # do miniIso
-        lepAna.doMiniIsolation = True
-        lepAna.miniIsolationPUCorr = 'rhoArea'
-        lepAna.miniIsolationVetoLeptons = None
-        lepAna.loose_muon_isoCut     = lambda muon : muon.miniRelIso < 0.4
-        lepAna.loose_electron_isoCut = lambda elec : elec.miniRelIso < 0.4
+	# do miniIso
+	lepAna.doMiniIsolation = True
+	lepAna.miniIsolationPUCorr = 'rhoArea'
+	lepAna.miniIsolationVetoLeptons = None
+	lepAna.loose_muon_isoCut     = lambda muon : muon.miniRelIso < 0.4
+	lepAna.loose_electron_isoCut = lambda elec : elec.miniRelIso < 0.4
 elif isolation == "relIso03":
-        # normal relIso03
-        lepAna.ele_isoCorr = "rhoArea"
-        lepAna.mu_isoCorr = "rhoArea"
+	# normal relIso03
+	lepAna.ele_isoCorr = "rhoArea"
+	lepAna.mu_isoCorr = "rhoArea"
 
-        lepAna.loose_electron_relIso = 0.5
-        lepAna.loose_muon_relIso = 0.5
+	lepAna.loose_electron_relIso = 0.5
+	lepAna.loose_muon_relIso = 0.5
 
 # --- LEPTON SKIMMING ---
 ttHLepSkim.minLeptons = 0
@@ -59,68 +59,73 @@ genAna.allGenTaus = True
 
 from CMGTools.TTHAnalysis.analyzers.ttHLepEventAnalyzer import ttHLepEventAnalyzer
 ttHEventAna = cfg.Analyzer(
-        ttHLepEventAnalyzer, name="ttHLepEventAnalyzer",
-        minJets25 = 0,
-        )
+	ttHLepEventAnalyzer, name="ttHLepEventAnalyzer",
+	minJets25 = 0,
+	)
 
 ## Insert the FatJet, SV, HeavyFlavour analyzers in the sequence
 susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
-                        ttHFatJetAna)
+			ttHFatJetAna)
 susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
-                        ttHSVAna)
+			ttHSVAna)
 
 ## Single lepton + ST skim
 from CMGTools.TTHAnalysis.analyzers.ttHSTSkimmer import ttHSTSkimmer
 ttHSTSkimmer = cfg.Analyzer(
-        ttHSTSkimmer, name='ttHSTSkimmer',
-        minST = 200,
-        )
+	ttHSTSkimmer, name='ttHSTSkimmer',
+	minST = 200,
+	)
 
 #from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import * # central trigger list
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15_1l import *
 
 triggerFlagsAna.triggerBits = {
-        # put trigger here for _MC_
-        ## hadronic
-        'HT350' : triggers_HT350,
-        'HT600' : triggers_HT600,
-        'HT900' : triggers_HT900,
-        'MET170' : triggers_MET170,
-        'HTMET' : triggers_HTMET,
-        'Had' : triggers_had,
-        ## muon
-        'SingleMu' : triggers_1mu,
-        'Mu45NoIso' : trigger_1mu_noiso_r,
-        'Mu50NoIso' : trigger_1mu_noiso_w,
-        'MuHT600' : triggers_mu_ht600,
-        'MuHT400MET70' : triggers_mu_ht400_met70,
-        'MuMET120' : triggers_mu_met120,
-        'MuHT400B': triggers_mu_ht400_btag,
-        'MuHad' : triggers_muhad,
-        ## electrons
-        'SingleEl' : triggers_1el,
-        'ElNoIso' : trigger_1el_noiso,
-        'EleHT600' : triggers_el_ht600,
-        'EleHT400MET70' : triggers_el_ht400_met70,
-        'EleHT200' :triggers_el_ht200,
-        'ElHT400B': triggers_el_ht400_btag,
-        'ElHad' : triggers_elhad
-        #put trigger here for data
-        }
+	# put trigger here for _MC_
+	## hadronic
+	'HT350' : triggers_HT350,
+	'HT600' : triggers_HT600,
+	'HT800' : triggers_HT800,
+	'HT900' : triggers_HT900,
+	'MET170' : triggers_MET170,
+	'HTMET' : triggers_HTMET,
+	'HT350MET120' : triggers_HT350MET120,
+	'HT350MET100' : triggers_HT350MET100,
+	'Had' : triggers_had,
+	## muon
+	'SingleMu' : triggers_1mu,
+	'Mu45NoIso' : trigger_1mu_noiso_r,
+	'Mu50NoIso' : trigger_1mu_noiso_w,
+	'MuHT600' : triggers_mu_ht600,
+	'MuHT400MET70' : triggers_mu_ht400_met70,
+	'MuHT350MET70' : triggers_mu_ht350_met70,
+	'MuMET120' : triggers_mu_met120,
+	'MuHT400B': triggers_mu_ht400_btag,
+	'MuHad' : triggers_muhad,
+	## electrons
+	'SingleEl' : triggers_1el,
+	'ElNoIso' : trigger_1el_noiso,
+	'EleHT600' : triggers_el_ht600,
+	'EleHT400MET70' : triggers_el_ht400_met70,
+	'EleHT350MET70' : triggers_el_ht350_met70,
+	'EleHT200' :triggers_el_ht200,
+	'ElHT400B': triggers_el_ht400_btag,
+	'ElHad' : triggers_elhad
+	#put trigger here for data
+	}
 
 # Tree Producer
 from CMGTools.TTHAnalysis.analyzers.treeProducerSusySingleLepton import *
 ## Tree Producer
 treeProducer = cfg.Analyzer(
-        AutoFillTreeProducer, name='treeProducerSusySingleLepton',
-        vectorTree = True,
-        saveTLorentzVectors = False,  # can set to True to get also the TLorentzVectors, but trees will be bigger
-        defaultFloatType = 'F', # use Float_t for floating point
-        PDFWeights = PDFWeights,
-        globalVariables = susySingleLepton_globalVariables,
-        globalObjects = susySingleLepton_globalObjects,
-        collections = susySingleLepton_collections,
-        )
+	AutoFillTreeProducer, name='treeProducerSusySingleLepton',
+	vectorTree = True,
+	saveTLorentzVectors = False,  # can set to True to get also the TLorentzVectors, but trees will be bigger
+	defaultFloatType = 'F', # use Float_t for floating point
+	PDFWeights = PDFWeights,
+	globalVariables = susySingleLepton_globalVariables,
+	globalObjects = susySingleLepton_globalObjects,
+	collections = susySingleLepton_collections,
+	)
 
 
 
@@ -135,58 +140,84 @@ treeProducer = cfg.Analyzer(
 # -- samples at DESY
 from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
 
-selectedComponents = [
-	T1tttt_mGo1500_mChi100,
-	T1tttt_mGo1200_mChi800
-        #TTJets,
-        #TTJets_50ns
-        #TTJets_LO,
-        #TTJets_LO_50ns,
+#selectedComponents = [
+#	T1tttt_mGo1500_mChi100,
+#	T1tttt_mGo1200_mChi800
+	#TTJets,
+	#TTJets_50ns
+	#TTJets_LO,
+	#TTJets_LO_50ns,
 	#TTJets_LO_25ns
-        ]
-
+#        ]
+selectedComponents = [
+    QCD_HT300to500,
+    QCD_HT500to700,
+    QCD_HT700to1000,
+    QCD_HT1000to1500,
+    QCD_HT1500to2000,
+    QCD_HT2000toInf
+]
 
 #-------- SEQUENCE
 
 sequence = cfg.Sequence(susyCoreSequence+[
-                ttHEventAna,
-                #ttHSTSkimmer,
-                #ttHReclusterJets,
-                treeProducer,
-                ])
+		ttHEventAna,
+		#ttHSTSkimmer,
+		#ttHReclusterJets,
+		treeProducer,
+		])
 
 
 #-------- HOW TO RUN
-test = 2
+#test = 'MC'
+test = 'data'
+test = 3
+
 if test==1:
-        # test a single component, using a single thread.
-        comp = TTJets
-        comp.files = comp.files[:1]
-        selectedComponents = [comp]
-        comp.splitFactor = 1
+	# test a single component, using a single thread.
+	comp = TTJets
+	comp.files = comp.files[:1]
+	selectedComponents = [comp]
+	comp.splitFactor = 1
 elif test==2:
-        # test all components (1 thread per component).
-        for comp in selectedComponents:
-                comp.splitFactor = 1
-                comp.fineSplitFactor = 1
-                comp.files = comp.files[:1]
+	# test all components (1 thread per component).
+	for comp in selectedComponents:
+		comp.splitFactor = 1
+		comp.fineSplitFactor = 1
+		comp.files = comp.files[:1]
 elif test==3:
-        # run all components (1 thread per component).
-        for comp in selectedComponents:
+	# run all components (1 thread per component).
+	for comp in selectedComponents:
+		comp.fineSplitFactor = 5
+		comp.splitFactor = len(comp.files)
+
+elif test=='MC':
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	selectedComponents = mcSamples_Asymptotic50ns
+
+	for comp in selectedComponents:
                 comp.splitFactor = len(comp.files)
 
 elif test=="data":
-        from CMGTools.RootTools.samples.samples_13TeV_Data import *
-        selectedComponents = [ privEGamma2015A ]
+	#from CMGTools.RootTools.samples.samples_13TeV_Data import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
+	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
+	#selectedComponents = [ SingleElectron_Run2015B ]
+	selectedComponents = [ SingleMuon_Run2015B ]
+	#selectedComponents = [ JetHT_Run2015B ]
+	#selectedComponents = [ HTMHT_Run2015B ]
 
-        for comp in selectedComponents:
-                comp.splitFactor = 1
-                comp.fineSplitFactor = 1
-                comp.files = comp.files[:1]
+	eventFlagsAna.processName = 'HLT'
+        jetAna.recalibrateJets = False
+
+	for comp in selectedComponents:
+		comp.splitFactor = len(comp.files)
+		comp.fineSplitFactor = 10
+		#comp.files = comp.files[:1]
 
 
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
-                     sequence = sequence,
-                     services = [],
-                     events_class = Events)
+		     sequence = sequence,
+		     services = [],
+		     events_class = Events)
