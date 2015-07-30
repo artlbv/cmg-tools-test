@@ -29,9 +29,9 @@ centralEta = 2.4
 #btag_TightWP = 0.941
 
 ## CSV v2 (CSV-IVF) (Spring15 50ns)
-btag_LooseWP = 0.423 # <-- update
+btag_LooseWP = 0.605
 btag_MediumWP = 0.890
-btag_TightWP = 0.941 # <-- update
+btag_TightWP = 0.990
 
 
 ## Non-triggering electron MVA id (Phys14 WP)
