@@ -5,7 +5,7 @@ import re
 
 class ComponentCreator(object):
     def makeMCComponent(self,name,dataset,user,pattern,xSec=1,useAAA=False):
-        
+
          component = cfg.MCComponent(
              dataset=dataset,
              name = name,
@@ -92,7 +92,7 @@ class ComponentCreator(object):
         try:
             files = getDatasetFromCache('EOS%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern))
         except IOError:
-            files = [ 'root://eoscms.cern.ch/'+x for x in eostools.listFiles('/eos/cms'+path) if re.match(pattern,x) ] 
+            files = [ 'root://eoscms.cern.ch/'+x for x in eostools.listFiles('/eos/cms'+path) if re.match(pattern,x) ]
             if len(files) == 0:
                 raise RuntimeError, "ERROR making component %s: no files found under %s matching '%s'" % (name,path,pattern)
             writeDatasetToCache('EOS%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern), files)
@@ -116,7 +116,7 @@ class ComponentCreator(object):
         try:
             files = getDatasetFromCache('PSI%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern))
         except IOError:
-            files = [ 'root://t3se01.psi.ch//'+x.replace("/pnfs/psi.ch/cms/trivcat/","") for x in eostools.listFiles('/pnfs/psi.ch/cms/trivcat/'+path) if re.match(pattern,x) ] 
+            files = [ 'root://t3se01.psi.ch//'+x.replace("/pnfs/psi.ch/cms/trivcat/","") for x in eostools.listFiles('/pnfs/psi.ch/cms/trivcat/'+path) if re.match(pattern,x) ]
             if len(files) == 0:
                 raise RuntimeError, "ERROR making component %s: no files found under %s matching '%s'" % (name,path,pattern)
             writeDatasetToCache('PSI%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern), files)
@@ -133,9 +133,9 @@ class ComponentCreator(object):
         )
         return component
 
-    def getFilesFromDESY(self, dataset, user, pattern):
+    def getFilesFromDESY(self, dataset, user, pattern, run_range=None):
         # print 'getting files for', dataset,user,pattern
-        ds = createDataset( user, dataset, pattern, True )
+        ds = createDataset( user, dataset, pattern, readcache=True, run_range=run_range )
         files = ds.listOfGoodFiles()
         mapping = 'dcap://dcache-cms-dcap.desy.de/pnfs/desy.de/cms/tier2/%s'
         return [ mapping % f for f in files]
@@ -152,6 +152,18 @@ class ComponentCreator(object):
         )
         return component
 
+    def makeDataComponentDESY(self,name,dataset,user,pattern,json=None,run_range=None,triggers=[],vetoTriggers=[]):
+        component = cfg.DataComponent(
+            #dataset = dataset,
+            name = name,
+            files = self.getFilesFromDESY(dataset,user,pattern,run_range=run_range),
+            intLumi = 1,
+            triggers = triggers,
+            json = json
+            )
+        component.vetoTriggers = vetoTriggers
+
+        return component
 
     def getFilesFromIC(self, dataset, user, pattern):
         # print 'getting files for', dataset,user,pattern
@@ -178,7 +190,7 @@ class ComponentCreator(object):
         try:
             files = getDatasetFromCache('Local%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern))
         except IOError:
-            files = [ x for x in eostools.listFiles(path,True) if re.match(pattern,x) ] 
+            files = [ x for x in eostools.listFiles(path,True) if re.match(pattern,x) ]
             if len(files) == 0:
                 raise RuntimeError, "ERROR making component %s: no files found under %s matching '%s'" % (name,path,pattern)
             writeDatasetToCache('Local%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern), files)
@@ -206,7 +218,7 @@ class ComponentCreator(object):
             json = json
             )
         component.vetoTriggers = vetoTriggers
-        
+
         return component
 
     def getFiles(self, dataset, user, pattern, useAAA=False, run_range=None):
@@ -232,8 +244,8 @@ class ComponentCreator(object):
         fraction=info.dataset_details['PrimaryDatasetFraction']
         if fraction<0.001:
             print 'ERROR FRACTION IS ONLY ',fraction
-        return fraction 
-        
+        return fraction
+
 
 def testSamples(mcSamples):
    from subprocess import check_output, CalledProcessError
