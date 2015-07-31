@@ -50,7 +50,7 @@ jetAna.mcGT = "Summer15_V5_p6_MC"
 jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
 jetAna.recalibrateJets = True #should be true in susycore, already
-metAna.recalibrate = True #should be false in susycore, already
+metAna.recalibrate = False #should be false in susycore, already
 
 isoTrackAna.setOff=False
 
@@ -133,15 +133,16 @@ treeProducer = cfg.Analyzer(
 #selectedComponents = [QCD_HT_100To250, QCD_HT_250To500, QCD_HT_500To1000, QCD_HT_1000ToInf,TTJets, TTWJets, TTZJets, TTH, SMS_T1tttt_2J_mGl1500_mLSP100, SMS_T1tttt_2J_mGl1200_mLSP800] + SingleTop + WJetsToLNuHT + DYJetsM50HT + T5ttttDeg + T1ttbbWW + T5qqqqWW
 
 # -- new 74X samples
-from CMGTools.RootTools.samples.samples_13TeV_74X import *
+#from CMGTools.RootTools.samples.samples_13TeV_74X import *
 
-selectedComponents = [
-        TTJets,
+
+#selectedComponents = [
+        #TTJets,
         #TTJets_50ns
         #TTJets_LO,
         #TTJets_LO_50ns,
 	#TTJets_LO_25ns
-        ]
+#        ]
 
 
 #-------- SEQUENCE
@@ -185,9 +186,8 @@ elif test=="data":
 		comp.isMC = False
 		comp.isData = True
 
-
         for comp in selectedComponents:
-		comp.splitFactor = 1
+		comp.splitFactor = len(comp.files)
                 comp.fineSplitFactor = 10
                 #comp.files = comp.files[:1]
 
