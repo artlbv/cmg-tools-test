@@ -124,7 +124,7 @@ def reMax(hist,hist2,islog,factorLin=1.3,factorLog=2.0):
           max2 = max(max2, (hist2.GetBinContent(b) + hist2.GetBinError(b))*(factorLog if islog else factorLin))
     if max2 > max0:
         max0 = max2;
-        if islog: hist.GetYaxis().SetRangeUser(0.9,max0)
+        if islog: hist.GetYaxis().SetRangeUser(0.5,max0)
         else:     hist.GetYaxis().SetRangeUser(0,max0)
 
 def doDataNorm(pspec,pmap):
@@ -619,7 +619,8 @@ class PlotMaker:
                 if doRatio: ROOT.gStyle.SetPaperSize(20.,25.)
                 else:       ROOT.gStyle.SetPaperSize(20.,20.)
                 # create canvas
-                c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, 600, (750 if doRatio else 600))
+                #c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, 600, (750 if doRatio else 600))
+                c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, (750 if doRatio else 600), (750 if doRatio else 600))
                 c1.Draw()
                 p1, p2 = c1, None # high and low panes
                 # set borders, if necessary create subpads
@@ -654,7 +655,7 @@ class PlotMaker:
                     total.SetMaximum(maximum)
                 elif islog: #plain log without extra labels
                     total.SetMaximum(2*total.GetMaximum())
-                    total.SetMinimum(0.01) # default min value for logy
+                    total.SetMinimum(0.05) # default min value for logy
                     if pspec.hasOption('YMin'): total.SetMinimum(pspec.getOption('YMin',1.0))
                 else: total.SetMinimum(0)
                 total.Draw("HIST")
@@ -687,7 +688,7 @@ class PlotMaker:
                         doStatTests(totalSyst, pmap['data'], options.doStatTests, legendCorner=pspec.getOption('Legend','TR'))
                 if pspec.hasOption('YMin') and pspec.hasOption('YMax'):
                     total.GetYaxis().SetRangeUser(pspec.getOption('YMin',1.0), pspec.getOption('YMax',1.0))
-                legendCutoff = pspec.getOption('LegendCutoff', 1e-5 if c1.GetLogy() else 1e-2)
+                legendCutoff = pspec.getOption('LegendCutoff', 0 if c1.GetLogy() else 1e-2)
                 if self._options.plotmode == "norm": legendCutoff = 0 
                 doLegend(pmap,mca,corner=pspec.getOption('Legend','TR'),
                                   cutoff=legendCutoff, mcStyle=("F" if self._options.plotmode == "stack" else "L"),
