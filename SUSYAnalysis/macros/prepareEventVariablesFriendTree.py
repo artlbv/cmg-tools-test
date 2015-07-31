@@ -5,7 +5,7 @@ import os.path, re
 
 MODULES = []
 
-from CMGTools.SUSYAnalysis.tools.eventVars_1l_base import EventVars1L_base
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_newbase import EventVars1L_base
 MODULES.append( ('1l_Basics', EventVars1L_base()) )
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_triggers import EventVars1L_triggers
 MODULES.append( ('1l_Triggers', EventVars1L_triggers()) )
@@ -18,10 +18,10 @@ MODULES.append( ('1l_TopVars', EventVars1L_Top()) )
 #MODULES.append( ('1l_Extra', EventVars1L_extra()) )
 from CMGTools.SUSYAnalysis.tools.resolvedTopTagVars_1l import resolvedTopTagVars1l
 MODULES.append( ('1l_resolvedTopTagVars', resolvedTopTagVars1l()) )
-'''
+
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_genLevel import EventVars1LGenLevel
 MODULES.append( ('1l_BasicsGen', EventVars1LGenLevel()) )
-
+'''
 
 class VariableProducer(Module):
     def __init__(self,name,booker,modules):
