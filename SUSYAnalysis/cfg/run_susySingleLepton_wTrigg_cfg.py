@@ -171,7 +171,6 @@ sequence = cfg.Sequence(susyCoreSequence+[
 #-------- HOW TO RUN
 #test = 'MC'
 test = 'data'
-test = 3
 
 if test==1:
 	# test a single component, using a single thread.
@@ -199,21 +198,18 @@ elif test=='MC':
                 comp.splitFactor = len(comp.files)
 
 elif test=="data":
-	#from CMGTools.RootTools.samples.samples_13TeV_Data import *
-	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
+	from CMGTools.RootTools.samples.samples_13TeV_Data import *
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
 	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
 	#selectedComponents = [ SingleElectron_Run2015B ]
-	selectedComponents = [ SingleMuon_Run2015B ]
+	selectedComponents = [ SingleElectron_Run2015B_17Jul ]
 	#selectedComponents = [ JetHT_Run2015B ]
 	#selectedComponents = [ HTMHT_Run2015B ]
 
-	eventFlagsAna.processName = 'HLT'
-        jetAna.recalibrateJets = False
-
 	for comp in selectedComponents:
-		comp.splitFactor = len(comp.files)
-		comp.fineSplitFactor = 10
-		#comp.files = comp.files[:1]
+		#comp.splitFactor = len(comp.files)
+		#comp.fineSplitFactor = 10
+		comp.files = comp.files[:1]
 
 
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
