@@ -48,15 +48,6 @@ Ele_mvaPhys14_eta0p8_L = 0.35;
 Ele_mvaPhys14_eta1p4_L = 0.20;
 Ele_mvaPhys14_eta2p4_L = -0.52;
 
-## Isolation
-ele_miniIsoCut = 0.1
-muo_miniIsoCut = 0.2
-Lep_miniIsoCut = 0.4
-
-goodEl_lostHits = 0
-goodEl_sip3d = 4
-goodMu_sip3d = 4
-
 ## Ele MVA check
 def checkEleMVA(lepMVA,lepEta,WP = 'Tight'):
     # Eta dependent MVA ID check:
@@ -83,6 +74,15 @@ def checkEleMVA(lepMVA,lepEta,WP = 'Tight'):
 
     return passID
 
+## Isolation
+ele_miniIsoCut = 0.1
+muo_miniIsoCut = 0.2
+Lep_miniIsoCut = 0.4
+
+goodEl_lostHits = 0
+goodEl_sip3d = 4
+goodMu_sip3d = 4
+
 class EventVars1L_base:
     def __init__(self):
         self.branches = [
@@ -91,6 +91,8 @@ class EventVars1L_base:
             ## leptons
             'nLep', 'nVeto',
             'nEl','nMu',
+            ## selected == tight leps
+            'nTightLeps', 'nTightEl','nTightMu',
             #("tightLeps_DescFlag","I",10,"nTightLeps"),
             'Lep_pdgId','Lep_pt','Lep_eta','Lep_phi','Lep_Idx','Lep_relIso','Lep_miniIso',
             'Selected', # selected (tight) or anti-selected lepton
@@ -145,7 +147,7 @@ class EventVars1L_base:
         ## make MET
         metp4 = ROOT.TLorentzVector(0,0,0,0)
         metp4.SetPtEtaPhiM(event.met_pt,event.met_eta,event.met_phi,event.met_mass)
-        pmiss  =array.array('d',[event.met_pt * cos(event.met_phi), event.met_pt * sin(event.met_phi)] )
+        #pmiss = array.array('d',[event.met_pt * cos(event.met_phi), event.met_pt * sin(event.met_phi)] )
 
         #plain copy of MET pt (just as an example and cross-check for proper friend tree production)
         ret["MET"] = metp4.Pt()
@@ -163,24 +165,23 @@ class EventVars1L_base:
         antiTightLepsIdx = []
         antiVetoLeps = []
 
-
         for idx,lep in enumerate(leps):
 
             # check acceptance
             lepEta = abs(lep.eta)
-
             if(lepEta > 2.5): continue
 
-            # muons
-            if(abs(lep.pdgId) == 13):
+            # Pt cut
+            if lep.pt < 10: continue
 
-                # Pt cut
-                if lep.pt < 10: continue
+            ###################
+            # MUONS
+            ###################
+            if(abs(lep.pdgId) == 13):
 
                 # pass variables
                 passID = False
                 passIso = False
-
 
                 # ID and Iso check:
                 if lep.mediumMuonId == 1 and lep.sip3d < goodMu_sip3d:
@@ -215,11 +216,11 @@ class EventVars1L_base:
                     selectedVetoLeps.append(lep);
                     antiTightLeps.append(lep)
 
-            # electrons
-            if(abs(lep.pdgId) == 11):
+            ###################
+            # ELECTRONS
+            ###################
 
-                # Pt cut
-                if lep.pt < 10: continue
+            if(abs(lep.pdgId) == 11):
 
                 # pass variables
                 passIso = False
@@ -256,7 +257,7 @@ class EventVars1L_base:
                     selectedVetoLeps.append(lep)
 
                     # Iso check:
-                    if lep.miniRelIso < 0.4: passIso = True
+                    if lep.miniRelIso < Lep_miniIsoCut: passIso = True
                     # conversion check
                     passConv = True
 
@@ -278,6 +279,10 @@ class EventVars1L_base:
             tightLepsIdx = selectedTightLepsIdx
 
             vetoLeps = selectedVetoLeps
+
+            ret['nTightLeps'] = len(tightLeps)
+            ret['nTightMu'] = sum([ abs(lep.pdgId) == 13 for lep in tightLeps])
+            ret['nTightEl'] = sum([ abs(lep.pdgId) == 11 for lep in tightLeps])
 
             ret['Selected'] = 1
 
@@ -382,7 +387,7 @@ class EventVars1L_base:
         # isSR SR vs CR flag
         isSR = 0
 
-        if LT < 200:   isSR = 0
+        if LT < 250:   isSR = 0
         elif LT < 350: isSR = dPhi > 1.0
         elif LT < 600: isSR = dPhi > 0.75
         elif LT > 600: isST = dPhi > 0.5
