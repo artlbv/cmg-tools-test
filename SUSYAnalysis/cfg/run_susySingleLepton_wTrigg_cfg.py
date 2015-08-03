@@ -11,12 +11,12 @@ from CMGTools.TTHAnalysis.analyzers.susyCore_modules_cff import *
 
 # Lepton Preselection
 # ele
-lepAna.loose_electron_id = "POG_MVA_ID_Run2_NonTrig_Loose"
+lepAna.loose_electron_id = "POG_MVA_ID_Run2_NonTrig_VLoose"
 lepAna.loose_electron_pt  = 5
 # mu
 lepAna.loose_muon_pt  = 5
 
-# Redefine what I need
+# lep collection
 lepAna.packedCandidates = 'packedPFCandidates'
 
 # selec Iso
@@ -38,7 +38,7 @@ elif isolation == "relIso03":
 	lepAna.loose_muon_relIso = 0.5
 
 # --- LEPTON SKIMMING ---
-ttHLepSkim.minLeptons = 0
+ttHLepSkim.minLeptons = 1
 ttHLepSkim.maxLeptons = 999
 #LepSkim.idCut  = ""
 #LepSkim.ptCuts = []
@@ -89,32 +89,30 @@ triggerFlagsAna.triggerBits = {
 	'HT350' : triggers_HT350,
 	'HT600' : triggers_HT600,
 	'HT800' : triggers_HT800,
-	'HT900' : triggers_HT900,
 	'MET170' : triggers_MET170,
-	'HTMET' : triggers_HTMET,
 	'HT350MET120' : triggers_HT350MET120,
 	'HT350MET100' : triggers_HT350MET100,
-	'Had' : triggers_had,
+	'HTMET' : triggers_HT350MET100 + triggers_HT350MET120,
 	## muon
 	'SingleMu' : triggers_1mu,
-	'Mu45NoIso' : trigger_1mu_noiso_r,
-	'Mu50NoIso' : trigger_1mu_noiso_w,
+	'IsoMu27' : triggers_1mu,
+	'Mu45eta2p1' : trigger_1mu_noiso_r,
+	'Mu50' : trigger_1mu_noiso_w,
 	'MuHT600' : triggers_mu_ht600,
 	'MuHT400MET70' : triggers_mu_ht400_met70,
 	'MuHT350MET70' : triggers_mu_ht350_met70,
+	'MuHTMET' : triggers_mu_ht350_met70 + triggers_mu_ht400_met70,
 	'MuMET120' : triggers_mu_met120,
 	'MuHT400B': triggers_mu_ht400_btag,
-	'MuHad' : triggers_muhad,
 	## electrons
-	'SingleEl' : triggers_1el,
-	'ElNoIso' : trigger_1el_noiso,
+	'IsoEle32' : triggers_1el,
+	'Ele105' : trigger_1el_noiso,
 	'EleHT600' : triggers_el_ht600,
 	'EleHT400MET70' : triggers_el_ht400_met70,
 	'EleHT350MET70' : triggers_el_ht350_met70,
+	'EleHTMET' : triggers_el_ht350_met70 + triggers_el_ht400_met70,
 	'EleHT200' :triggers_el_ht200,
-	'ElHT400B': triggers_el_ht400_btag,
-	'ElHad' : triggers_elhad
-	#put trigger here for data
+	'EleHT400B': triggers_el_ht400_btag
 	}
 
 ## TEMPORARY
@@ -141,10 +139,6 @@ treeProducer = cfg.Analyzer(
 
 
 #-------- SAMPLES AND TRIGGERS -----------
-
-# -- old PHYS14
-#from CMGTools.RootTools.samples.samples_13TeV_PHYS14 import *
-#selectedComponents = [QCD_HT_100To250, QCD_HT_250To500, QCD_HT_500To1000, QCD_HT_1000ToInf,TTJets, TTWJets, TTZJets, TTH, SMS_T1tttt_2J_mGl1500_mLSP100, SMS_T1tttt_2J_mGl1200_mLSP800] + SingleTop + WJetsToLNuHT + DYJetsM50HT + T5ttttDeg + T1ttbbWW + T5qqqqWW
 
 # -- new 74X samples
 #from CMGTools.RootTools.samples.samples_13TeV_74X import *
@@ -210,12 +204,13 @@ elif test=='MC':
                 comp.splitFactor = len(comp.files)
 
 elif test=="data":
-	from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
-	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
+	#from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
 	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
 	#selectedComponents = [ SingleElectron_Run2015B ]
-	selectedComponents = [ SingleElectron_Run2015B_17Jul ]
-	#selectedComponents = [ JetHT_Run2015B ]
+	#selectedComponents = [ SingleElectron_Run2015B_17Jul ]
+	selectedComponents = [ SingleMuon_Run2015B_17Jul ]
+	#selectedComponents = [ JetHT_Run2015B_17Jul ]
 	#selectedComponents = [ HTMHT_Run2015B ]
 
 	for comp in selectedComponents:
