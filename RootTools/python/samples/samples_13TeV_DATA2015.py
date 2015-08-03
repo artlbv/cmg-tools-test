@@ -8,8 +8,8 @@ kreator = ComponentCreator()
 dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"  # use environmental variable, useful for instance to run on CRAB
 #lumi: delivered= 4.430 (/nb) recorded= 4.013 (/nb)
 ###json='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/DCSOnly/json_DCSONLY_Run2015B.txt'
-####json=dataDir+'/json/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2.json' # golden json 40.03 pb
-json=dataDir+'/json/json_DCSONLY_Run2015B.txt'
+json=dataDir+'/json/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2.json' # golden json 40.03 pb
+#json=dataDir+'/json/json_DCSONLY_Run2015B.txt'
 #json=dataDir+'/json/Cert_246908-251252_13TeV_PromptReco_Collisions15_JSON.txt' # golden json 5.6/pb
 
 
