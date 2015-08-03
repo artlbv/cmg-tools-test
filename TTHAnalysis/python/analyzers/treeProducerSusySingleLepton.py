@@ -16,7 +16,7 @@ susySingleLepton_globalVariables = susyCore_globalVariables + [
             ##------------------------------------------------
 
             # ----------------------- MET filter information (temporary)  -------------------------------------------------------------------- #
-            NTupleVariable("Flag_HBHENoiseFilter", lambda ev: ev.hbheFilterNew, help="HBEHE temporary filter decision"),
+            NTupleVariable("Flag_HBHENoiseFilter_fix", lambda ev: ev.hbheFilterNew, help="HBEHE temporary filter decision"),
 
 ]
 susySingleLepton_globalObjects = susyCore_globalObjects.copy()
