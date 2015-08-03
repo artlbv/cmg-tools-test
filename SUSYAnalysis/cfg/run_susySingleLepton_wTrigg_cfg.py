@@ -43,15 +43,19 @@ ttHLepSkim.maxLeptons = 999
 #LepSkim.idCut  = ""
 #LepSkim.ptCuts = []
 
+# JETS
 # --- JET-LEPTON CLEANING ---
 jetAna.minLepPt = 10
 
-jetAna.mcGT = "Summer15_V5_p6_MC"
+#jetAna.mcGT = "Summer15_V5_p6_MC" # use default
 jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
 jetAna.recalibrateJets = True #should be true in susycore, already
-metAna.recalibrate = True #should be false in susycore, already
 
+## MET
+metAna.recalibrate = False #should be false in susycore, already
+
+## Iso Track
 isoTrackAna.setOff=False
 
 # store all taus by default
@@ -80,7 +84,7 @@ ttHSTSkimmer = cfg.Analyzer(
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15_1l import *
 
 triggerFlagsAna.triggerBits = {
-	# put trigger here for _MC_
+	# put trigger here
 	## hadronic
 	'HT350' : triggers_HT350,
 	'HT600' : triggers_HT600,
@@ -112,6 +116,13 @@ triggerFlagsAna.triggerBits = {
 	'ElHad' : triggers_elhad
 	#put trigger here for data
 	}
+
+## TEMPORARY
+# HBHE filter analyzer
+from CMGTools.TTHAnalysis.analyzers.hbheAnalyzer import hbheAnalyzer
+hbheFilterAna = cfg.Analyzer(
+    hbheAnalyzer, name = 'hbheAnalyzer',
+)
 
 # Tree Producer
 from CMGTools.TTHAnalysis.analyzers.treeProducerSusySingleLepton import *
@@ -164,6 +175,7 @@ sequence = cfg.Sequence(susyCoreSequence+[
 		ttHEventAna,
 		#ttHSTSkimmer,
 		#ttHReclusterJets,
+		hbheFilterAna,
 		treeProducer,
 		])
 
@@ -198,7 +210,7 @@ elif test=='MC':
                 comp.splitFactor = len(comp.files)
 
 elif test=="data":
-	from CMGTools.RootTools.samples.samples_13TeV_Data import *
+	from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
 	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
 	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
 	#selectedComponents = [ SingleElectron_Run2015B ]
