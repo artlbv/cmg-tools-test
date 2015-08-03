@@ -44,8 +44,9 @@ ttHLepSkim.maxLeptons = 999
 #LepSkim.ptCuts = []
 
 # JETS
-# --- JET-LEPTON CLEANING ---
-jetAna.minLepPt = 10
+jetAna.minLepPt = 10 # --- JET-LEPTON CLEANING ---
+jetAna.jetPt = 25
+jetAna.jetEta = 2.4
 
 #jetAna.mcGT = "Summer15_V5_p6_MC" # use default
 jetAna.doQG = True
