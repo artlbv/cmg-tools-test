@@ -12,7 +12,6 @@ json=dataDir+'/json/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2.jso
 #json=dataDir+'/json/json_DCSONLY_Run2015B.txt'
 #json=dataDir+'/json/Cert_246908-251252_13TeV_PromptReco_Collisions15_JSON.txt' # golden json 5.6/pb
 
-
 ### ----------------------------- Magnetic Field On ----------------------------------------
 
 Jet_Run2015B            = kreator.makeDataComponent("Jet_Run2015B"           , "/Jet/Run2015B-PromptReco-v1/MINIAOD"           , "CMS", ".*root", json)

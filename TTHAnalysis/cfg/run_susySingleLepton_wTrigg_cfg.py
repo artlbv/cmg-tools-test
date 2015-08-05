@@ -135,8 +135,7 @@ treeProducer = cfg.Analyzer(
 # -- new 74X samples
 #from CMGTools.RootTools.samples.samples_13TeV_74X import *
 
-
-#selectedComponents = [
+selectedComponents = [
         #TTJets,
         #TTJets_50ns
         #TTJets_LO,
