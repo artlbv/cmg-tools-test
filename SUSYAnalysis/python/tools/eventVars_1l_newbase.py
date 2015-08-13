@@ -101,7 +101,8 @@ class EventVars1L_base:
             "DeltaPhiLepW", 'dPhi','Lp',
             ## jets
             'HT','nJet','nBJet',
-             "htJet30j", "htJet30ja",
+            "htJet30j", "htJet30ja",
+            'Jet1_pt','Jet2_pt',
             ## top tags
             "nHighPtTopTag", "nHighPtTopTagPlusTau23",
             ## special Vars
@@ -286,14 +287,29 @@ class EventVars1L_base:
 
             ret['Selected'] = 1
 
-        else: #if len(antiTightLeps) > 0: or empty collection
+        elif len(antiTightLeps) > 0:
             tightLeps = antiTightLeps
             tightLepsIdx = antiTightLepsIdx
 
             vetoLeps = antiVetoLeps
 
-            if len(antiTightLeps) > 0:
-                ret['Selected'] = -1
+            ret['nTightLeps'] = 0
+            ret['nTightMu'] = 0
+            ret['nTightEl'] = 0
+
+            ret['Selected'] = -1
+
+        else:
+            tightLeps = []
+            tightLepsIdx = []
+
+            vetoLeps = []
+
+            ret['nTightLeps'] = 0
+            ret['nTightMu'] = 0
+            ret['nTightEl'] = 0
+
+            ret['Selected'] = 0
 
         # store Tight and Veto lepton numbers
         ret['nLep'] = len(tightLeps)
@@ -336,7 +352,13 @@ class EventVars1L_base:
             if j.pt>30 and abs(j.eta)<centralEta:
                 centralJet30.append(j)
 
-        ret['nJet']   = len(centralJet30)
+        nJetC = len(centralJet30)
+        ret['nJet']   = nJetC
+
+        if nJetC > 0:
+            ret['Jet1_pt'] = centralJet30[0].pt
+        if nJetC > 1:
+            ret['Jet2_pt'] = centralJet30[1].pt
 
         ret['LSLjetptGT80'] = 1 if sum([j.pt>80 for j in centralJet30])>=2 else 0
 
