@@ -39,16 +39,13 @@ class EventVars1L_triggers:
         #        print line.GetName()
 
         # custom names for triggers
-        '''
-        ret['HLT_IsoMu27'] = event.HLT_SingleMu
-        ret['HLT_IsoEle32'] = event.HLT_SingleEl
-        ret['HLT_Mu50'] = event.HLT_Mu50NoIso
-        ret['HLT_Ele105'] = event.HLT_ElNoIso
-        '''
 
-        ret['HLT_EleOR'] = event.HLT_Ele105 or event.HLT_EleHTMET
-        ret['HLT_MuOR'] = event.HLT_Mu50 or event.HLT_MuHTMET
-        ret['HLT_LepOR'] = event.HLT_Mu50 or event.HLT_MuHTMET or event.HLT_Ele105 or event.HLT_EleHTMET
+        if hasattr(event,'HLT_Ele105'):
+            ret['HLT_EleOR'] = event.HLT_Ele105 or event.HLT_EleHTMET
+        if hasattr(event,'HLT_Mu50'):
+            ret['HLT_MuOR'] = event.HLT_Mu50 or event.HLT_MuHTMET
+        if hasattr(event,'HLT_Ele105'):
+            ret['HLT_LepOR'] = event.HLT_Mu50 or event.HLT_MuHTMET or event.HLT_Ele105 or event.HLT_EleHTMET
 
         ## loop over all HLT names and set them in tree
         for var in self.branches:
