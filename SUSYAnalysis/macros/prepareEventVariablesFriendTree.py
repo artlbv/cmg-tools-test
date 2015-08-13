@@ -68,7 +68,7 @@ parser.add_option("-p", "--pretend", dest="pretend",   action="store_true", defa
 parser.add_option("-T", "--tree-dir",   dest="treeDir",     type="string", default="sf", help="Directory of the friend tree in the file (default: 'sf')");
 parser.add_option("-q", "--queue",   dest="queue",     type="string", default=False, help="Run jobs on lxbatch instead of locally");
 parser.add_option("-b", "--naf",     dest="naf",     action="store_true", default=None, help="Run jobs on nafbatch instead of locally");
-parser.add_option("-t", "--tree",    dest="tree",      default='ttHLepTreeProducerTTH', help="Pattern for tree name");
+parser.add_option("-t", "--tree",    dest="tree",      default='treeProducerSusySingleLepton', help="Pattern for tree name");
 parser.add_option("-V", "--vector",  dest="vectorTree", action="store_true", default=True, help="Input tree is a vector");
 parser.add_option("-F", "--add-friend",    dest="friendTrees",  action="append", default=[], nargs=2, help="Add a friend tree (treename, filename). Can use {name}, {cname} patterns in the treename")
 parser.add_option("--FMC", "--add-friend-mc",    dest="friendTreesMC",  action="append", default=[], nargs=2, help="Add a friend tree (treename, filename) to MC only. Can use {name}, {cname} patterns in the treename")
