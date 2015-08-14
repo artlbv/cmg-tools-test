@@ -391,24 +391,6 @@ ttHCoreEventAna = cfg.Analyzer(
     jetPt = 40.,
     )
 
-
-metNoHFAna = cfg.Analyzer(
-    METAnalyzer, name="metAnalyzer",
-    metCollection     = "slimmedMETsNoHF",
-    noPUMetCollection = "slimmedMETsNoHF",
-    copyMETsByValue = False,
-    doTkMet = False,
-    doMetNoPU = True,
-    doMetNoMu = False,
-    doMetNoEle = False,
-    doMetNoPhoton = False,
-    recalibrate = False,
-    jetAnalyzerCalibrationPostFix = "",
-    candidates='packedPFCandidates',
-    candidatesTypes='std::vector<pat::PackedCandidate>',
-    dzMax = 0.1,
-    collectionPostFix = "NoHF",
-    )
 ## Jet-MET based Skim (generic, but requirements depend on the final state)
 # from CMGTools.TTHAnalysis.analyzers.ttHJetMETSkimmer import ttHJetMETSkimmer
 # ttHJetMETSkim = cfg.Analyzer(
