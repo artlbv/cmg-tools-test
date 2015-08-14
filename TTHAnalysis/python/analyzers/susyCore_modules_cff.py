@@ -363,7 +363,7 @@ metAna = cfg.Analyzer(
     )
 
 metNoHFAna = cfg.Analyzer(
-    METAnalyzer, name="metAnalyzer",
+    METAnalyzer, name="metAnalyzerNoHF",
     metCollection     = "slimmedMETsNoHF",
     noPUMetCollection = "slimmedMETsNoHF",
     copyMETsByValue = False,
