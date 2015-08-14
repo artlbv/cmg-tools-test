@@ -1,11 +1,24 @@
 #!/usr/bin/python
 
 import sys
+import os
+#sys.argv.append( '-b' )
 
-from array import array
+#import pystyle.CMS_lumi
+import CMS_lumi
+
+CMS_lumi.writeExtraText = 1
+#CMS_lumi.extraText = "t#bar{t} LO, 25ns"#"Spring15 MC"
+CMS_lumi.extraText = "Simulation"#"Spring15 MC"
+iPos = 0
+if( iPos==0 ): CMS_lumi.relPosX = 0.12
+
 from ROOT import *
+from array import array
 
-from triggTools import *
+gStyle.SetOptTitle(0)
+gStyle.SetOptStat(0)
+gStyle.SetPadTopMargin(0.05)
 
 _canvStore = []
 _histStore = {}
@@ -14,6 +27,89 @@ _hEffStore = {}
 _fitrStore = []
 
 _colorList = [2,8,4,9,7,3,6] + range(10,50)
+
+def varToLabel(var):
+
+    label = var
+
+    if 'pt' in var:
+        label = 'p_{T}(lep)'
+    elif 'MET' in var:
+        label = 'E_{T}^{miss}'
+    elif 'T' in var:
+        label = var.replace('T','_{T}')
+
+    return label
+
+def getLegend(pos = 'ne'):
+    if pos == 'ne':
+        leg = TLegend(0.4,0.7,0.9,0.9)
+    elif pos == 'log':
+        leg = TLegend(0.6,0.8,0.99,0.99)
+    elif pos == 'roc':
+        leg = TLegend(0.15,0.2,0.7,0.4)
+    elif pos == 'fit':
+        leg = TLegend(0.15,0.75,0.5,0.9)
+    elif pos == '2d':
+        leg = TLegend(0.3,0.75,0.85,0.9)
+
+    leg.SetBorderSize(1)
+    leg.SetTextFont(62)
+    leg.SetTextSize(0.03321678)
+    leg.SetLineColor(1)
+    leg.SetLineStyle(1)
+    leg.SetLineWidth(1)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(1001)
+
+    return leg
+
+def turnon_func(x, par):
+
+    halfpoint = par[0]
+    #slope = max(par[1],0.00001)
+    width = max(par[1],1)
+    plateau = par[2]
+
+    #offset = par[3]
+    #plateau = 1.0
+    offset = 0
+
+    pt = TMath.Max(x[0],0.000001)
+
+    arg = 0
+    #print pt, halfpoint, width
+    #arg = (pt - halfpoint)/(TMath.Sqrt(pt)*slope)
+    arg = (pt - halfpoint) / (width * TMath.Sqrt(2))
+
+    fitval = offset + plateau * 0.5 * (1 + TMath.Erf(arg))
+    #fitval = offset + plateau * TMath.Erfc(arg)
+
+    return fitval
+
+def textBox():
+
+    pt = TPaveText(.05,.1,.95,.8);
+
+    pt.AddText("A TPaveText can contain severals line of text.");
+    pt.AddText("They are added to the pave using the AddText method.");
+    pt.AddLine(.0,.5,1.,.5);
+    pt.AddText("Even complex TLatex formulas can be added:");
+    pt.AddText("F(t) = #sum_{i=-#infty}^{#infty}A(i)cos#[]{#frac{i}{t+i}}");
+
+    return pt
+
+
+def cutsToString(cutList):
+
+    cutstr = ''
+
+    for i, cut in enumerate(cutList):
+        cutstr += cut
+
+        if i != len(cutList)-1: cutstr += ' && '
+
+    return cutstr
 
 def get2DHistsFromTree(tree, tvar = ('MET','HT'), refTrig = '', cuts = '', testTrig = '', maxEntries = -1, lumi = -1):
 
@@ -44,7 +140,9 @@ def get2DHistsFromTree(tree, tvar = ('MET','HT'), refTrig = '', cuts = '', testT
         refName = 'PreSel'
 
     ## name replacement
-    refName = renameTrig(refName)
+    refName = refName.replace('SingleMu','IsoMu27')
+    refName = refName.replace('SingleEl','El32')
+    refName = refName.replace('HTMET','HT350MET120')
 
     rname = histPrefix + refName
 
@@ -68,46 +166,35 @@ def get2DHistsFromTree(tree, tvar = ('MET','HT'), refTrig = '', cuts = '', testT
     # make hist
     nbins = 50
 
+    varBinSize = False
+    pt_bins = range(0,30,2) + range(30,70,5) + range(70,150,10) + range (150,250,25) + range(250,350,50)
+    met_bins = range(0,200,10) + range(200,400,50) + range(400,700,100)
+    ht_bins = range(0,200,10) + range(200,400,50) + range(400,1000,100) + range(1000,1750,250)
+
     if var1 == 'MET' and var2 == 'HT':
         hRef = TH2F(rname,htitle,nbins,0,1500,nbins,0,600)
-        hRef = TH2F(rname,htitle,len(ht_bins_2d)-1,array('f',ht_bins_2d),len(met_bins_2d)-1,array('f',met_bins_2d))
+        hRef = TH2F(rname,htitle,len(ht_bins)-1,array('f',ht_bins),len(met_bins)-1,array('f',met_bins))
     elif var1 == 'HT' and var2 == 'MET':
-        hRef = TH2F(rname,htitle,len(met_bins_2d)-1,array('f',met_bins_2d),len(ht_bins_2d)-1,array('f',ht_bins_2d))
+        hRef = TH2F(rname,htitle,len(met_bins)-1,array('f',met_bins),len(ht_bins)-1,array('f',ht_bins))
     elif 'pt' in var2 and var1 == 'MET':
-        hRef = TH2F(rname,htitle,len(pt_bins_2d)-1,array('f',pt_bins_2d),len(met_bins_2d)-1,array('f',met_bins_2d))
+        hRef = TH2F(rname,htitle,len(pt_bins)-1,array('f',pt_bins),len(met_bins)-1,array('f',met_bins))
     elif 'pt' in var2 and var1 == 'HT':
-        hRef = TH2F(rname,htitle,len(pt_bins_2d)-1,array('f',pt_bins_2d),len(ht_bins_2d)-1,array('f',ht_bins_2d))
+        hRef = TH2F(rname,htitle,len(pt_bins)-1,array('f',pt_bins),len(ht_bins)-1,array('f',ht_bins))
     else:
         hRef = TH2F(rname,htitle,nbins,0,1500,nbins,0,600)
 
-    ## lumi scaling
-    if lumi == 0:
-        # don't do lumi scaling on MC
-        doLumi = False
-        CMS_lumi.lumi_13TeV = "MC"
-        CMS_lumi.extraText = "Simulation"
-        hRef.GetYaxis().SetTitle('MC counts')
-    elif lumi > 0:
-        # make lumi label for data
-        doLumi = False
-        CMS_lumi.lumi_13TeV = str(lumi) + " pb^{-1}"
-        CMS_lumi.extraText = "Preliminary"
-        hRef.GetYaxis().SetTitle('Events')
-    elif lumi < 0:
-        # do lumi scaling for MC
-        doLumi = True
-        lumi = abs(lumi)
-        CMS_lumi.lumi_13TeV = str(lumi) + " pb^{-1}"
-        CMS_lumi.extraText = "Simulation"
-        hRef.GetYaxis().SetTitle('Events')
-
     # make reference plot
+    # lumi scale. -1 means use MC counts
+    doLumi = True if lumi != -1 else False
+
     varstr = var1 + ':' + var2
 
     if not doLumi:
         tree.Draw(varstr + '>>' + hRef.GetName(),cuts,plotOpt, maxEntries)
         print 'Drawing', hRef.GetName(), 'with cuts', cuts
+        hRef.GetYaxis().SetTitle('MC counts')
     else:
+        hRef.GetYaxis().SetTitle('Events')
         hRef.Sumw2()
 
         wt = 600*lumi/float(maxEntries)
@@ -119,8 +206,6 @@ def get2DHistsFromTree(tree, tvar = ('MET','HT'), refTrig = '', cuts = '', testT
 
         tree.Draw(varstr + '>>' + hRef.GetName(),wcuts,plotOpt, maxEntries)
         hRef.SetMaximum(hRef.GetMaximum() * 2)
-
-    print '#Found', hRef.Integral(), 'events'
 
     hRef.GetZaxis().SetRangeUser(0,1)
     hRef.SetLineColor(1)
@@ -155,7 +240,9 @@ def get2DHistsFromTree(tree, tvar = ('MET','HT'), refTrig = '', cuts = '', testT
         else:
             trigName = trig.replace('HLT_','')
 
-        trigName = renameTrig(trigName)
+        trigName = trigName.replace('SingleMu','IsoMu27')
+        trigName = trigName.replace('SingleEl','El32')
+        trigName = trigName.replace('HTMET','HT350MET120')
 
         hname = 'h' + var + '_' + trigName
 
@@ -182,8 +269,6 @@ def get2DHistsFromTree(tree, tvar = ('MET','HT'), refTrig = '', cuts = '', testT
             else: wtcuts = weight
             tree.Draw(varstr + '>>' + hTest.GetName(),wtcuts,plotOpt+'same', maxEntries)
 
-        print '#Found', hTest.Integral(), 'events'
-
         gPad.Update()
 
         #hTest.Divide(hRef)
@@ -194,12 +279,36 @@ def get2DHistsFromTree(tree, tvar = ('MET','HT'), refTrig = '', cuts = '', testT
         _histStore[hTest.GetName()] = hTest
         histList.append(hTest)
 
+    '''
+    # if var bin sizes
+    if varBinSize:
+
+        # add /bin in Y axis label
+        hRef.GetYaxis().SetTitle(hRef.GetYaxis().GetTitle() + '/bin')
+
+        for hist in histList:
+            for bin in range(1,hist.GetNbinsX()+1):
+                binC = hist.GetBinContent(bin)
+                binW = hist.GetBinWidth(bin)
+
+                binV = binC/binW
+                #print binC, binW, binV
+
+                hist.SetBinContent(bin, binV)
+
+    #hRef.SetTitle(ctitle)
+    '''
+
     # legend
     leg = canv.BuildLegend()
     leg.SetFillColor(0)
     #leg.SetHeader(ctitle.replace('&&','\n'));
 
-    #CMS lumi
+    ## CMS LUMI
+    if lumi != -1:
+        CMS_lumi.lumi_13TeV = str(lumi) + ' fb^{-1}'
+    else:
+        CMS_lumi.lumi_13TeV = 'MC'
     CMS_lumi.CMS_lumi(canv, 4, iPos)
 
     gPad.Update()
@@ -277,34 +386,72 @@ def plot2DEff(histList,  tvar = ('MET','HT')):
 def make2DEffPlots(tree, lumi = -1, maxEntries = -1, varList = [], refTrig = '', testTrig = [], cuts = ''):
 
     # lumi dir
-    if lumi == 0:
-        # unscaled MC counts
-        lumiDir = 'MC/LumiMC/'
-    elif lumi < 0:
-        # scaled MC
-        lumiDir = 'MC/Lumi'+str(-lumi).replace('.','p')+'pb/'
-    elif lumi > 0:
-        # data
-        lumiDir = 'Data/Lumi'+str(lumi).replace('.','p')+'pb/'
+    if lumi != -1:
+        lumiDir = 'Lumi'+str(lumi)+'fb/'
+    else:
+        lumiDir = 'LumiMC/'
 
     # make suffix from testTrigNames
-    #suffix = 'test'
-    #for trig in testTrig:
-    #    suffix +=  '_' + trig.replace('||','OR')
+    suffix = 'test'
+    for trig in testTrig:
+        suffix +=  '_' + trig.replace('||','OR')
     suffix = ''
 
-    # final output dir:
-    lumiDir = 'plots/2d/' + lumiDir
-
-    print 'Going to save plots to', lumiDir
-
     for var in varList:
+        #for ref in refTrig[:1]:
 
         histList = get2DHistsFromTree(tree,var,refTrig, cuts, testTrig, maxEntries, lumi)
         plot2DEff(histList, var)
-        saveCanvases(_canvStore,lumiDir,suffix,_batchMode)
+        saveCanvases(lumiDir,suffix)
 
     return 1
+
+def saveCanvases(pdir = '', extraName = ''):
+
+    ## save canvases to file
+    extList = ['.png','.pdf']
+
+    pdir = 'plots/2d/' + pdir
+    prefix = ''
+    suffix = '_' + extraName
+
+    ## wait
+    if not _batchMode:
+        answ = raw_input("'Enter' to proceed (or 'q' to exit): ")
+        if 'q' in answ: exit(0)
+
+    cdir = os.path.dirname(pdir + prefix)
+    print 'Canvas dir is', cdir
+
+    if not os.path.exists(cdir):
+        os.makedirs(cdir)
+
+    cdir += '/'
+
+    # make output file
+    outName = cdir + 'plots_'+ extraName +'.root'
+    ofile = TFile(outName,'RECREATE')
+
+    for canv in _canvStore:
+
+        if 'Eff' not in canv.GetName(): continue
+
+        for ext in extList:
+            cname = canv.GetName().replace('LepGood1_pt','LepPt')
+            cname = cdir + cname+ suffix + ext
+            canv.SaveAs(cname)
+        canv.Write()
+
+    # empty stores for further use
+    del _canvStore[:]
+    _histStore.clear()
+    _hEffStore.clear()
+    del _fitrStore[:]
+
+    ofile.Close()
+
+    return 1
+
 
 if __name__ == "__main__":
 
@@ -354,9 +501,27 @@ if __name__ == "__main__":
     # do efficiency fit
     doFit = True#False
     # luminosity scaling, -1 takes MC counts
-    lumi = 0
+    lumi = -1
 
     '''
+    ## DEFINE plots
+    # variable list
+    #varList = ['HT']#,'MET','ST']
+    #varList = ['HT','LepGood1_pt']#,'LepGood1_eta']
+    varList = ['LepGood1_pt']
+
+    # TEST triggers
+    #testTrig = ['SingleMu','SingleEl','HT350','MET170']
+    #testTrig = ['HT350','HT900','HTMET','MET170']#,'MuHT400MET70']
+    #testTrig = ['HT350','HT600','HT900']
+    #testTrig = ['MuHT400MET70']
+    #testTrig = ['HT900', 'MuHad']
+    #testTrig = ['HLT_SingleMu', 'HLT_MuNoIso', 'HLT_MuHad', 'HLT_MuHT600', 'HLT_MuHT400MET70','HLT_MuMET120', 'HLT_MuHT400B']
+    #testTrig = ['HLT_SingleEl', 'HLT_ElNoIso', 'HLT_ElHad', 'HLT_EleHT600','HLT_EleHT400MET70','HLT_EleHT200', 'HLT_EleHT400B']
+    #testTrig = ['HLT_SingleEl','HLT_ElNoIso','HLT_EleHT600']
+    #testTrig = ['HLT_SingleMu','HLT_MuNoIso','HLT_MuHT600']
+    '''
+
     # muon
     cuts = 'nTightMu >= 1 && LepGood1_pt > 25'
     refTrig = 'SingleMu'
@@ -366,14 +531,31 @@ if __name__ == "__main__":
     #make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
 
     # electron
-    cuts = 'nEl >= 1 && Lep_pt > 15'
+    cuts = 'nTightEl >= 1 && LepGood1_pt > 25'
     refTrig = 'SingleEl'
-    #testTrig = ['HTMET','EleHT350MET70']
-    testTrig = ['EleHT350MET70']
+    testTrig = ['HTMET','EleHT400MET70']
     var = ('MET','HT')
     varList = [var]
     #make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
 
+    ## LepPt vs MET
+    var = ('MET','LepGood1_pt')
+    varList = [var]
+
+    ## Muons
+    cuts = 'nTightMu >= 1 && LepGood1_pt > 5 && HT > 500'
+    refTrig = 'HT350'
+    testTrig = ['Mu50NoIso||MuHT400MET70']#,'Mu50NoIso','MuHT400MET70']
+    make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
+
+    ## Electrons
+    cuts = 'nTightEl >= 1 && LepGood1_pt > 5 && HT > 500'
+    refTrig = 'HT350'
+    testTrig = ['ElNoIso||EleHT400MET70','ElNoIso','EleHT400MET70']
+
+    #make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
+
+    '''
     #############
     # LT: Muon
     #############
@@ -496,80 +678,9 @@ if __name__ == "__main__":
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
     '''
 
-    ###################
-    ###################
-    # DATA
-    ###################
-    ###################
-
-    # define base cuts like filters
-    basecut = ''
-
-    if 'JetHT' in fileName:
-
-        lumi = 40.0
-
-        ## LepPt vs MET
-        var = ('MET','Lep_pt')
-        varList = [var]
-        refTrig = ''#HT800'
-
-        ## Muons
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 5 && HT > 400'
-        testTrig = ['Mu50||MuHT350MET70']#,'Mu50','MuHT350MET70']
-        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
-
-        ## Electrons
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5 && HT > 400'
-        testTrig = ['Ele105||EleHT350MET70']#,'Ele105','EleHT350MET70']
-        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
-
-    elif 'HTMHT' in fileName:
-
-        lumi = 40.0
-
-        ## LepPt vs MET
-        var = ('MET','Lep_pt')
-        varList = [var]
-        refTrig = 'HT350MET100'
-
-        ## Muons
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 5 && HT > 400'
-        testTrig = ['Mu50||MuHT350MET70','Mu50','MuHT350MET70']
-        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
-
-        ## Electrons
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5 && HT > 400'
-        testTrig = ['Ele105||EleHT350MET70','Ele105','EleHT350MET70']
-        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
-
-    ###################
-    ###################
-    # MC
-    ###################
-    ###################
-
-    elif 'TTJets' in fileName:
-
-        lumi = -40.0
-
-        ## LepPt vs MET
-        var = ('MET','Lep_pt')
-        varList = [var]
-        refTrig = ''#HT800'
-
-        ## Muons
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 5 && HT > 400'
-        testTrig = ['Mu50NoIso||MuHT400MET70','Mu50NoIso','MuHT400MET70']
-        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
-
-        ## Electrons
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5 && HT > 400'
-        testTrig = ['ElNoIso||EleHT400MET70','ElNoIso','EleHT400MET70']
-        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
-
-    else:
-        print 'Nothing to draw for this file!'
+    ## wait
+    if not _batchMode:
+        answ = raw_input("'Enter' to exit: ")
 
     tfile.Close()
     #outfile.Close()
