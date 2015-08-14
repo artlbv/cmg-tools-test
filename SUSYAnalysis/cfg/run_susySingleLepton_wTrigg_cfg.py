@@ -73,7 +73,8 @@ susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
 			ttHFatJetAna)
 susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
 			ttHSVAna)
-
+#susyCoreSequence.insert(susyCoreSequence.index(metAna),
+#			metNoHFAna)
 ## Single lepton + ST skim
 from CMGTools.TTHAnalysis.analyzers.ttHSTSkimmer import ttHSTSkimmer
 ttHSTSkimmer = cfg.Analyzer(
@@ -122,6 +123,34 @@ from CMGTools.TTHAnalysis.analyzers.hbheAnalyzer import hbheAnalyzer
 hbheFilterAna = cfg.Analyzer(
     hbheAnalyzer, name = 'hbheAnalyzer',
 )
+
+
+removeResiduals = True
+isData=False
+# -------------------- Running pre-processor
+import subprocess
+jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV2_MC.db'
+jecEra    = 'Summer15_50nsV2_MC'
+preprocessorFile = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
+extraArgs=[]
+if isData:
+	extraArgs.append('--isData')
+	GT= '74X_dataRun2_Prompt_v1'
+else:
+	GT= 'MCRUN2_74_V9A'
+if removeResiduals:extraArgs.append('--removeResiduals')
+args = ['python',
+	os.path.expandvars('$CMSSW_BASE/python/CMGTools/ObjectStudies/corMETMiniAOD_cfgCreator.py'),\
+		'--GT='+GT,
+	'--outputFile='+preprocessorFile,
+	'--jecDBFile='+jecDBFile,
+	'--jecEra='+jecEra
+	] + extraArgs
+#print "Making pre-processorfile:"
+#print " ".join(args)
+subprocess.call(args)
+from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
+preprocessor = CmsswPreprocessor(preprocessorFile)
 
 # Tree Producer
 from CMGTools.TTHAnalysis.analyzers.treeProducerSusySingleLepton import *
@@ -178,9 +207,11 @@ sequence = cfg.Sequence(susyCoreSequence+[
 #-------- HOW TO RUN
 #test = 'MC'
 test = 'data'
+#test = 1
 
 if test==1:
 	# test a single component, using a single thread.
+	isData = False
 	comp = TTJets
 	comp.files = comp.files[:1]
 	selectedComponents = [comp]
@@ -207,6 +238,7 @@ elif test=='MC':
 elif test=="data":
 	#from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
 	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
+	isData = True
 	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
 	#selectedComponents = [ SingleElectron_Run2015B ]
 	#selectedComponents = [ SingleElectron_Run2015B_17Jul ]
@@ -224,4 +256,5 @@ from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
 		     sequence = sequence,
 		     services = [],
+		     preprocessor=preprocessor,
 		     events_class = Events)
