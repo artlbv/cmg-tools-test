@@ -58,9 +58,15 @@ echo "CMSSW base:" $CMSSW_BASE
 echo "Python version" `python --version`
 
 cd $OUTDIR
-TaskID=$((SGE_TASK_ID+1))
-#cd *_Chunk$TaskID
-JobDir=$(find . -maxdepth 1 -type d ! -name "logs" | sed ''$TaskID'q;d')
+TaskID=$((SGE_TASK_ID))
+JobDir=$(find . -maxdepth 1 -type d -name "*_Chunk*" | sed ''$TaskID'q;d')
+
+if [[ $JobDir != *"_Chunk"* ]]
+then
+   echo "$Jobdir is not a chunk!"
+   exit 0
+fi
+
 echo "Changing to job dir" $JobDir
 cd $JobDir
 
@@ -76,30 +82,51 @@ if [ -f processed ]; then
     exit 0
 fi
 
+if [ -f failed ]; then
+    echo "Going to reprocess this chunk"
+    rm failed
+    # do clean up magic (TODO)
+fi
+
 touch processing
-python $CMSSW_BASE/src/PhysicsTools/HeppyCore/python/framework/looper.py pycfg.py config.pck
-# >& looper.log
-mv Loop/* ./
-rm -r Loop
-rm processing
 
-# check output quality
-root -b -q treeProducerSusySingleLepton/tree.root 2>&1 > .filetest
+LOOPER=$CMSSW_BASE/src/PhysicsTools/HeppyCore/python/framework/looper.py
+python $LOOPER  pycfg.py config.pck > looper.log
 
-if grep -r "Error" .filetest ; then
-   echo "Job failed!"
-   touch failed
-elif grep -r "0x0" .filetest ; then
-   echo "Job failed!"
-   touch failed
-elif grep -r "File" .filetest; then
-   echo "Successfully" $log
+echo "Looper finished!"
+echo "Checking output..."
+
+if grep -r "number of events processed" looper.log; then
+   echo "Job succeeded"
    touch processed
-   rm .filetest
+
+   mv Loop/* ./
+   rm -r Loop/
 else
+   echo "Couldn't find processed events!"
    echo "Job failed!"
+   mv Loop Loop_failed_`date +%s`
    touch failed
 fi
+
+# # check output quality
+# root -b -q treeProducerSusySingleLepton/tree.root 2>&1 > .filetest
+# if grep -r "Error" .filetest ; then
+#    echo "Job failed!"
+#    touch failed
+# elif grep -r "0x0" .filetest ; then
+#    echo "Job failed!"
+#    touch failed
+# elif grep -r "File" .filetest; then
+#    echo "Successfully" $log
+#    touch processed
+#    rm .filetest
+# else
+#    echo "Job failed!"
+#    touch failed
+# fi
+
+rm processing
 
 echo
 echo job end at `date`
