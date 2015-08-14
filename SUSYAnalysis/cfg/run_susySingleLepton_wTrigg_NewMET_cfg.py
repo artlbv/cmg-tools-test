@@ -124,13 +124,16 @@ triggerFlagsAna.triggerBits = {
 #-------- HOW TO RUN
 isData = False
 
-#sample = 'MC'
-sample = 'data'
+sample = 'MC'
+#sample = 'data'
 test = 0
 
 if sample == "MC":
 
 	print 'Going to process MC'
+
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_MC.db'
+	jecEra    = 'Summer15_50nsV4_MC'
 
 	isData = False
 
@@ -162,21 +165,26 @@ if sample == "MC":
 	elif test==3:
 		# run all components (1 thread per component).
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 5
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 	elif test==0:
 		# PRODUCTION
 		# run on everything
 
 		#selectedComponents = mcSamples_Asymptotic50ns
+		selectedComponents = QCD_HT
 
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 5
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 
 elif sample == "data":
 
 	print 'Going to process DATA'
+
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_DATA.db'
+	jecEra    = 'Summer15_50nsV4_DATA'
+
 
 	isData = True
 
@@ -190,9 +198,9 @@ elif sample == "data":
 
 	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
 	#selectedComponents = [ SingleElectron_Run2015B ]
-	#selectedComponents = [ SingleElectron_Run2015B_17Jul ]
-	#selectedComponents = [ SingleMuon_Run2015B_17Jul ]
-	selectedComponents = [ JetHT_Run2015B, JetHT_Run2015B_17Jul ]
+	selectedComponents = [ SingleElectron_Run2015B, SingleElectron_Run2015B_17Jul ]
+	#selectedComponents = [ SingleMuon_Run2015B, SingleMuon_Run2015B_17Jul ]
+	#selectedComponents = [ JetHT_Run2015B, JetHT_Run2015B_17Jul ]
 	#selectedComponents = [ HTMHT_Run2015B ]
 
 
@@ -209,9 +217,10 @@ elif sample == "data":
 			comp.fineSplitFactor = 1
 			comp.files = comp.files[:1]
 	elif test==3:
-		# run all components (1 thread per component).
+		# run all components (10 files per component).
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 5
+			comp.files = comp.files[:10]
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 	elif test==0:
 		# PRODUCTION
@@ -225,10 +234,6 @@ elif sample == "data":
 removeResiduals = False
 # -------------------- Running pre-processor
 import subprocess
-#jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV2_MC.db'
-jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_DATA.db'
-#jecEra    = 'Summer15_50nsV2_MC'
-jecEra    = 'Summer15_50nsV4_DATA'
 preprocessorFile = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
 extraArgs=[]
 if isData:
