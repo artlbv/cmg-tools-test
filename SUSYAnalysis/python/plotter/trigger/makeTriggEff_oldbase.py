@@ -1,21 +1,133 @@
 #!/usr/bin/python
 
 import sys
+import os
+#sys.argv.append( '-b' )
 
-from math import *
-from array import array
+#import pystyle.CMS_lumi
+import CMS_lumi
+
+CMS_lumi.writeExtraText = 1
+#CMS_lumi.extraText = "t#bar{t} LO, 25ns"#"Spring15 MC"
+CMS_lumi.extraText = "Simulation"#"Spring15 MC"
+iPos = 0
+if( iPos==0 ): CMS_lumi.relPosX = 0.12
+
 from ROOT import *
+from array import array
 
-from triggTools import *
+gStyle.SetOptTitle(0)
+gStyle.SetOptStat(0)
+gStyle.SetPadTopMargin(0.05)
 
-# global storages
 _canvStore = []
 _histStore = {}
 _hEffStore = {}
 
 _fitrStore = []
 
-_colorList = [2,4,8,9,7,3,6] + range(10,50)
+_colorList = [2,8,4,9,7,3,6] + range(10,50)
+
+def varToLabel(var):
+
+    label = var
+
+    if 'pt' in var:
+        label = 'p_{T}(lep)'
+    elif 'MET' in var:
+        label = 'E_{T}^{miss}'
+    elif 'T' in var:
+        label = var.replace('T','_{T}')
+
+    return label
+
+def getLegend(pos = 'ne'):
+    if pos == 'ne':
+        leg = TLegend(0.4,0.7,0.9,0.9)
+    elif pos == 'log':
+        leg = TLegend(0.6,0.8,0.99,0.99)
+    elif pos == 'roc':
+        leg = TLegend(0.15,0.2,0.7,0.4)
+    elif pos == 'fit':
+        leg = TLegend(0.15,0.75,0.5,0.9)
+
+    leg.SetBorderSize(1)
+    leg.SetTextFont(62)
+    leg.SetTextSize(0.03321678)
+    leg.SetLineColor(1)
+    leg.SetLineStyle(1)
+    leg.SetLineWidth(1)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(1001)
+
+    return leg
+
+def turnon_func(x, par):
+
+    halfpoint = par[0]
+    #slope = max(par[1],0.00001)
+    width = max(par[1],1)
+    plateau = par[2]
+
+    #offset = par[3]
+    #plateau = 1.0
+    offset = 0
+
+    pt = TMath.Max(x[0],0.000001)
+
+    arg = 0
+    #print pt, halfpoint, width
+    #arg = (pt - halfpoint)/(TMath.Sqrt(pt)*slope)
+    arg = (pt - halfpoint) / (width * TMath.Sqrt(2))
+
+    fitval = offset + plateau * 0.5 * (1 + TMath.Erf(arg))
+    #fitval = offset + plateau * TMath.Erfc(arg)
+
+    return fitval
+
+def textBox():
+
+    pt = TPaveText(.05,.1,.95,.8);
+
+    pt.AddText("A TPaveText can contain severals line of text.");
+    pt.AddText("They are added to the pave using the AddText method.");
+    pt.AddLine(.0,.5,1.,.5);
+    pt.AddText("Even complex TLatex formulas can be added:");
+    pt.AddText("F(t) = #sum_{i=-#infty}^{#infty}A(i)cos#[]{#frac{i}{t+i}}");
+
+    return pt
+
+
+def cutsToString(cutList):
+
+    cutstr = ''
+
+    for i, cut in enumerate(cutList):
+        cutstr += cut
+
+        if i != len(cutList)-1: cutstr += ' && '
+
+    return cutstr
+
+def varBinSize():
+
+    bins = '[10,15,20,50,80]'
+    edges = [ float(f) for f in bins[1:-1].split(",") ]
+
+    histo = ROOT.TH1F("dummy","dummy",len(edges)-1,array('f',edges))
+
+    print edges
+
+    return histo
+
+def setColors(histList):
+
+    #    colorList = [3,2,ROOT.kGreen-2,1]
+    colorList = [1,2,3,4]
+
+    for ind,hist in enumerate(histList):
+        hist.SetLineColor(colorList[ind])
+        hist.SetMarkerColor(colorList[ind])
 
 def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', maxEntries = -1, lumi = -1):
 
@@ -36,38 +148,15 @@ def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', 
     testTrig = ['HLT_'+name.replace('HLT_','') for name in testTrig]
 
     # names
-    if 'HLT' in refTrig:
+    if refTrig != '':
         refName = refTrig.replace('HLT_','')
-    elif refTrig != '':
-        refName = refTrig#'PreSel'
-        refTrig = ''
     else:
         refName = 'PreSel'
 
     ## name replacement
-    refName = renameTrig(refName)
-
-    # for OR and AND test triggers
-    if '||' in refTrig:
-        tnames = refTrig.replace('HLT_','').split('||')
-        refTrigName = tnames[0]
-        refTrig = '(' + 'HLT_'+tnames[0].replace('HLT_','')
-
-        for name in tnames[1:]:
-            refTrigName += '||' + name
-            refTrig += '||' + 'HLT_'+name.replace('HLT_','')
-        refTrig += ')'
-
-        print refTrigName
-        print refTrig
-    else:
-        refTrigName = refTrig.replace('HLT_','')
-
-    refTrigName = renameTrig(refTrigName)
-
-#    refName = refTrigName
-#    print 'New', refTrigName, refTrig
-#    exit(0)
+    refName = refName.replace('SingleMu','IsoMu27')
+    refName = refName.replace('SingleEl','El32')
+    refName = refName.replace('HTMET','HT350MET120')
 
     rname = histPrefix + refName
 
@@ -78,8 +167,7 @@ def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', 
         ctitle += ' cut: ' + cuts
 
     if refTrig != '':
-        #cuts += ' && HLT_' + refTrig.replace('HLT_','')
-        cuts += ' && ' + refTrig
+        cuts += ' && HLT_' + refTrig.replace('HLT_','')
         htitle = refTrig.replace('HLT_','')#'Ref: ' + refTrig
     else:
         htitle = 'Preselection'
@@ -96,77 +184,41 @@ def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', 
 
     if var == 'MET':
         hRef = TH1F(rname,htitle,nbins,0,1000)
-        varBinSize = True
-        hRef = TH1F(rname,htitle,len(met_bins)-1,array('f',met_bins))
     elif var == 'HT':
-        varBinSize = True
-        hRef = TH1F(rname,htitle,len(ht_bins)-1,array('f',ht_bins))
-        #hRef = TH1F(rname,htitle,nbins,0,3000)
-    elif var == 'LT':
-        hRef = TH1F(rname,htitle,nbins,0,1000)
-        varBinSize = True
-        hRef = TH1F(rname,htitle,len(lt_bins)-1,array('f',lt_bins))
+        hRef = TH1F(rname,htitle,nbins,0,3000)
     elif 'pt' in var:
+        #xbins = range(5,25,1) + range(25,70,5) + range(70,150,10) + range (150,225,25)#[10,20,30,40,60,80,100,150,200]
+        xbins = range(6,30,2) + range(30,70,5) + range(70,150,10) + range (150,225,25)
         varBinSize = True
-        hRef = TH1F(rname,htitle,len(pt_bins)-1,array('f',pt_bins))
+
+        hRef = TH1F(rname,htitle,len(xbins)-1,array('f',xbins))
         #hRef = TH1F(rname,htitle,nbins,0,200)
     elif 'eta' in var:
         hRef = TH1F(rname,htitle,nbins,-2.5,2.5)
     else:
         hRef = TH1F(rname,htitle,nbins,0,1000)
 
-    ## lumi scaling
-    if lumi == 0:
-        # don't do lumi scaling on MC
-        doLumi = False
-        CMS_lumi.lumi_13TeV = "MC"
-        CMS_lumi.extraText = "Simulation"
-        hRef.GetYaxis().SetTitle('MC counts')
-    elif lumi > 0:
-        # make lumi label for data
-        doLumi = False
-        CMS_lumi.lumi_13TeV = str(lumi) + " pb^{-1}"
-        CMS_lumi.extraText = "Preliminary"
-        hRef.GetYaxis().SetTitle('Events')
-    elif lumi < 0:
-        # do lumi scaling for MC
-        doLumi = True
-        lumi = abs(lumi)
-        CMS_lumi.lumi_13TeV = str(-lumi) + " fb^{-1}"
-        CMS_lumi.extraText = "Simulation"
-        hRef.GetYaxis().SetTitle('Events')
-
     # make reference plot
+    # lumi scale. -1 means use MC counts
+    doLumi = True if lumi != -1 else False
+
     if not doLumi:
-        #hRef.Sumw2(False)
         tree.Draw(var + '>>' + hRef.GetName(),cuts,plotOpt, maxEntries)
-        print '# Drawing', hRef.GetName(), 'with cuts', cuts
+        print 'Drawing', hRef.GetName(), 'with cuts', cuts
+        hRef.GetYaxis().SetTitle('MC counts')
     else:
+        hRef.GetYaxis().SetTitle('Events')
         hRef.Sumw2()
 
         wt = 1000*lumi/float(maxEntries)
-        print '# Weight for %2.2f lumi and maxEntries %10.f is %f' %(lumi, maxEntries,wt)
+        print 'Weight for %2.2f lumi and maxEntries %10.f is %f' %(lumi, maxEntries,wt)
         weight = str(wt) + ' * Xsec'
         if cuts != '': wcuts = weight + '*(' + cuts + ')'
         else: wcuts = weight
-        print '# Drawing', hRef.GetName(), 'with cuts', wcuts
+        print 'Drawing', hRef.GetName(), 'with cuts', wcuts
 
         tree.Draw(var + '>>' + hRef.GetName(),wcuts,plotOpt, maxEntries)
         hRef.SetMaximum(hRef.GetMaximum() * 2)
-
-    ## do overflow
-    doOverflow = False#True
-
-    if doOverflow:
-        n = hRef.GetNbinsX()
-        print hRef.GetBinContent(n+1),hRef.GetBinContent(n)
-        hRef.SetBinContent(n,hRef.GetBinContent(n+1)+hRef.GetBinContent(n))
-        hRef.SetBinError(n,hypot(hRef.GetBinError(n+1),hRef.GetBinError(n)))
-        hRef.SetBinContent(n+1,0)
-        hRef.SetBinError(n+1,0)
-        hRef.Sumw2(False)
-
-    print '# Found', hRef.Integral(), 'events'
 
     hRef.SetLineColor(1)
     # axis set up
@@ -190,7 +242,7 @@ def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', 
             trig = '(' + 'HLT_'+tnames[0].replace('HLT_','')
 
             for name in tnames[1:]:
-                trigName += '||' + name
+                trigName += '_' + name
                 trig += '||' + 'HLT_'+name.replace('HLT_','')
             trig += ')'
 
@@ -198,8 +250,6 @@ def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', 
             print trig
         else:
             trigName = trig.replace('HLT_','')
-
-        trigName = renameTrig(trigName)
 
         hname = 'h' + var + '_' + trigName
 
@@ -215,53 +265,40 @@ def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', 
         else:
             tcuts = trig
 
-        print '# Drawing', hTest.GetName(), 'with cuts', tcuts
+        print 'Drawing', hTest.GetName(), 'with cuts', tcuts
 
         # lumi scale
         if not doLumi:
             tree.Draw(var + '>>' + hTest.GetName(),tcuts,plotOpt+'same', maxEntries)
-            #hTest.Sumw2(False)
         else:
             #hTest.Sumw2()
             if tcuts != '': wtcuts = weight + '*(' + tcuts + ')'
             else: wtcuts = weight
             tree.Draw(var + '>>' + hTest.GetName(),wtcuts,plotOpt+'same', maxEntries)
 
-        if doOverflow:
-            n = hTest.GetNbinsX()
-            hTest.SetBinContent(n,hTest.GetBinContent(n+1)+hTest.GetBinContent(n))
-            hTest.SetBinError(n,hypot(hTest.GetBinError(n+1),hTest.GetBinError(n)))
-            hTest.SetBinContent(n+1,0)
-            hTest.SetBinError(n+1,0)
-            hTest.Sumw2(False)
-
-        print '# Found', hTest.Integral(), 'events'
-
         gPad.Update()
+
+        #hTest.Divide(hRef)
 
         _histStore[hTest.GetName()] = hTest
         histList.append(hTest)
 
     # if var bin sizes
-    if varBinSize and False: # leave it off for now (strange errors)
+    if varBinSize:
 
         # add /bin in Y axis label
         hRef.GetYaxis().SetTitle(hRef.GetYaxis().GetTitle() + '/bin')
 
+
         for hist in histList:
             for bin in range(1,hist.GetNbinsX()+1):
                 binC = hist.GetBinContent(bin)
-                binE = hist.GetBinError(bin)
                 binW = hist.GetBinWidth(bin)
 
                 binV = binC/binW
-                binE = binE/binW
                 #print binC, binW, binV
 
                 hist.SetBinContent(bin, binV)
-                #hist.SetBinError(bin, binE)
-
-        hist.Sumw2(False)
 
     #hRef.SetTitle(ctitle)
 
@@ -270,10 +307,15 @@ def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', 
     leg.SetFillColor(0)
     #leg.SetHeader(ctitle.replace('&&','\n'));
 
-    # plot CMS info
+    ## CMS LUMI
+    if lumi != -1:
+        CMS_lumi.lumi_13TeV = str(lumi) + ' fb^{-1}'
+    else:
+        CMS_lumi.lumi_13TeV = 'MC'
     CMS_lumi.CMS_lumi(canv, 4, iPos)
 
     gPad.Update()
+
     _canvStore.append(canv)
 
     return histList
@@ -295,7 +337,7 @@ def plotEff(histList, var = 'HT', doFit = False):
     hRefEff.GetYaxis().SetTitle("Efficiency")
 
     if not doFit:
-        cname = hRef.GetName().replace('h'+var,var) + '_Eff_'
+        cname = hRef.GetName().replace('h'+var+'_',var) + '_Eff_'
     else:
         cname = hRef.GetName().replace('h'+var,var) + '_EffFit'
 
@@ -303,8 +345,6 @@ def plotEff(histList, var = 'HT', doFit = False):
 
     ## make canvas
     canv = TCanvas(cname,ctitle,800,800)
-    #canv.UseGL()
-    #canv.SetSupportGL(True)
     ## style
 
     ## legend
@@ -319,14 +359,6 @@ def plotEff(histList, var = 'HT', doFit = False):
     #leg.AddEntry(0,'Reference: ' + hRefEff.GetName(),'')
     leg.SetHeader('Reference: ' + hRef.GetName().replace('h'+var+'_',''))
     #leg.AddEntry(hRefEff,hRefEff.GetTitle(),'lp')
-
-    '''
-    if len(histList) == 2:
-        # add normalized hist shape
-        hRef.SetFillColorAlpha(hRef.GetLineColor(),0.35)
-        hRef.DrawNormalized("same")
-        leg.AddEntry(hRef,varToLabel(var)+' distribution','f')
-    '''
 
     plotOpt = 'same'
 
@@ -366,12 +398,6 @@ def plotEff(histList, var = 'HT', doFit = False):
         tEff.Draw(plotOpt)
         leg.AddEntry(tEff,tEff.GetTitle(),'lp')
 
-        if len(histList) == 2:
-            # add normalized hist shape
-            hist.SetFillColorAlpha(hist.GetLineColor(),0.35)
-            hist.DrawNormalized("same")
-            leg.AddEntry(hist,varToLabel(var)+' distribution','f')
-
         if 'same' not in plotOpt: plotOpt += 'same'
 
         gPad.Update()
@@ -394,15 +420,13 @@ def plotEff(histList, var = 'HT', doFit = False):
             fturn.SetLineColor(hEff.GetLineColor())
 
             ## get painted graph and fit with turn-on
-            #print tEff
             gEff = tEff.GetPaintedGraph()
-            #print gEff
             #gEff = hEff
 
             ## get estimate of parameters
             expPlateau = min(hEff.GetMaximum(),0.99)
-            expHalfP = max(hEff.GetBinCenter(hEff.FindFirstBinAbove(0.5)),0)
-            expWidth = TMath.Sqrt(expHalfP)
+            expHalfP = hEff.GetBinCenter(hEff.FindFirstBinAbove(0.5))
+            expWidth = expHalfP/2
 
             #fturn.SetParameters(300,100,1)
             fturn.SetParameters(expHalfP,expWidth,expPlateau)
@@ -420,15 +444,9 @@ def plotEff(histList, var = 'HT', doFit = False):
             print 'Fit result: halfpoint = %5.2f, width = %5.2f, plateau = %5.2f' % (halfpoint, width, plateau)
             print 80*'#'
 
+            gStyle.SetOptFit()
             #gStyle.SetOption("Show Fit Parameters")
             gPad.Update()
-
-            # get stat box
-            #TPaveStats *stats =(TPaveStats*)c1->GetPrimitive("stats");
-            #for prim in canv.GetListOfPrimitives():
-            #    print prim
-            stats = gEff.GetListOfFunctions().FindObject("stats")
-            stats.SetLineColor(gEff.GetLineColor())
 
             _fitrStore.append((hname,halfpoint, width, plateau))
 
@@ -447,7 +465,6 @@ def plotEff(histList, var = 'HT', doFit = False):
     hRefEff.SetStats(0)
     #hRef.GetXaxis().SetTitle(var)
     hRefEff.GetYaxis().SetRangeUser(0,1.5)
-    canv.SetTicks(1,1)
     #canv.SetLogy()
 
     #leg.GetListOfPrimitives().Remove(hRefEff)
@@ -462,42 +479,93 @@ def plotEff(histList, var = 'HT', doFit = False):
 
     return 1
 
+def fitEff(histList):
+
+    # hist prefix
+    histPrefix = 'h' + var + '_'
+
+    # reference hist should be first
+    hRefEff = histList[0]
+
+    cname = 'c_FitEff_Test' + hRefEff.GetName()
+    ctitle = 'Eff for reference:' + hRefEff.GetName()
+
+    ## make canvas
+    canv = TCanvas(cname,ctitle,800,800)
+
+    ## legend
+    leg = getLegend('fit')
+
+    return 1
+
+
 def makeEffPlots(tree, lumi = -1, maxEntries = -1, doFit = False, varList = [], refTrig = '', testTrig = [], cuts = ''):
 
+    #print 'Split cuts:', cuts.split('&&')
+    #print 'ReSplit cuts:', cutsToString(cuts.split('&&'))
+
     # lumi dir
-    if lumi == 0:
-        # unscaled MC counts
-        lumiDir = 'MC/LumiMC/'
-    elif lumi < 0:
-        # scaled MC
-        lumiDir = 'MC/Lumi'+str(-lumi).replace('.','p')+'fb/'
-    elif lumi > 0:
-        # data
-        lumiDir = 'Data/Lumi'+str(lumi).replace('.','p')+'pb/'
+    if lumi != -1:
+        lumiDir = 'Lumi'+str(lumi)+'fb/'
+    else:
+        lumiDir = 'LumiMC/'
 
     # make suffix from testTrigNames
     suffix = 'test'
     for trig in testTrig:
         suffix +=  '_' + trig.replace('||','OR')
 
-    # final output dir:
-    lumiDir = 'plots/1d/' + lumiDir
-
-    print '## Going to save plots to', lumiDir
-
     for var in varList:
+        #for ref in refTrig[:1]:
 
         histList = getHistsFromTree(tree,var,refTrig, cuts, testTrig, maxEntries, lumi)
         plotEff(histList, var, doFit)
-        saveCanvases(_canvStore, lumiDir,suffix, _batchMode)
-
-        # empty stores for further use
-        del _canvStore[:]
-        _histStore.clear()
-        _hEffStore.clear()
-        del _fitrStore[:]
+        saveCanvases(lumiDir,suffix)
 
     return 1
+
+def saveCanvases(pdir = '', extraName = ''):
+
+    ## save canvases to file
+    extList = ['.png','.pdf']
+
+    pdir = 'plots/' + pdir
+    prefix = ''
+    suffix = '_' + extraName
+
+    ## wait
+    if not _batchMode:
+        answ = raw_input("'Enter' to proceed: ")
+
+    cdir = os.path.dirname(pdir + prefix)
+    print 'Canvas dir is', cdir
+
+    if not os.path.exists(cdir):
+        os.makedirs(cdir)
+
+    cdir += '/'
+
+    # make output file
+    outName = cdir + 'plots_'+ extraName +'.root'
+    ofile = TFile(outName,'RECREATE')
+
+    for canv in _canvStore:
+        for ext in extList:
+            cname = canv.GetName().replace('LepGood1_pt','LepPt')
+            cname = cdir + cname+ suffix + ext
+            canv.SaveAs(cname)
+        canv.Write()
+
+    # empty stores for further use
+    del _canvStore[:]
+    _histStore.clear()
+    _hEffStore.clear()
+    del _fitrStore[:]
+
+    ofile.Close()
+
+    return 1
+
 
 if __name__ == "__main__":
 
@@ -517,6 +585,17 @@ if __name__ == "__main__":
 
     tfile  = TFile(fileName, "READ")
 
+    '''
+    if len(sys.argv) > 2:
+        outName = sys.argv[2]
+    else:
+        print '#No out file name is given'
+        outName = (os.path.basename(fileName)).replace('.root','_plots.root')
+        print '#> Out file name is', outName
+
+    outfile = TFile(outName, "RECREATE")
+    '''
+
     if not tfile:
         print "Couldn't open the file"
         exit(0)
@@ -534,17 +613,50 @@ if __name__ == "__main__":
     # max entries to process
     maxEntries = -1#100000
     # do efficiency fit
-    doFit = True
-    # luminosity: 0 takes MC counts, >0 is data, <0 is for MC scaling
-    lumi = 0
+    doFit = True#False
+    # luminosity scaling, -1 takes MC counts
+    lumi = 3
 
     '''
+    ## DEFINE plots
+    # variable list
+    #varList = ['HT']#,'MET','ST']
+    #varList = ['HT','LepGood1_pt']#,'LepGood1_eta']
+    varList = ['LepGood1_pt']
+
+    # reference trigger (without HLT_)
+    refTrig = 'HTMET'
+
+    # TEST triggers
+    #testTrig = ['SingleMu','SingleEl','HT350','MET170']
+    #testTrig = ['HT350','HT900','HTMET','MET170']#,'MuHT400MET70']
+    #testTrig = ['HT350','HT600','HT900']
+    #testTrig = ['MuHT400MET70']
+    #testTrig = ['HT900', 'MuHad']
+    #testTrig = ['HLT_SingleMu', 'HLT_MuNoIso', 'HLT_MuHad', 'HLT_MuHT600', 'HLT_MuHT400MET70','HLT_MuMET120', 'HLT_MuHT400B']
+    #testTrig = ['HLT_SingleEl', 'HLT_ElNoIso', 'HLT_ElHad', 'HLT_EleHT600','HLT_EleHT400MET70','HLT_EleHT200', 'HLT_EleHT400B']
+    #testTrig = ['HLT_SingleEl','HLT_ElNoIso','HLT_EleHT600']
+    #testTrig = ['HLT_SingleMu','HLT_MuNoIso','HLT_MuHT600']
+    #testTrig = ['SingleMu','ElNoIso']
+    testTrig = ['SingleMu','Mu50NoIso','HLT_MuHT400MET70']
+    #testTrig = ['SingleMu']
+
+    # replace HLT from names
+    testTrig = [trig.replace('HLT_','') for trig in testTrig]
+
+    # cuts
+    cuts = 'nTightMu == 1 && LepGood1_pt > 5 && HT > 500 && MET > 200'#  && abs(LepGood1_eta) < 2.1'
+    #cuts = 'nTightEl == 1 && LepGood1_pt > 15 && abs(LepGood1_eta) < 2.1'
+    '''
+
+    '''
+
     #############
     # LT: Muon
     #############
 
     varList = ['LT']
-    cuts = 'nMu == 1 && Lep_pt > 25 && HT > 500'
+    cuts = 'nTightMu == 1 && LepGood1_pt > 25 && HT > 500'
     refTrig = ''
     #testTrig = ['Mu50NoIso','MuHT400MET70','Mu50NoIso||MuHT400MET70']
     testTrig = ['Mu50NoIso||MuHT400MET70']
@@ -555,7 +667,7 @@ if __name__ == "__main__":
     #############
 
     varList = ['LT']
-    cuts = 'nEl == 1 && Lep_pt > 25 && HT > 500'
+    cuts = 'nTightEl == 1 && LepGood1_pt > 25 && HT > 500'
     refTrig = ''
     #testTrig = ['ElNoIso','EleHT400MET70','ElNoIso||EleHT400MET70']
     testTrig = ['ElNoIso||EleHT400MET70']
@@ -566,27 +678,31 @@ if __name__ == "__main__":
     #############
 
     ## muons
-    varList = ['Lep_pt']
-    cuts = 'nMu == 1 && Lep_pt > 5 && HT > 500 && MET > 200'
+    varList = ['LepGood1_pt']
+    cuts = 'nTightMu == 1 && LepGood1_pt > 5 && HT > 500 && MET > 200'
     refTrig = ''
     testTrig = ['Mu50NoIso','MuHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
-    varList = ['Lep_pt']
-    cuts = 'nMu == 1 && Lep_pt > 5 && HT > 500 && MET > 200'
+    '''
+
+    varList = ['LepGood1_pt']
+    cuts = 'nTightMu == 1 && LepGood1_pt > 5 && HT > 500 && MET > 200'
     refTrig = 'HTMET'
     testTrig = ['Mu50NoIso','MuHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
+    '''
+
     ## electrons
-    varList = ['Lep_pt']
-    cuts = 'nEl == 1 && Lep_pt > 5 && HT > 500 && MET > 200'
+    varList = ['LepGood1_pt']
+    cuts = 'nTightEl == 1 && LepGood1_pt > 5 && HT > 500 && MET > 200'
     refTrig = ''
     testTrig = ['ElNoIso','EleHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
-    varList = ['Lep_pt']
-    cuts = 'nEl == 1 && Lep_pt > 5 && HT > 500 && MET > 200'
+    varList = ['LepGood1_pt']
+    cuts = 'nTightEl == 1 && LepGood1_pt > 5 && HT > 500 && MET > 200'
     refTrig = 'HTMET'
     testTrig = ['ElNoIso','EleHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
@@ -596,32 +712,32 @@ if __name__ == "__main__":
     ###############
 
     varList = ['HT']
-    cuts = 'nMu == 1 && Lep_pt > 55 && MET > 200'
+    cuts = 'nTightMu == 1 && LepGood1_pt > 55 && MET > 200'
     refTrig = ''
     testTrig = ['SingleMu','Mu50NoIso', 'MuHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, False, varList, refTrig, testTrig, cuts)
 
     varList = ['HT']
-    cuts = 'nMu == 1 && Lep_pt > 25 && MET > 200'
+    cuts = 'nTightMu == 1 && LepGood1_pt > 25 && MET > 200'
     refTrig = ''
     testTrig = ['MuHT400MET70']#,'MuHT600']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
     varList = ['MET']
-    cuts = 'nMu == 1 && Lep_pt > 25 && HT  > 500'
+    cuts = 'nTightMu == 1 && LepGood1_pt > 25 && HT  > 500'
     refTrig = ''
     testTrig = ['MuHT400MET70']#,'MuHT600']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
     varList = ['HT']
-    cuts = 'nMu == 1 && Lep_pt > 25 && MET > 200'
+    cuts = 'nTightMu == 1 && LepGood1_pt > 25 && MET > 200'
     refTrig = 'SingleMu'
     #testTrig = ['SingleMu','Mu50NoIso','HLT_MuHT400MET70']
     testTrig = ['MuHT400MET70']#,'MuHT600']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
     varList = ['MET']
-    cuts = 'nMu == 1 && Lep_pt > 25 && HT  > 500'
+    cuts = 'nTightMu == 1 && LepGood1_pt > 25 && HT  > 500'
     refTrig = 'SingleMu'
     testTrig = ['MuHT400MET70']#,'MuHT600']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
@@ -631,209 +747,35 @@ if __name__ == "__main__":
     ###############
 
     varList = ['HT']
-    cuts = 'nEl == 1 && Lep_pt > 120 && MET > 200'
+    cuts = 'nTightEl == 1 && LepGood1_pt > 120 && MET > 200'
     refTrig = ''
     testTrig = ['SingleEl','ElNoIso', 'EleHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, False, varList, refTrig, testTrig, cuts)
 
     varList = ['HT']
-    cuts = 'nEl == 1 && Lep_pt > 25 && MET > 200'
+    cuts = 'nTightEl == 1 && LepGood1_pt > 25 && MET > 200'
     refTrig = ''
     testTrig = ['EleHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
     varList = ['MET']
-    cuts = 'nEl == 1 && Lep_pt > 25 && HT  > 500'
+    cuts = 'nTightEl == 1 && LepGood1_pt > 25 && HT  > 500'
     refTrig = ''
     testTrig = ['EleHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-    refTrig = 'SingleEl'
-    testTrig = ['EleHT400MET70']
 
     varList = ['HT']
-    cuts = 'nEl == 1 && Lep_pt > 25 && MET > 200'
+    cuts = 'nTightEl == 1 && LepGood1_pt > 25 && MET > 200'
+    refTrig = 'SingleEl'
+    testTrig = ['EleHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
     varList = ['MET']
-    cuts = 'nEl == 1 && Lep_pt > 25 && HT  > 500'
+    cuts = 'nTightEl == 1 && LepGood1_pt > 25 && HT  > 500'
+    refTrig = 'SingleEl'
+    testTrig = ['EleHT400MET70']
     makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
     '''
-
-    ###################
-    ###################
-    # DATA
-    ###################
-    ###################
-
-    doFit = True
-
-    if 'SingleEl' in fileName:
-        ## Electrons
-        lumi = 40.0 # SingleEl RunB
-
-        '''
-        refTrig = 'SingleEl'
-        testTrig = ['EleNoIso']
-
-        varList = ['Lep_pt']
-        cuts = 'nTightEl >= 1 && Lep_pt > 50'
-        #cuts = 'nEl >= 1 && Lep_pt > 5'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-        '''
-
-        refTrig = 'IsoEle32'
-        testTrig = ['EleHT350MET70']
-
-        varList = ['MET']
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && HT  > 500'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        varList = ['HT']
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && MET  > 200'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        refTrig = 'IsoEle32'
-        testTrig = ['Ele105']
-
-        varList = ['Lep_pt']
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 50'
-        #cuts = 'nEl >= 1 && Lep_pt > 5'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-
-    elif 'SingleMu' in fileName:
-        ## Muons
-        lumi = 40.0 # SingleMu RunB
-
-        refTrig = 'IsoMu27'
-        testTrig = ['MuHT350MET70']
-
-        varList = ['MET']
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && HT  > 500'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        varList = ['HT']
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && MET  > 200'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        refTrig = 'IsoMu27'
-        testTrig = ['Mu50']
-
-        varList = ['Lep_pt']
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 25'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-    elif 'SingleLep' in fileName:
-        ## Ele + Mu
-        lumi = 40.0 # SingleEl/Mu RunB
-
-        refTrig = 'HLT_IsoMu27||HLT_IsoEle32'
-        testTrig = ['MuHT350MET70||EleHT350MET70']
-
-        varList = ['HT']
-        cuts = 'Selected == 1 && nLep == 1  && Lep_pt > 25 && MET  > 200 && HT > 180'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        varList = ['MET']
-        cuts = 'Selected == 1 && nLep >= 1 && Lep_pt > 25 && HT  > 500'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-    elif 'JetHT' in fileName:
-
-        # Jet + HT triggers
-        if 'dcsonly' in fileName:
-            lumi = 50
-        elif 'golden40pb' in fileName:
-            lumi = 40
-        else:
-            lumi = 40.0
-
-        ## LT
-        varList = ['LT']
-        refTrig = 'JetHT'#HT800'
-
-        testTrig = ['Mu50||MuHT350MET70||Ele105||EleHT350MET70']
-        cuts = 'Selected == 1 && nLep == 1 && nVeto == 0 && Lep_pt > 25 && HT > 400'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 15 && HT > 500'
-        testTrig = ['Mu50||MuHT350MET70']
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 15 && HT > 500'
-        testTrig = ['Ele105||EleHT350MET70']
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-        '''
-
-        #### LEPTON LEG
-        refTrig = 'JetHT'
-        varList = ['Lep_pt']
-
-        testTrig = ['Ele105']
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 50'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        refTrig = 'JetHT'
-        testTrig = ['EleHT350MET70','Ele105']
-        #testTrig = ['EleHT350MET70||Ele105']
-
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5 && MET > 150 && HT > 400'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        ## muons
-        testTrig = ['MuHT350MET70','Mu50']
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 5 && MET > 150 && HT > 400'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        refTrig = 'HLT_HT350MET100'
-
-        testTrig = ['EleHT350MET70','Ele105']
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt'# > 5 && MET > 200 && HT > 500'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        testTrig = ['MuHT350MET70']
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 5 && MET > 200 && HT > 500'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-        '''
-
-    elif 'HTMHT' in fileName:
-
-        # Jet + HT triggers
-        lumi = 40.0
-
-        refTrig = 'HT350MET100'
-        varList = ['Lep_pt']
-
-        testTrig = ['EleHT350MET70','Ele105']
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5 && MET > 200'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        testTrig = ['MuHT350MET70','Mu50']
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 5 && MET > 200'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-    ###################
-    ###################
-    # MC
-    ###################
-    ###################
-
-    elif 'TTJets' in fileName:
-
-        lumi = 0
-
-        refTrig = ''#HT350MET120'
-        varList = ['Lep_pt']
-
-        testTrig = ['EleHT400MET70']
-        #testTrig = ['EleHT400MET70','Ele105']
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5 && HT > 500 && MET > 200'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-    else:
-        print 'Nothing to draw for this file!'
 
     tfile.Close()
     #outfile.Close()
