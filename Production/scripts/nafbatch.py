@@ -105,6 +105,7 @@ if grep -r "number of events processed" looper.log; then
 else
    echo "Couldn't find processed events!"
    echo "Job failed!"
+   mv looper.log Loop/
    mv Loop Loop_failed_`date +%s`
    touch failed
 fi
