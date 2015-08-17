@@ -12,7 +12,7 @@ class EventVars1L_triggers:
         self.branches = [
             'HLT_HT350', 'HLT_HT600', 'HLT_HT800',
             'HLT_MET170',
-            'HLT_HT350MET120','HLT_HT350MET100','HTMET',
+            'HLT_HT350MET120','HLT_HT350MET100','HLT_HTMET',
             'HLT_IsoMu27','HLT_Mu50', # single mu
             'HLT_MuHT400MET70','HLT_MuHT350MET70', 'HLT_MuHTMET',# for analysis
             'HLT_MuHT600', 'HLT_MuMET120', 'HLT_MuHT400B', #aux
