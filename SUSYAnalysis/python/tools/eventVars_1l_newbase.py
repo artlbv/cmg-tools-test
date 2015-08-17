@@ -108,7 +108,9 @@ class EventVars1L_base:
             ## special Vars
             "LSLjetptGT80", # leading + subl. jet pt > 80
             'isSR', # is it Signal or Control region
-            'Mll' #di-lepton mass
+            'Mll', #di-lepton mass
+            'METfilters',
+            'Dataset'
             ]
 
     def listBranches(self):
@@ -125,6 +127,14 @@ class EventVars1L_base:
                 ret[name] = []
             elif type(name) == 'str':
                 ret[name] = -999
+
+        ##############################
+        ##############################
+        # DATASET FLAG
+        # -- needs to be adjusted manually
+        ##############################
+        ret['Dataset'] = 'JetHT'
+        ##############################
 
         # copy basic event info:
         ret['Run'] = event.run
@@ -152,6 +162,11 @@ class EventVars1L_base:
 
         #plain copy of MET pt (just as an example and cross-check for proper friend tree production)
         ret["MET"] = metp4.Pt()
+
+        ## MET FILTERS for data
+        if event.isData:
+            #ret['METfilters'] = event.Flag_goodVertices and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter)
+            ret['METfilters'] = event.nVert > 0 and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter)
 
         ### LEPTONS
         Selected = False
