@@ -100,6 +100,8 @@ class EventVars1L_base:
             ## MET
             'MET','LT','ST',
             "DeltaPhiLepW", 'dPhi','Lp',
+            # no HF stuff
+            'METNoHF', 'LTNoHF', 'dPhiNoHF',
             ## jets
             'HT','nJet','nBJet',
             "htJet30j", "htJet30ja",
@@ -117,7 +119,6 @@ class EventVars1L_base:
 
     def listBranches(self):
         return self.branches[:]
-
 
     def __call__(self,event,keyvals):
 
@@ -167,10 +168,12 @@ class EventVars1L_base:
         ## make MET
         metp4 = ROOT.TLorentzVector(0,0,0,0)
         metp4.SetPtEtaPhiM(event.met_pt,event.met_eta,event.met_phi,event.met_mass)
-        #pmiss = array.array('d',[event.met_pt * cos(event.met_phi), event.met_pt * sin(event.met_phi)] )
-
-        #plain copy of MET pt (just as an example and cross-check for proper friend tree production)
         ret["MET"] = metp4.Pt()
+
+        ## MET NO HF
+        metNoHFp4 = ROOT.TLorentzVector(0,0,0,0)
+        metNoHFp4.SetPtEtaPhiM(event.metNoHF_pt,event.metNoHF_eta,event.metNoHF_phi,event.metNoHF_mass)
+        ret["METNoHF"] = metNoHFp4.Pt()
 
         ## MET FILTERS for data
         if event.isData:
@@ -407,8 +410,10 @@ class EventVars1L_base:
 
         # deltaPhi between the (single) lepton and the reconstructed W (lep + MET)
         dPhiLepW = -999 # set default value to -999 to spot "empty" entries
+        dPhiLepWNoHF = -999 # set default value to -999 to spot "empty" entries
         # LT of lepton and MET
         LT = -999
+        LTNoHF = -999
         Lp = -99
 
         if len(tightLeps) >=1:
@@ -418,12 +423,22 @@ class EventVars1L_base:
             LT = tightLeps[0].pt + event.met_pt
             Lp = tightLeps[0].pt / recoWp4.Pt() * cos(dPhiLepW)
 
+            ## no HF
+            recoWNoHFp4 =  tightLeps[0].p4() + metNoHFp4
+            dPhiLepWNoHF = tightLeps[0].p4().DeltaPhi(recoWNoHFp4)
+            LTNoHF = tightLeps[0].pt + event.metNoHF_pt
+
         ret["DeltaPhiLepW"] = dPhiLepW
         dPhi = abs(dPhiLepW) # nickname for absolute dPhiLepW
         ret['dPhi'] = dPhi
         ret['ST'] = LT
         ret['LT'] = LT
         ret['Lp'] = Lp
+
+        # no HF
+        dPhiNoHF = abs(dPhiLepWNoHF) # nickname for absolute dPhiLepW
+        ret['dPhiNoHF'] = dPhiNoHF
+        ret['LTNoHF'] = LTNoHF
 
         #############
         ## Playground
