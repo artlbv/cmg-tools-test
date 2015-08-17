@@ -3,6 +3,10 @@
 import os
 from ROOT import *
 
+#import tdrstyle
+#set the tdr style
+#tdrstyle.setTDRStyle()
+
 import CMS_lumi
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
@@ -30,7 +34,7 @@ pt_bins_2d = range(0,80,10) + range(80,150,20) + range (150,350,50)
 #lt_bins = range(0,100,10) + range(100,200,25) + range(200,400,50) + range(400,700,100) # high stat
 lt_bins = range(0,200,25) + range(200,300,50) + range(300,700,150) # low stat
 
-met_bins = range(0,200,10) + range(200,400,50) + range(400,700,100) # high stat
+met_bins = range(0,200,20) + range(200,400,50) + range(400,700,100) # high stat
 #met_bins = range(0,200,40) + range(200,400,100) + range(400,700,300) # low stat
 met_bins_2d = range(0,200,25) + range(200,400,100) + range(400,700,200) # high stat
 
@@ -44,6 +48,10 @@ def varToLabel(var):
 
     if 'pt' in var:
         label = 'p_{T}(lep)'
+    elif 'METNoHF' in var:
+        label = 'E_{T}^{miss} (NoHF)'
+    elif 'LTNoHF' in var:
+        label = 'L_{T}'
     elif 'MET' in var:
         label = 'E_{T}^{miss}'
         #label = '#slashE_{T}'
