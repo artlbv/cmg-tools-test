@@ -85,6 +85,7 @@ goodMu_sip3d = 4
 
 class EventVars1L_base:
     def __init__(self):
+
         self.branches = [
             ## general event info
             'Run','Event','Lumi','Xsec',
@@ -110,7 +111,8 @@ class EventVars1L_base:
             'isSR', # is it Signal or Control region
             'Mll', #di-lepton mass
             'METfilters',
-            'Dataset'
+            #Datasets
+            'PD_JetHT', 'PD_SingleEle', 'PD_SingleMu'
             ]
 
     def listBranches(self):
@@ -133,7 +135,14 @@ class EventVars1L_base:
         # DATASET FLAG
         # -- needs to be adjusted manually
         ##############################
-        ret['Dataset'] = 'JetHT'
+        if event.isData:
+            ret['PD_JetHT'] = 1
+            ret['PD_SingleEle'] = 0
+            ret['PD_SingleMu'] = 0
+        else:
+            ret['PD_JetHT'] = 0
+            ret['PD_SingleEle'] = 0
+            ret['PD_SingleMu'] = 0
         ##############################
 
         # copy basic event info:
@@ -166,7 +175,7 @@ class EventVars1L_base:
         ## MET FILTERS for data
         if event.isData:
             #ret['METfilters'] = event.Flag_goodVertices and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter)
-            ret['METfilters'] = event.nVert > 0 and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter)
+            ret['METfilters'] = event.nVert > 0 and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter
 
         ### LEPTONS
         Selected = False
