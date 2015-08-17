@@ -16,7 +16,7 @@ if( iPos==0 ): CMS_lumi.relPosX = 0.12
 gStyle.SetOptTitle(0)
 gStyle.SetOptStat(0)
 gStyle.SetPadTopMargin(0.05)
-gStyle.SetOptFit()
+#gStyle.SetOptFit()
 
 gStyle.SetLabelFont(62)
 gStyle.SetTitleFont(62)
@@ -38,7 +38,8 @@ met_bins = range(0,200,20) + range(200,400,50) + range(400,700,100) # high stat
 #met_bins = range(0,200,40) + range(200,400,100) + range(400,700,300) # low stat
 met_bins_2d = range(0,200,25) + range(200,400,100) + range(400,700,200) # high stat
 
-ht_bins = range(0,200,10) + range(200,400,50) + range(400,1000,100) + range(1000,1750,250) # high stat
+#ht_bins = range(0,200,10) + range(200,400,50) + range(400,1000,100) + range(1000,1750,250) # high stat
+ht_bins = range(200,400,50) + range(400,1000,100) + range(1000,1750,250) # high stat
 #ht_bins = range(0,200,40) + range(200,400,100) + range(400,1000,300) + range(1000,1750,250) # low stat
 ht_bins_2d = range(0,200,10) + range(200,400,50) + range(400,1000,100) + range(1000,1750,250) # high stat
 
@@ -51,7 +52,7 @@ def varToLabel(var):
     elif 'METNoHF' in var:
         label = 'E_{T}^{miss} (NoHF)'
     elif 'LTNoHF' in var:
-        label = 'L_{T}'
+        label = 'L_{T} (NoHF)'
     elif 'MET' in var:
         label = 'E_{T}^{miss}'
         #label = '#slashE_{T}'
@@ -69,6 +70,8 @@ def getLegend(pos = 'ne'):
         leg = TLegend(0.15,0.2,0.7,0.4)
     elif pos == 'fit':
         leg = TLegend(0.15,0.75,0.5,0.9)
+    elif pos == 'fit2':
+        leg = TLegend(0.15,0.7,0.8,0.9)
     elif pos == '2d':
         leg = TLegend(0.3,0.75,0.85,0.9)
 

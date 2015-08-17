@@ -171,7 +171,12 @@ def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', 
     hRef.SetLineColor(1)
     # axis set up
     hRef.SetStats(0)
-    hRef.GetXaxis().SetTitle(varToLabel(var))
+
+    label = varToLabel(var)
+    if 'eta' not in label:
+        label += ' [GeV]'
+
+    hRef.GetXaxis().SetTitle(label)
     hRef.GetYaxis().SetTitleOffset(1.2)
     canv.SetLogy()
 
@@ -308,7 +313,7 @@ def plotEff(histList, var = 'HT', doFit = False):
     ## style
 
     ## legend
-    leg = getLegend('fit')
+    leg = getLegend('fit2')
 
     # set reference eff to 1
     for bin in range(1,hRefEff.GetNbinsX()+1):
@@ -358,17 +363,24 @@ def plotEff(histList, var = 'HT', doFit = False):
         tEff.SetTitle(htitle)
 
         # style
-        tEff.SetLineColor(hist.GetLineColor())
+        if len(histList) == 2: # for one single curve
+            tEff.SetLineColor(kBlue)
+            tEff.SetMarkerColor(kBlue)
+        else:
+            tEff.SetLineColor(hist.GetLineColor())
+            tEff.SetMarkerColor(hist.GetLineColor())
+
         tEff.SetFillColor(0)
         tEff.SetMarkerStyle(20)
-        tEff.SetMarkerColor(hist.GetLineColor())
 
         tEff.Draw(plotOpt)
-        leg.AddEntry(tEff,tEff.GetTitle(),'lp')
+        leg.AddEntry(tEff,tEff.GetTitle(),'lpe')
 
         if len(histList) == 2:
             # add normalized hist shape
-            hist.SetFillColorAlpha(hist.GetLineColor(),0.35)
+            #hist.SetFillColorAlpha(hist.GetLineColor(),0.35)
+            hist.SetFillColorAlpha(kBlue,0.35)
+            hist.SetLineColor(kBlue)
             hist.DrawNormalized("same")
             leg.AddEntry(hist,varToLabel(var)+' distribution','f')
 
@@ -419,15 +431,26 @@ def plotEff(histList, var = 'HT', doFit = False):
             print 'Expected values: halfpoint = %5.2f, width = %5.2f, plateau = %5.2f' % (expHalfP, expWidth, expPlateau)
             print 'Fit result: halfpoint = %5.2f, width = %5.2f, plateau = %5.2f' % (halfpoint, width, plateau)
 
-            #gStyle.SetOption("Show Fit Parameters")
+            # get 0.99% of plateau
+            xpl = 0
+            for x in range(int(xmin),int(xmax)):
+                tpl = fturn(x)
+                if tpl > 0.98*plateau:
+                    xpl = x
+                    break
+
+            plattxt = '#varepsilon =  %2.1f#pm%2.1f%%' % (plateau*100, fitr.Error(2)*100)
+            if xpl > 0:
+                plattxt += ' at %s = %3.0f GeV' % (varToLabel(var),xpl)
+
+            leg.AddEntry(0,"Plateau:","")
+            leg.AddEntry(fturn,plattxt,"")
+
             gPad.Update()
 
             # get stat box
-            #TPaveStats *stats =(TPaveStats*)c1->GetPrimitive("stats");
-            #for prim in canv.GetListOfPrimitives():
-            #    print prim
-            stats = gEff.GetListOfFunctions().FindObject("stats")
-            stats.SetLineColor(gEff.GetLineColor())
+            #stats = gEff.GetListOfFunctions().FindObject("stats")
+            #stats.SetLineColor(gEff.GetLineColor())
 
             _fitrStore.append((hname,halfpoint, width, plateau))
 
@@ -545,28 +568,31 @@ if __name__ == "__main__":
     ###################
     ###################
 
-    #basecuts = 'METFilters && '
-    basecuts = ''
+    basecuts = 'METfilters && '
+    #basecuts = ''
 
     doFit = True
 
     if 'SingleEl' in fileName:
         ## Electrons
-        lumi = 40.03 # SingleEl RunB
+        #lumi = 40.03 # SingleEl RunB
+        lumi = 42 # SingleEl RunB
 
         refTrig = 'IsoEle32'
         testTrig = ['EleHT350MET70']
 
+        varList = ['HT']
+        #cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && METNoHF  > 200'
+        cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && MET  > 200'
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        '''
         varList = ['MET']
         cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && HT  > 500'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         varList = ['METNoHF']
         cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && HT  > 500'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        varList = ['HT']
-        cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && MET  > 200'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         refTrig = 'IsoEle32'
@@ -576,33 +602,46 @@ if __name__ == "__main__":
         cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 50'
         #cuts = basecuts + 'nEl >= 1 && Lep_pt > 5'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
+        '''
 
     elif 'SingleMu' in fileName:
         ## Muons
-        lumi = 40.0 # SingleMu RunB
+        #lumi = 40.0 # SingleMu RunB
+        lumi = 42 # SingleMu RunB
 
         refTrig = 'IsoMu27'
         testTrig = ['MuHT350MET70']
+
+
+        varList = ['HT']
+        #cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && MET  > 200'
+        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && METNoHF  > 200'
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        '''
+        varList = ['MET']
+        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && HT  > 500'
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        varList = ['METNoHF']
+        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && HT  > 500'
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         varList = ['MET']
         cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && HT  > 500'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
-        varList = ['HT']
-        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && MET  > 200'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        refTrig = 'IsoMu27'
         testTrig = ['Mu50']
-
         varList = ['Lep_pt']
         cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        '''
 
     elif 'SingleLep' in fileName:
         ## Ele + Mu
-        lumi = 40.0 # SingleEl/Mu RunB
+        lumi = 42.0 # SingleEl/Mu RunB
+
+        basecuts += ' (PD_SingleMu + PD_SingleEl == 1) &&'
 
         refTrig = 'HLT_IsoMu27||HLT_IsoEle32'
         testTrig = ['MuHT350MET70||EleHT350MET70']
@@ -643,6 +682,17 @@ if __name__ == "__main__":
         cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 15 && HT > 500'
         testTrig = ['Ele105||EleHT350MET70']
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        varList = ['LT']
+
+        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 15 && HT > 500'
+        testTrig = ['Mu50||MuHT350MET70']
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 15 && HT > 500'
+        testTrig = ['Ele105||EleHT350MET70']
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
         '''
 
         #### LEPTON LEG
