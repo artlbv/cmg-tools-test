@@ -322,8 +322,16 @@ def plotEff(histList, var = 'HT', doFit = False):
 
     hRefEff.Draw()
     #leg.AddEntry(0,'Reference: ' + hRefEff.GetName(),'')
-    leg.SetHeader('Reference: ' + hRef.GetName().replace('h'+var+'_',''))
+    pureName = hRef.GetName().replace('h'+var+'_','')
+    leg.SetHeader('Reference: ' + cleanName(pureName))
     #leg.AddEntry(hRefEff,hRefEff.GetTitle(),'lp')
+
+    # axis set up
+    hRefEff.SetStats(0)
+    #hRef.GetXaxis().SetTitle(var)
+    hRefEff.GetYaxis().SetRangeUser(0.01,1.5)
+    canv.SetTicks(1,0)
+    #canv.SetLogy()
 
     '''
     if len(histList) == 2:
@@ -382,7 +390,23 @@ def plotEff(histList, var = 'HT', doFit = False):
             hist.SetFillColorAlpha(kBlue,0.35)
             hist.SetLineColor(kBlue)
             hist.DrawNormalized("same")
+            #scale = hist.GetMaximum()*1.1/1.5
+            hist.Scale()
+
             leg.AddEntry(hist,varToLabel(var)+' distribution','f')
+
+            # extra axis
+            #scale = 1.5 * hist.GetEntries()#/hist.GetMaximum()#*1.1/1.5
+            scale = 1.5*hist.GetEntries()#/hist.GetMaximum()#*1.1/1.5
+            #scale = 1.5
+
+            raxis = TGaxis(gPad.GetUxmax(),gPad.GetUymin(),gPad.GetUxmax(), gPad.GetUymax(),0.01,scale,505,"+L");
+            raxis.SetLineColor(kBlue);
+            raxis.SetLabelColor(kBlue);
+            raxis.SetTitleColor(kBlue);
+            raxis.SetTitle("Events")
+            raxis.Draw()
+            SetOwnership(raxis, 0)
 
         if 'same' not in plotOpt: plotOpt += 'same'
 
@@ -444,7 +468,7 @@ def plotEff(histList, var = 'HT', doFit = False):
                 plattxt += ' at %s = %3.0f GeV' % (varToLabel(var),xpl)
 
             leg.AddEntry(0,"Plateau:","")
-            leg.AddEntry(fturn,plattxt,"")
+            leg.AddEntry(fturn,plattxt,"l")
 
             gPad.Update()
 
@@ -464,13 +488,6 @@ def plotEff(histList, var = 'HT', doFit = False):
     #leg.SetFillColor(0)
     leg.Draw()
     SetOwnership( leg, 0 )
-
-    # axis set up
-    hRefEff.SetStats(0)
-    #hRef.GetXaxis().SetTitle(var)
-    hRefEff.GetYaxis().SetRangeUser(0,1.5)
-    canv.SetTicks(1,1)
-    #canv.SetLogy()
 
     #leg.GetListOfPrimitives().Remove(hRefEff)
 

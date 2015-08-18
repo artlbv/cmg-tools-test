@@ -43,6 +43,15 @@ ht_bins = range(200,400,50) + range(400,1000,100) + range(1000,1750,250) # high 
 #ht_bins = range(0,200,40) + range(200,400,100) + range(400,1000,300) + range(1000,1750,250) # low stat
 ht_bins_2d = range(0,200,10) + range(200,400,50) + range(400,1000,100) + range(1000,1750,250) # high stat
 
+def cleanName(line):
+
+    cline = line
+
+    if line == 'JetHT':
+        cline = 'hadronic triggers'
+
+    return cline
+
 def varToLabel(var):
 
     label = var
@@ -52,7 +61,7 @@ def varToLabel(var):
     elif 'METNoHF' in var:
         label = 'E_{T}^{miss} (NoHF)'
     elif 'LTNoHF' in var:
-        label = 'L_{T} (NoHF)'
+        label = 'L_{T}'# (NoHF)'
     elif 'MET' in var:
         label = 'E_{T}^{miss}'
         #label = '#slashE_{T}'
@@ -180,10 +189,16 @@ def renameTrig(trigName):
         trigName = 'IsoMu27||Ele32'
 
     if trigName == 'MuHT350MET70||EleHT350MET70':
-        trigName = 'Mu||Ele x HT350MET70'
+        trigName = 'Mu || Ele x HT350MET70'
 
     if trigName == 'Mu50||MuHT350MET70||Ele105||EleHT350MET70':
         trigName = 'Mu+Ele combined'
+
+    if trigName == 'Mu50||MuHT350MET70':
+        trigName = 'Mu50 OR MuHT350MET70'
+
+    if trigName == 'Ele105||EleHT350MET70':
+        trigName = 'Ele105 OR EleHT350MET70'
 
     return trigName
 
