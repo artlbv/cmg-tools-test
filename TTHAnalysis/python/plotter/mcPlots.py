@@ -5,10 +5,6 @@ import itertools
 
 ## OFFICIAL CMS LUMI
 import CMS_lumi
-CMS_lumi.writeExtraText = 1
-CMS_lumi.extraText = "Preliminary"
-iPos = 0
-if( iPos==0 ): CMS_lumi.relPosX = 0.12
 
 if "/bin2Dto1Dlib_cc.so" not in ROOT.gSystem.GetLibraries():
     ROOT.gROOT.ProcessLine(".L %s/src/CMGTools/TTHAnalysis/python/plotter/bin2Dto1Dlib.cc+" % os.environ['CMSSW_BASE']);
@@ -101,6 +97,7 @@ def PrintHisto(h):
         print 'not th1 or th2'
     print c
 
+
 def doSpam(text,x1,y1,x2,y2,align=12,fill=False,textSize=0.033,_noDelete={}):
     cmsprel = ROOT.TPaveText(x1,y1,x2,y2,"NDC");
     cmsprel.SetTextSize(textSize);
@@ -110,7 +107,11 @@ def doSpam(text,x1,y1,x2,y2,align=12,fill=False,textSize=0.033,_noDelete={}):
     cmsprel.SetLineColor(0);
     cmsprel.SetTextAlign(align);
     cmsprel.SetTextFont(42);
-    cmsprel.AddText(text);
+    splittext = text.split("\\n")
+    if(len(splittext)>1):
+        for text in splittext: cmsprel.AddText(text)
+    else:
+        cmsprel.AddText(text);
     cmsprel.Draw("same");
     _noDelete[text] = cmsprel; ## so it doesn't get deleted by PyROOT
     return cmsprel
@@ -127,6 +128,19 @@ def getLumiText(lumi = None):
     else               : lumitext = "%.2f pb^{-1}" % (lumi*1000)
 
     return lumitext
+
+def doCMSlumi(canv):
+
+    CMS_lumi.writeExtraText = 1
+    CMS_lumi.extraText = "Preliminary"
+    iPos = 0
+    if( iPos==0 ): CMS_lumi.relPosX = 0.12
+
+    iPeriod = 4 #13TeV
+
+    CMS_lumi.lumi_13TeV = getLumiText()
+    CMS_lumi.CMS_lumi(canv, iPeriod, iPos)
+
 
 def doTinyCmsPrelim(textLeft="_default_",textRight="_default_",hasExpo=False,textSize=0.033,lumi=None, xoffs=0):
     global options
@@ -146,6 +160,14 @@ def doTinyCmsPrelim(textLeft="_default_",textRight="_default_",hasExpo=False,tex
     if textRight not in ['', None]:
         doSpam(textRight,.68+xoffs, .955, .99+xoffs, .995, align=32, textSize=textSize)
 
+def printExtraLabel(labeltext, legPosition):
+    nLines = len(labeltext.split("\\n"))
+
+    if legPosition  == "TR":
+        doSpam(labeltext, .30, .90-nLines*0.03, .48, .90, align=11, textSize=0.03)
+    elif legPosition == "TL":
+        doSpam(labeltext, .75, .90-nLines*0.03, .93, .90, align=11, textSize=0.03)
+
 def reMax(hist,hist2,islog,factorLin=1.3,factorLog=2.0):
     if  hist.ClassName() == 'THStack':
         hist = hist.GetHistogram()
@@ -159,7 +181,7 @@ def reMax(hist,hist2,islog,factorLin=1.3,factorLog=2.0):
           max2 = max(max2, (hist2.GetBinContent(b) + hist2.GetBinError(b))*(factorLog if islog else factorLin))
     if max2 > max0:
         max0 = max2;
-        if islog: hist.GetYaxis().SetRangeUser(0.9,max0)
+        if islog: hist.GetYaxis().SetRangeUser(0.05,max0)
         else:     hist.GetYaxis().SetRangeUser(0,max0)
 
 def doDataNorm(pspec,pmap):
@@ -659,8 +681,8 @@ class PlotMaker:
                 if doRatio: ROOT.gStyle.SetPaperSize(20.,25.)
                 else:       ROOT.gStyle.SetPaperSize(20.,20.)
                 # create canvas
-                #c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, 600, (750 if doRatio else 600))
-                c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, (750 if doRatio else 600), (750 if doRatio else 600))
+                c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, 600, (750 if doRatio else 600))
+                #c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, (750 if doRatio else 600), (750 if doRatio else 600))
                 c1.Draw()
                 p1, p2 = c1, None # high and low panes
                 # set borders, if necessary create subpads
@@ -683,8 +705,24 @@ class PlotMaker:
                     if p2: p2.SetLogx(True)
                     total.GetXaxis().SetNoExponent(True)
                     total.GetXaxis().SetMoreLogLabels(True)
-                if islog: total.SetMaximum(2*total.GetMaximum())
-                if not islog: total.SetMinimum(0)
+                #if islog: total.SetMaximum(2*total.GetMaximum())
+                #if not islog: total.SetMinimum(0)
+                if not options.extraLabel=="": #free some space on the canvas for extra label lines
+                    tmpMin = 0.01 #default log miminum
+                    if pspec.hasOption('YMin'):
+                        tmpMin = pspec.getOption('YMin',1.0)
+                    total.SetMinimum(tmpMin)
+                    tmpMax = total.GetMaximum()#total.GetBinContent(total.GetMaximumBin())
+                    relHistHeight = 1- (ROOT.gStyle.GetPadTopMargin() + ROOT.gStyle.GetPadBottomMargin() + 0.03*len(options.extraLabel.split("\\n")))
+                    if islog: maximum = tmpMin * pow(tmpMax/tmpMin,1./relHistHeight);
+                    else: maximum = (tmpMax-tmpMin)/relHistHeight + tmpMin
+                    total.SetMaximum(maximum)
+                elif islog: #plain log without extra labels
+                    total.SetMaximum(2*total.GetMaximum())
+                    total.SetMinimum(0.05) # default min value for logy
+                    if pspec.hasOption('YMin'): total.SetMinimum(pspec.getOption('YMin',1.0))
+                else: total.SetMinimum(0)
+
                 total.Draw("HIST")
                 if self._options.plotmode == "stack":
                     stack.Draw("SAME HIST")
@@ -723,16 +761,11 @@ class PlotMaker:
                                   cutoffSignals=not(options.showSigShape or options.showIndivSigShapes or options.showSFitShape), 
                                   textSize=(0.045 if doRatio else 0.035),
                                   legWidth=options.legendWidth)
-                if False:
+                if not options.cmslumi:
                     doTinyCmsPrelim(hasExpo = total.GetMaximum() > 9e4 and not c1.GetLogy(),textSize=(0.045 if doRatio else 0.033))
                 else:
-                    #p1.SetTopMargin(0.10)
-                    #c1.SetTopMargin(0.10)
-                    #CMS_lumi.lumi_13TeV = str(options.lumi*1000) + " pb^{-1}"
-                    CMS_lumi.lumi_13TeV = getLumiText()
-                    CMS_lumi.CMS_lumi(c1, 4, iPos)
-                #if not options.extraLabel=="": printExtraLabel(options.extraLabel,pspec.getOption('Legend','TR'))
-
+                    doCMSlumi(c1)
+                if not options.extraLabel=="": printExtraLabel(options.extraLabel,pspec.getOption('Legend','TR'))
                 signorm = None; datnorm = None; sfitnorm = None
                 if options.showSigShape or options.showIndivSigShapes or options.showIndivSigs: 
                     signorms = doStackSignalNorm(pspec,pmap,options.showIndivSigShapes or options.showIndivSigs,extrascale=options.signalPlotScale, norm=not options.showIndivSigs)
@@ -811,7 +844,8 @@ class PlotMaker:
 def addPlotMakerOptions(parser):
     addMCAnalysisOptions(parser)
     parser.add_option("--ss",  "--scale-signal", dest="signalPlotScale", default=1.0, type="float", help="scale the signal in the plots by this amount");
-    parser.add_option("--cmslumi", dest="cmslumi", type="string", default=("Preliminary","13TeV","%(lumi).1f pb^{-1}"), help="CMS lumi text");
+    #parser.add_option("--cmslumi", dest="cmslumi", type="string", default=("Preliminary","13TeV","%(lumi).1f pb^{-1}"), help="CMS lumi text");
+    parser.add_option("--cmslumi", dest="cmslumi", action="store_true", default=True, help="Do official CMS lumi text")
     parser.add_option("--lspam", dest="lspam",   type="string", default="CMS Preliminary", help="Spam text on the right hand side");
     #parser.add_option("--rspam", dest="rspam",   type="string", default="#sqrt{s} = 13 TeV, L = %(lumi)", help="Spam text on the right hand side");
     parser.add_option("--rspam", dest="rspam",   type="string", default="%(lumi) (13 TeV)", help="Spam text on the right hand side");
@@ -840,6 +874,8 @@ def addPlotMakerOptions(parser):
     parser.add_option("--legendWidth", dest="legendWidth", type="float", default=0.25, help="Width of the legend")
     parser.add_option("--flagDifferences", dest="flagDifferences", action="store_true", default=False, help="Flag plots that are different (when using only two processes, and plotmode nostack")
     parser.add_option("--pseudoData", dest="pseudoData", type="string", default=None, help="If set to 'background' or 'all', it will plot also a pseudo-dataset made from background (or signal+background) with Poisson fluctuations in each bin.")
+    parser.add_option("--extraLabel", dest="extraLabel", default = "", help="print extra text next to the legend (several lines in case string contains \\n )")
+
 
 if __name__ == "__main__":
     from optparse import OptionParser
@@ -856,7 +892,7 @@ if __name__ == "__main__":
     if os.path.dirname(outname) and not os.path.exists(os.path.dirname(outname)):
         os.system("mkdir -p "+os.path.dirname(outname))
         #if os.path.exists("/afs/cern.ch"): os.system("cp /afs/cern.ch/user/g/gpetrucc/php/index.php "+os.path.dirname(outname))
-        if os.path.exists("/afs/desy.de"): os.system("cp /afs/cern.ch/user/a/alobanov/public/php/index.php "+fdir)
+        if os.path.exists("/afs/desy.de"): os.system("cp /afs/cern.ch/user/a/alobanov/public/php/index.php  "+os.path.dirname(outname))
 
     print "Will save plots to ",outname
     fcut = open(re.sub("\.root$","",outname)+"_cuts.txt","w")
