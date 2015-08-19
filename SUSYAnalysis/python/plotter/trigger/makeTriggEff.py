@@ -385,25 +385,27 @@ def plotEff(histList, var = 'HT', doFit = False):
         leg.AddEntry(tEff,tEff.GetTitle(),'lpe')
 
         if len(histList) == 2:
+
+            # transparent color for hist and axis
+            hCol = kBlue #hist.GetLineColor()
+            hAlpha = 0.35
+
             # add normalized hist shape
-            #hist.SetFillColorAlpha(hist.GetLineColor(),0.35)
-            hist.SetFillColorAlpha(kBlue,0.35)
-            hist.SetLineColor(kBlue)
+            hist.SetFillColorAlpha(hCol,hAlpha)
+            hist.SetLineColorAlpha(hCol,hAlpha)
             hist.DrawNormalized("same")
-            #scale = hist.GetMaximum()*1.1/1.5
             hist.Scale()
 
             leg.AddEntry(hist,varToLabel(var)+' distribution','f')
 
             # extra axis
-            #scale = 1.5 * hist.GetEntries()#/hist.GetMaximum()#*1.1/1.5
             scale = 1.5*hist.GetEntries()#/hist.GetMaximum()#*1.1/1.5
             #scale = 1.5
 
-            raxis = TGaxis(gPad.GetUxmax(),gPad.GetUymin(),gPad.GetUxmax(), gPad.GetUymax(),0.01,scale,505,"+L");
-            raxis.SetLineColor(kBlue);
-            raxis.SetLabelColor(kBlue);
-            raxis.SetTitleColor(kBlue);
+            raxis = TGaxis(gPad.GetUxmax(),gPad.GetUymin(),gPad.GetUxmax(), gPad.GetUymax(),0.01,scale,505,"+L")
+            raxis.SetLineColor(hCol)
+            raxis.SetLabelColor(hCol)
+            raxis.SetTitleColor(hCol)
             raxis.SetTitle("Events")
             raxis.Draw()
             SetOwnership(raxis, 0)
