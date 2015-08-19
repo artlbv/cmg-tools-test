@@ -363,7 +363,7 @@ metAna = cfg.Analyzer(
     )
 
 metNoHFAna = cfg.Analyzer(
-    METAnalyzer, name="metAnalyzer",
+    METAnalyzer, name="metAnalyzerNoHF",
     metCollection     = "slimmedMETsNoHF",
     noPUMetCollection = "slimmedMETsNoHF",
     copyMETsByValue = False,
@@ -429,6 +429,7 @@ susyCoreSequence = [
     #ttHFatJetAna,  # out of core sequence for now
     #ttHSVAna, # out of core sequence for now
     metAna,
+    metNoHFAna,
     ttHCoreEventAna,
     #ttHJetMETSkim
     triggerFlagsAna,
