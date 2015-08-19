@@ -372,8 +372,8 @@ def plotEff(histList, var = 'HT', doFit = False):
 
         # style
         if len(histList) == 2: # for one single curve
-            tEff.SetLineColor(kBlue)
-            tEff.SetMarkerColor(kBlue)
+            tEff.SetLineColor(1)#kBlue)
+            tEff.SetMarkerColor(1)#kBlue)
         else:
             tEff.SetLineColor(hist.GetLineColor())
             tEff.SetMarkerColor(hist.GetLineColor())
