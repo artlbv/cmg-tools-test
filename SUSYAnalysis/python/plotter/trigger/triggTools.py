@@ -26,6 +26,12 @@ gStyle.SetTitleFont(62)
 
 _colorList = [2,4,8,9,7,3,6] + range(10,50)
 
+eta_bins = []#-2.5,-2.25,-2.,-1.75,]
+for ieta in range(-10,11):
+    eta_bins += [ieta*2.4/10]
+
+eta_bins_2d = [-2.4,-2,-1.5,-1.,-0.5,0,0.5,1.,1.5,2.,2.4]
+
 #pt_bins = range(0,30,2) + range(30,70,5) + range(70,150,10) + range (150,250,25) + range(250,350,50)
 pt_bins = range(0,30,2) + range(30,70,5) + range(70,150,10) + range (150,350,50)
 #pt_bins = range(0,30,2) + range(30,70,5) + range(70,100,10)
@@ -47,7 +53,7 @@ def cleanName(line):
 
     cline = line
 
-    if line == 'JetHT':
+    if line == 'JetHT!':
         cline = 'hadronic triggers'
 
     return cline
@@ -67,6 +73,8 @@ def varToLabel(var):
         #label = '#slashE_{T}'
     elif 'T' in var:
         label = var.replace('T','_{T}')
+    if 'eta' in var:
+        label = '#eta(lep)'
 
     return label
 
