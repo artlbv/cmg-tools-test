@@ -77,6 +77,8 @@ def get2DHistsFromTree(tree, tvar = ('MET','HT'), refTrig = '', cuts = '', testT
         hRef = TH2F(rname,htitle,len(pt_bins_2d)-1,array('f',pt_bins_2d),len(met_bins_2d)-1,array('f',met_bins_2d))
     elif 'pt' in var2 and var1 == 'HT':
         hRef = TH2F(rname,htitle,len(pt_bins_2d)-1,array('f',pt_bins_2d),len(ht_bins_2d)-1,array('f',ht_bins_2d))
+    elif 'pt' in var2 and 'eta' in var1:
+        hRef = TH2F(rname,htitle,len(pt_bins_2d)-1,array('f',pt_bins_2d),len(eta_bins_2d)-1,array('f',eta_bins_2d))
     else:
         hRef = TH2F(rname,htitle,nbins,0,1500,nbins,0,600)
 
@@ -257,7 +259,7 @@ def plot2DEff(histList,  tvar = ('MET','HT')):
         SetOwnership( leg, 0 )
 
         # LT LINE
-        if 'MET' in hname and 'Lep' in hname:
+        if 'MET' in var and 'Lep' in var:
             cutline = TLine(0,250,250,0)
             cutline.SetLineWidth(5)
             cutline.SetLineStyle(4)
@@ -507,7 +509,7 @@ if __name__ == "__main__":
 
     if 'JetHT' in fileName:
 
-        lumi = 40.0
+        lumi = 42.0
 
         ## LepPt vs MET
         var = ('MET','Lep_pt')
@@ -517,11 +519,21 @@ if __name__ == "__main__":
         ## Muons
         cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 5 && HT > 400'
         testTrig = ['Mu50||MuHT350MET70']#,'Mu50','MuHT350MET70']
-        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
+        #make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
 
         ## Electrons
         cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5 && HT > 400'
         testTrig = ['Ele105||EleHT350MET70']#,'Ele105','EleHT350MET70']
+        #make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
+
+        ## LepPt vs LepEta
+        var = ('Lep_eta','Lep_pt')
+        varList = [var]
+        refTrig = ''#HT800'
+
+        ## Electrons
+        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5'# && HT > 400'
+        testTrig = ['Ele105']
         make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
 
     elif 'HTMHT' in fileName:
