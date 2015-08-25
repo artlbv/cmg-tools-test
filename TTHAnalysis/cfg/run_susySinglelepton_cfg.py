@@ -76,6 +76,10 @@ ttHSTSkimmer = cfg.Analyzer(
 	minST = 200,
 	)
 
+#add LHE Analyzer
+from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer 
+LHEAna = LHEAnalyzer.defaultConfig
+
 from CMGTools.TTHAnalysis.analyzers.ttHReclusterJetsAnalyzer import ttHReclusterJetsAnalyzer
 ttHReclusterJets = cfg.Analyzer(
 	ttHReclusterJetsAnalyzer, name="ttHReclusterJetsAnalyzer",
@@ -136,12 +140,12 @@ TTJets_LO,
 #-------- SEQUENCE
 
 sequence = cfg.Sequence(susyCoreSequence+[
-	ttHEventAna,
-	#ttHSTSkimmer,
-	#ttHReclusterJets,
-	treeProducer,
-	])
-
+    LHEAna,
+    ttHEventAna,
+    ttHSTSkimmer,
+    ttHReclusterJets,
+    treeProducer,
+    ])
 
 #-------- HOW TO RUN
 test = 3

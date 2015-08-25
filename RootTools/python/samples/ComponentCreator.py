@@ -16,6 +16,7 @@ class ComponentCreator(object):
              effCorrFactor = 1,
          )
 
+         component.dataset_entries = self.getPrimaryDatasetEntries(dataset,user,pattern,useAAA=useAAA)
          return component
 
     def makePrivateMCComponent(self,name,dataset,files,xSec=1):
@@ -162,7 +163,7 @@ class ComponentCreator(object):
             json = json
             )
         component.vetoTriggers = vetoTriggers
-
+        component.dataset_entries = self.getPrimaryDatasetEntries(dataset,user,pattern)
         return component
 
     def getFilesFromIC(self, dataset, user, pattern):
@@ -218,7 +219,7 @@ class ComponentCreator(object):
             json = json
             )
         component.vetoTriggers = vetoTriggers
-
+        component.dataset_entries = self.getPrimaryDatasetEntries(dataset,user,pattern)
         return component
 
     def getFiles(self, dataset, user, pattern, useAAA=False, run_range=None):
@@ -229,6 +230,10 @@ class ComponentCreator(object):
         if useAAA: mapping = 'root://cms-xrd-global.cern.ch/%s'
         return [ mapping % f for f in files]
 
+    def getPrimaryDatasetEntries(self, dataset, user, pattern, useAAA=False):
+        # print 'getting files for', dataset,user,pattern
+        ds = createDataset( user, dataset, pattern, True )
+        return ds.primaryDatasetEntries
 
     def getMyFiles(self, dataset, user, pattern, dbsInstance, useAAA=False):
         # print 'getting files for', dataset,user,pattern
