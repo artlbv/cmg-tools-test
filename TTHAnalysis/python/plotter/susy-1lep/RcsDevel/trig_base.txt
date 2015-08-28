@@ -1,0 +1,8 @@
+1 hard lep: nLep == 1 && Selected == 1 && Lep_pt > 25 && nVeto == 0
+triggHT: HT > 500
+triggLT: LTNoHF > 250
+
+nJetBase: nJet >= 4
+2.JetPt > 80: Jet2_pt > 80
+
+base: 1
