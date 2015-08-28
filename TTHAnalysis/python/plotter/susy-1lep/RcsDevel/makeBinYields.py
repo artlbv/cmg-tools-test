@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from CMGTools.TTHAnalysis.plotter.mcAnalysis import *
 import re, sys, os, os.path
-systs = {}
 
 from searchBins import *
 
@@ -24,7 +23,7 @@ def addOptions(options):
     options.weight = True
     options.final  = True
     options.allProcesses  = True
-    #options.maxEntries = 10000
+    #options.maxEntries = 100
 
     # signal scan
     if options.signal:
@@ -119,8 +118,8 @@ if __name__ == "__main__":
     addMCAnalysisOptions(parser)
 
     # extra options for tty
-    parser.add_option("-m","--mca", dest="mcaFile",default="mca-PAS.txt",help="MCA sample list")
-    parser.add_option("-c","--cuts", dest="cutFile",default="trig_base.txt",help="Baseline cuts file")
+    parser.add_option("--mca", dest="mcaFile",default="mca-PAS.txt",help="MCA sample list")
+    parser.add_option("--cuts", dest="cutFile",default="trig_base.txt",help="Baseline cuts file")
     parser.add_option("--binname", dest="binname",default="test",help="Binname")
 
     # options for cards
@@ -137,6 +136,7 @@ if __name__ == "__main__":
     parser.add_option("--pretend", dest="pretend",default=False, action="store_true",help="pretend to do it")
 
     # batch options
+    parser.add_option("-c","--chunk", dest="chunk",type="int",default=None,help="Number of chunk")
     parser.add_option("-b","--batch", dest="batch",default=False, action="store_true", help="batch command for submission")
     parser.add_option("--jobList","--jobList", dest="jobListName",default="jobList.txt",help="job list name")
     #parser.add_option("-f","--force", dest="force",default=False, action="store_true",help="force mode")
@@ -150,25 +150,56 @@ if __name__ == "__main__":
     # Read options and args
     (options,args) = parser.parse_args()
 
-    if options.verbose > 0:
+    if options.verbose > 0 and len(args) > 0:
         print 'Arguments', args
 
-    for bin in sorted(cutDict.keys()):
-        cuts = cutDict[bin]
+    print "Beginning processing..."
+
+    # make cut list
+    cDict = cutDictCR
+    cDict.update(cutDictSR)
+    binList = sorted(cDict.keys())
+
+    print options.chunk, len(binList), options.chunk > len(binList)
+
+    if options.chunk == None:
+        # execute all bins locally
+        for idx,bin in enumerate(binList):
+            cuts = cDict[bin]
+            options.bin = bin
+            options.cutsToAdd = cuts
+
+            if options.verbose > 0:
+                print 80*'#'
+                print 'Processing bin #%i/%i' %(idx,len(binList))
+                print '%s with cuts' %(bin),
+                for cut in cuts:
+                    print cut[2],'+',
+                print
+            else:
+                print '.',
+            makeCards(options, args)
+        print
+    elif options.chunk < len(binList):
+        # to test a single job
+        bin = binList[options.chunk]
+        idx = options.chunk+1
+
+        cuts = cDict[bin]
         options.bin = bin
         options.cutsToAdd = cuts
 
         if options.verbose > 0:
             print 80*'#'
-            print 'Processing bin %s with cuts' %(bin),
+            print 'Processing chunk #%i/%i' %(idx,len(binList))
+            print '%s with cuts' %(bin),
             for cut in cuts:
                 print cut[2],'+',
             print
-
+        else:
+            print '.',
         makeCards(options, args)
-
-    if False:
-        options.bin = "signal"
-        makeCards(options, args)
+    else:
+        print "Nothing to process!"
 
     print 'Finished'

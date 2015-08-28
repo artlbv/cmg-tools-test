@@ -26,6 +26,7 @@ def addOptions(options):
         options.friendTrees = [("sf/t","FriendTrees_MC/evVarFriend_{cname}.root")]
 
 def getYield(tfile,hname = "x_T1tttt_HM_1200_800"):
+#def getYield(tfile,hname = "x_background"):
 
     hist = tfile.Get(hname)
 
@@ -34,11 +35,11 @@ def getYield(tfile,hname = "x_T1tttt_HM_1200_800"):
     else:
         return (hist.Integral(),TMath.sqrt(hist.Integral()))
 
-def makeBinHisto(ydict):
+def makeBinHisto(ydict, hname = "hYields"):
 
     nbins = len(ydict)
 
-    hist = TH1F("hyields","bin yields",nbins,-0.5,nbins+0.5)
+    hist = TH1F(hname,"bin yields for "+hname,nbins,-0.5,nbins+0.5)
 
     for idx,bin in enumerate(sorted(ydict.keys())):
 
@@ -46,12 +47,18 @@ def makeBinHisto(ydict):
 
         hist.SetBinContent(idx+1,yd)
         hist.SetBinError(idx+1,yerr)
-        hist.GetXaxis().SetBinLabel(idx+1,bin)
 
-    hist.Draw("histe")
-    a = raw_input("wait")
+        binlabel = bin.replace('_SR','')
+        binlabel = binlabel.replace('_CR','')
+        binlabel = binlabel.replace('_CR','')
+        binlabel = binlabel.replace('_NJ45','')
+        binlabel = binlabel.replace('_NJ68','')
 
-def readFiles(fileList):
+        hist.GetXaxis().SetBinLabel(idx+1,binlabel)
+
+    return hist
+
+def getYHisto(fileList, hname):
 
     binDict = {}
 
@@ -69,7 +76,63 @@ def readFiles(fileList):
 
         binDict[binname] = (yd,yerr)
 
-    makeBinHisto(binDict)
+    return makeBinHisto(binDict, hname)
+
+
+def makeRCShist(fileList, hname):
+
+    # sort SR/CR files
+    srList = [fname for fname in fileList if 'SR' in fname]
+    crList = [fname for fname in fileList if 'CR' in fname]
+
+    #print 'SR files:', srList
+    #print 'CR files:', crList
+    print 'Found %i SR files and %i CR files matching pattern' %(len(srList), len(crList))
+
+    hSR = getYHisto(srList,"hSR"+hname)
+    hCR = getYHisto(crList,"hCR"+hname)
+
+    hRcs = hSR.Clone("hRcs")
+    hRcs.Divide(hCR)
+
+    #hRcs.Draw("histe")
+    #a = raw_input("wait")
+
+    return hRcs
+
+def makeKappaHists(fileList):
+
+
+    # filter
+    fileList = [fname for fname in fileList if 'NB3' not in fname]
+
+    # split lists
+    nj45List = [fname for fname in fileList if 'NJ45' in fname]
+    nj68List = [fname for fname in fileList if 'NJ68' in fname]
+
+    hRcsNj45 = makeRCShist(nj45List,"_Nj45")
+    hRcsNj45.SetLineColor(kRed)
+    hRcsNj45.SetMarkerStyle(22)
+    hRcsNj45.SetMarkerColor(kRed)
+
+    hRcsNj68 = makeRCShist(nj68List,"_Nj68")
+    hRcsNj68.SetLineColor(kBlue)
+    hRcsNj68.SetMarkerStyle(22)
+    hRcsNj68.SetMarkerColor(kBlue)
+
+    '''
+    hRcsNj45.Draw("histe1")
+    hRcsNj68.Draw("histe1same")
+    '''
+    hKappa = hRcsNj68.Clone("hKappa")
+    hKappa.Divide(hRcsNj45)
+    hKappa.GetYaxis().SetRangeUser(0,2)
+
+    hKappa.Draw("histe1")
+    b= raw_input("cont")
+
+    return 1
+
 
 if __name__ == "__main__":
 
@@ -87,13 +150,9 @@ if __name__ == "__main__":
         print "No pattern given!"
         exit(0)
 
-    #tfile  = TFile(fileName, "READ")
-    #indir = os.path.dirname(fileName)
-
     # find files matching pattern
     fileList = glob.glob(pattern+"*.root")
 
-    readFiles(fileList)
-    #print fileList
+    makeKappaHists(fileList)
 
     print 'Finished'

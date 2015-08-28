@@ -25,17 +25,26 @@ binsNB['NB1i'] = 'nBJet >= 1'
 binsNB['NB2p3'] = 'nBJet >= 2'
 
 # NJ Bins
-
-################
-# MAKE CUT LISTS
-################
 binsNJ = {}
 #binsNJ['NJi'] = 'nJet >= 4'
 binsNJ['NJ45'] = '4 <= nJet && nJet <= 5'
 binsNJ['NJ68'] = '6 <= nJet && nJet <= 8'
 binsNJ['NJ9i'] = '9 <= nJet'
 
+## Signal/Control region (wrt dPhi)
+binsSR = {}
+binsSR['SR'] = 'isSR == 1'
+binsCR = {}
+binsCR['CR'] = 'isSR == 0'
+
+################
+# MAKE CUT LISTS
+################
+
 cutDict = {}
+cutDictSR = {}
+cutDictCR = {}
+
 cutDictNJ45 = {}
 cutDictNJ68 = {}
 cutDictNJ9i = {}
@@ -86,9 +95,23 @@ for nj_bin in ['NJ45','NJ68']:#binsNJ.iteritems():
                 nb_cut = binsNB[nb_bin]
 
                 binname = "%s_%s_%s_%s" %(lt_bin,ht_bin,nb_bin,nj_bin)
-
                 cutDict[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
 
+                # split to SR/CR
+                for sr_bin in ['SR']:
+                    sr_cut = binsSR[sr_bin]
+
+                    binname = "%s_%s_%s_%s_%s" %(lt_bin,ht_bin,nb_bin,nj_bin,sr_bin)
+                    cutDictSR[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut),("base",sr_bin,sr_cut)]
+
+                for cr_bin in ['CR']:
+                    cr_cut = binsCR[cr_bin]
+
+                    binname = "%s_%s_%s_%s_%s" %(lt_bin,ht_bin,nb_bin,nj_bin,cr_bin)
+                    cutDictCR[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut),("base",cr_bin,cr_cut)]
+
+
+### FIXME
 for nj_bin in ['NJ9i']:#binsNJ.iteritems():
     nj_cut = binsNJ[nj_bin]
 
