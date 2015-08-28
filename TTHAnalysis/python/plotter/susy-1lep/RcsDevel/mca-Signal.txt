@@ -1,0 +1,5 @@
+#Cross sections need to be double-checked
+
+#Signal samples
+T1tttt_HM_1200_800+: T1tttt_mGo1200_mChi800 : xsec ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8"
+#T1tttt_HL_1500_100+: SMS_T1tttt_2J_mGl1500_mLSP100 : xsec ; FillColor=ROOT.kMagenta,   Label="T1t^{4} 1.5/0.1"
