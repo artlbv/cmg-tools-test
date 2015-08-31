@@ -28,6 +28,7 @@ shapeExe = "makeShapeCardsSusy.py"
 # choose CF and MCA files
 cutFlowCard = "cards_cf.txt"
 mcaFile = "mca-Cards_test.txt"
+#mcaFile = "mca-PAS.txt"
 
 SYSTS="susyDummy.txt"
 CnC_expr="1" #not used as of now
@@ -42,8 +43,10 @@ def makeCard(args):
     odir = opt.outdir
 
     # main options
-    cmd = "python %s/makeShapeCardsSusy.py %s %s " % (plotdir, rcsdir + mcaFile, rcsdir + cutFlowCard)
-    cmd += "%s %s %s " %(CnC_expr, CnC_bins, SYSTS)
+    #cmd = "python %s/makeShapeCardsSusy.py %s %s " % (plotdir, rcsdir + mcaFile, rcsdir + cutFlowCard)
+    cmd = "python %s/makeShapeCardsSusy.py %s %s " % (plotdir, mcaFile, cutFlowCard)
+    cmd += " %s %s %s " %(CnC_expr, CnC_bins, SYSTS)
+    cmd += " -o %s.txt " % cutName
 
     # execution options
     exeopt = " -f --s2v --tree treeProducerSusySingleLepton --asimov  --od %s " %(odir)
@@ -55,17 +58,16 @@ def makeCard(args):
 
     # cut name
     cmd += cuts
-    cmd += " -o %s " % cutName
 
     # set dummy yields
     cmd += " --dummyYieldsForZeroBkg"
 
     if opt.pretend:
         print cmd
-        exit(0)
     elif opt.batch:
-
-
+        jobList = open(opt.jobListName,'a')
+        jobList.write(cmd+'\n')
+        jobList.close()
     else:
         # execute locally
         os.system(cmd)
