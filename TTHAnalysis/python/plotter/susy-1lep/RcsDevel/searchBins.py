@@ -62,10 +62,8 @@ for nj_bin in ['NJ45','NJ68']:#binsNJ.iteritems():
 
         if lt_bin in ['LT1']:
             htbins += ['HT0','HT1p2']
-        if lt_bin in ['LT1','LT2']:
-            htbins += ['HT0']
         if lt_bin in ['LT2']:
-            htbins += ['HT1']
+            htbins += ['HT0','HT1']
         if lt_bin in ['LT2','LT3','LT4']:
             htbins += ['HT2']
         if lt_bin in ['LT3','LT4']:

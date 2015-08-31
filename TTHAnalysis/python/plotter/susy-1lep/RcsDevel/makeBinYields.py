@@ -160,8 +160,6 @@ if __name__ == "__main__":
     cDict.update(cutDictSR)
     binList = sorted(cDict.keys())
 
-    print options.chunk, len(binList), options.chunk > len(binList)
-
     if options.chunk == None:
         # execute all bins locally
         for idx,bin in enumerate(binList):
@@ -183,7 +181,7 @@ if __name__ == "__main__":
     elif options.chunk < len(binList):
         # to test a single job
         bin = binList[options.chunk]
-        idx = options.chunk+1
+        idx = options.chunk
 
         cuts = cDict[bin]
         options.bin = bin
