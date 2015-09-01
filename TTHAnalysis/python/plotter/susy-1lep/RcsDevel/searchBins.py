@@ -8,6 +8,7 @@ binsLT['LT3p4'] = '450 < LT'
 
 # HT bins
 binsHT = {}
+binsHT['HTi'] = '500 < HT'
 binsHT['HT0'] = '500 < HT && HT < 750'
 binsHT['HT1'] = '750 < HT && HT < 1250'
 binsHT['HT2'] = '1250 < HT'
@@ -27,6 +28,7 @@ binsNB['NB2p3'] = 'nBJet >= 2'
 # NJ Bins
 binsNJ = {}
 #binsNJ['NJi'] = 'nJet >= 4'
+binsNJ['NJ34'] = '3 <= nJet && nJet <= 4'
 binsNJ['NJ45'] = '4 <= nJet && nJet <= 5'
 binsNJ['NJ68'] = '6 <= nJet && nJet <= 8'
 binsNJ['NJ9i'] = '9 <= nJet'
@@ -41,14 +43,35 @@ binsCR['CR'] = 'isSR == 0'
 # MAKE CUT LISTS
 ################
 
+### QCD
+cutQCD = {}
+
+for nj_bin in ['NJ34']:#,'NJ45']:
+    nj_cut = binsNJ[nj_bin]
+    ltbins = ['LT1','LT2','LT3','LT4']
+
+    for lt_bin in ltbins:
+        lt_cut = binsLT[lt_bin]
+
+        for ht_bin in ['HTi']:
+            ht_cut = binsHT[ht_bin]
+
+            for nb_bin in ['NB0']:
+                nb_cut = binsNB[nb_bin]
+
+                binname = "%s_%s_%s_%s" %(lt_bin,ht_bin,nb_bin,nj_bin)
+                cutQCD[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
+
+
+### REAL SEARCH BINS (also for RCS)
 cutDict = {}
+
 cutDictSR = {}
 cutDictCR = {}
 
 cutDictNJ45 = {}
 cutDictNJ68 = {}
 cutDictNJ9i = {}
-
 
 for nj_bin in ['NJ45','NJ68']:#binsNJ.iteritems():
     nj_cut = binsNJ[nj_bin]
