@@ -29,7 +29,11 @@ def addOptions(options):
     if options.signal:
         options.var =  "mLSP:mGo"
         options.bins = "30,0,1500,30,0,1500"
-        options.friendTrees = [("sf/t","FriendTrees_MC/evVarFriend_{cname}.root")]
+        options.friendTrees = [("sf/t","FriendTrees_Signal/evVarFriend_{cname}.root")]
+
+    if options.grid:
+        options.var =  "(nEl-nMu):Selected"
+        options.bins = "2,-1.5,1.5,2,-1.5,1.5"
 
 
 def writeYields(options):
@@ -58,10 +62,15 @@ def writeYields(options):
 
     # add sum MC entry
     if not options.pretend:
-        totalMC = []
+        totalMC = []; ewkMC = []
         for p in mca.listBackgrounds():
-            if p in report: totalMC.append(report[p])
+            if p in report:
+                totalMC.append(report[p])
+                if 'QCD' not in p:
+                    ewkMC.append(report[p])
+
             report['x_background'] = mergePlots("x_background", totalMC)
+            report['x_EWK'] = mergePlots("x_EWK", ewkMC)
 
     '''
     if options.asimov:
@@ -157,9 +166,10 @@ if __name__ == "__main__":
     parser.add_option("-b","--batch", dest="batch",default=False, action="store_true", help="batch command for submission")
     parser.add_option("--jobList","--jobList", dest="jobListName",default="jobList.txt",help="job list name")
 
-    #makeShapeCards options
+    # more options
     parser.add_option("--asimov", dest="asimov", action="store_true", default=False, help="Make Asimov pseudo-data")
     parser.add_option("--signal", dest="signal", action="store_true", default=False, help="Is signal scan")
+    parser.add_option("--grid", dest="grid", action="store_true", default=False, help="Plot 2d grid: ele/mu vs selected/anti")
     #parser.add_option("--dummy",  dest="dummyYieldsForZeroBkg", action="store_true", default=False, help="Set dummy yields such it corresponds to 0.01 for 4/fb");
     #parser.add_option("--ignoreEmptySignal",  dest="ignoreEmptySignal", action="store_true", default=False, help="Do not write out a datacard if the expected signal is less than 0.01");
 
@@ -170,8 +180,10 @@ if __name__ == "__main__":
         print 'Arguments', args
 
     # make cut list
-    cDict = cutDictCR
-    cDict.update(cutDictSR)
+    #cDict = cutDictCR
+    #cDict.update(cutDictSR)
+    cDict = cutQCD #QCD
+
     binList = sorted(cDict.keys())
 
     if options.batch:
