@@ -7,13 +7,31 @@ import PhysicsTools.Heppy.loadlibs
 import array
 import operator
 
+# import gluino xsec table
+#from glu_xsecs_v2 import xsecGlu
+
+xsecGlu = {} # dict for xsecs
+xsecFile = "../python/tools/glu_xsecs_13TeV.txt"
+with open(xsecFile,"r") as xfile:
+    lines = xfile.readlines()
+    print 'Found %i lines in %s' %(len(lines),xsecFile)
+    for line in lines:
+        if line[0] == '#': continue
+        (mGo,xsec,err) = line.split()
+        #print 'Importet', mGo, xsec, err, 'from', line
+        xsecGlu[int(mGo)] = (float(xsec),float(err))
+
+    print 'Filled %i items to dict' % (len(xsecGlu))
+    #print sorted(xsecGlu.keys())
+
+
 # REMOVE LATER
 import random
 
 class EventVars1L_signal:
     def __init__(self):
         self.branches = [
-            'mGo','mLSP'
+            'mGo','mLSP','susyXsec'
             ]
 
     def listBranches(self):
@@ -44,8 +62,13 @@ class EventVars1L_signal:
                     mLSP = random.randrange(0,1500,50)
 
                 ret['mGo'] = mGo; ret['mLSP'] = mLSP
-                #ret['mGo'] = random.randrange(500,1500,50)
-                #ret['mLSP'] = random.randrange(0,ret['mGo'],50)
+
+            # SUSY Xsec
+            if mGo in xsecGlu:
+                ret['susyXsec'] = xsecGlu[mGo][0]
+                #ret['susyXsecErr'] = xsecGlu[mGo][1]
+            else:
+                print 'Xsec not found for mGo', mGo
 
         # return branches
         return ret
