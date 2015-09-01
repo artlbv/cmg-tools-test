@@ -9,6 +9,12 @@ from CMGTools.SUSYAnalysis.tools.eventVars_1l_newbase import EventVars1L_base
 MODULES.append( ('1l_Basics', EventVars1L_base()) )
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_triggers import EventVars1L_triggers
 MODULES.append( ('1l_Triggers', EventVars1L_triggers()) )
+
+# for signal masses
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_signal import EventVars1L_signal
+MODULES.append( ('1l_Signal', EventVars1L_signal()) )
+
+
 '''
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_bkgDilep import EventVars1L_bkgDilep
 MODULES.append( ('1l_bkgDilep', EventVars1L_bkgDilep()) )
