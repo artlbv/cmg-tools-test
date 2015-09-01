@@ -25,13 +25,27 @@ def addOptions(options):
         options.bins = "30,0,1500,30,0,1500"
         options.friendTrees = [("sf/t","FriendTrees_MC/evVarFriend_{cname}.root")]
 
-#def getYield(tfile,hname = "x_T1tttt_HM_1200_800"):
-def getYield(tfile,hname = "x_background"):
+def getYield(tfile,hname = "x_background",yclass = 6):
 
     hist = tfile.Get(hname)
 
     if hist.GetNbinsX() == 1:
         return (hist.GetBinContent(1),hist.GetBinError(1))
+    elif hist.GetNbinsX() == 2 and hist.GetNbinsY() == 2:
+
+        # yield class: 1 (mu,anti); 2 (mu,sel); 3 (ele,anti); 4 (ele,sel); 5 (mu+ele,anti); 6 (mu+ele,sel)
+        if yclass == 1:
+            return (hist.GetBinContent(1,1),hist.GetBinError(1,1))
+        elif yclass == 2:
+            return (hist.GetBinContent(1,2),hist.GetBinError(1,2))
+        elif yclass == 3:
+            return (hist.GetBinContent(2,1),hist.GetBinError(2,1))
+        elif yclass == 4:
+            return (hist.GetBinContent(2,2),hist.GetBinError(2,2))
+        elif yclass == 5:
+            return (hist.GetBinContent(1,1)+hist.GetBinContent(1,2),hist.GetBinError(1,1)+hist.GetBinError(1,2))
+        elif yclass == 6:
+            return (hist.GetBinContent(2,1)+hist.GetBinContent(2,2),hist.GetBinError(2,1)+hist.GetBinError(2,2))
     else:
         return (hist.Integral(),TMath.sqrt(hist.Integral()))
 
@@ -62,7 +76,9 @@ def makeBinHisto(ydict, hname = "hYields"):
 
     return hist
 
-def getYHisto(fileList, hname):
+def getYHisto(fileList, hname, hyname = "x_background"):
+
+    #hyname = "x_T1tttt_HM_1200_800"
 
     binDict = {}
     binList = []
@@ -74,7 +90,7 @@ def getYHisto(fileList, hname):
         print 'Bin', binname, #'in file', fname
 
         tfile = TFile(fname,"READ")
-        (yd,yerr) = getYield(tfile)
+        (yd,yerr) = getYield(tfile,hyname)
 
         print "yield:", yd, "+/-", yerr
         tfile.Close()
@@ -103,8 +119,8 @@ def makeRCShist(fileList, hname):
     hRcs = hSR.Clone("hRcs")
     hRcs.Divide(hCR)
 
-    #hRcs.Draw("histe")
-    #a = raw_input("wait")
+    hRcs.Draw("histe")
+    a = raw_input("wait")
 
     return hRcs
 
