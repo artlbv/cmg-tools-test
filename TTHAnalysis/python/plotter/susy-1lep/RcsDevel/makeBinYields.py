@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from CMGTools.TTHAnalysis.plotter.mcAnalysis import *
-import re, sys, os, os.path
+import sys, os, os.path
 
 from searchBins import *
 
@@ -32,7 +32,12 @@ def addOptions(options):
         options.friendTrees = [("sf/t","FriendTrees_MC/evVarFriend_{cname}.root")]
 
 
-def analyzeReport(options):
+def writeYields(options):
+
+    addOptions(options)
+
+    if options.verbose > 1:
+        print options
 
     # make MCA and cut vars
     mca  = MCAnalysis(options.mcaFile,options)
@@ -88,22 +93,7 @@ def analyzeReport(options):
             workspace.WriteTObject(h,h.GetName())
     workspace.Close()
 
-
-def makeCards(options, args):
-
-    addOptions(options)
-
-    if options.verbose > 1:
-        print options
-
-    if options.pretend:
-        #return 1
-        pass
-
-    analyzeReport(options)
-
     return 1
-
 
 if __name__ == "__main__":
 
@@ -176,7 +166,7 @@ if __name__ == "__main__":
                 print
             else:
                 print '.',
-            makeCards(options, args)
+            writeYields(options)
         print
     elif options.chunk < len(binList):
         # to test a single job
@@ -196,7 +186,7 @@ if __name__ == "__main__":
             print
         else:
             print '.',
-        makeCards(options, args)
+        writeYields(options)
     else:
         print "Nothing to process!"
 
