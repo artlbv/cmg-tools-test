@@ -44,15 +44,11 @@ def writeYields(options):
     cuts = CutsFile(options.cutFile,options)
 
     # make bin name and outdir names
-
-    #binname = os.path.basename(options.cutFile).replace(".txt","") if options.outname!=None else options.outname
     binname = options.bin
     if options.outdir == None:
         outdir = "test/"
     else:
         outdir = options.outdir
-    #outdir  = options.outdir+"/" if options.outdir!=None else ""
-    #outdir = "test/"
 
     # get report
     if options.pretend:
@@ -77,10 +73,10 @@ def writeYields(options):
     #    report['data_obs'] = report['data'].Clone(binname+"_data_obs")
     '''
 
-    myout = outdir+"/common/"
-    if not os.path.exists(myout): os.system("mkdir -p "+myout)
+    ydir = outdir+"/"
+    if not os.path.exists(ydir): os.system("mkdir -p "+ydir)
 
-    foutname = myout+binname+".yields.root"
+    foutname = ydir+binname+".yields.root"
     workspace = ROOT.TFile.Open(foutname, "RECREATE")
     if options.verbose > 0:
         print 'Writing', foutname
@@ -95,6 +91,38 @@ def writeYields(options):
 
     return 1
 
+def submitJobs(args, nchunks):
+
+    # make unique name for jobslist
+    import time
+    itime = int(time.time())
+    jobListName = 'jobList_%i.txt' %(itime)
+    jobList = open(jobListName,'w')
+    print 'Filling %s with job commands' % (jobListName)
+
+    # not to run again
+    if '-b' in args: args.remove('-b')
+
+    # execute only one thread
+    args += ['-j','1']
+
+    for chunk in range(nchunks):
+        chargs = args + ['-c',str(chunk)]
+        runcmd = " ".join(str(arg) for arg in chargs )
+        jobList.write(runcmd + '\n')
+
+    # check log dir
+    logdir = 'logs'
+    if not os.path.exists(logdir): os.system("mkdir -p "+logdir)
+
+    # submit job array on list
+    subCmd = 'qsub -t 1-%s -o logs nafbatch_runner.sh %s' %(nchunks,jobListName)
+    print 'Going to submit', nchunks, 'jobs with', subCmd
+    os.system(subCmd)
+
+    jobList.close()
+    return 1
+
 if __name__ == "__main__":
 
     from optparse import OptionParser
@@ -102,7 +130,7 @@ if __name__ == "__main__":
 
     parser.usage = '%prog [options]'
     parser.description="""
-    Make cards for Rcs
+    Make yields from trees
     """
 
     addMCAnalysisOptions(parser)
@@ -119,7 +147,6 @@ if __name__ == "__main__":
     # I/O options
     parser.add_option("-o",   "--out",    dest="outname", type="string", default=None, help="output name")
     parser.add_option("--od", "--outdir", dest="outdir", type="string", default=None, help="output name")
-    ##parser.add_option("-o","--outdir", dest="outdir",default="test", help="out dir for cards")
 
     # running options
     parser.add_option("-v","--verbose",  dest="verbose",  default=0,  type="int",    help="Verbosity level (0 = quiet, 1 = verbose, 2+ = more)")
@@ -129,7 +156,6 @@ if __name__ == "__main__":
     parser.add_option("-c","--chunk", dest="chunk",type="int",default=None,help="Number of chunk")
     parser.add_option("-b","--batch", dest="batch",default=False, action="store_true", help="batch command for submission")
     parser.add_option("--jobList","--jobList", dest="jobListName",default="jobList.txt",help="job list name")
-    #parser.add_option("-f","--force", dest="force",default=False, action="store_true",help="force mode")
 
     #makeShapeCards options
     parser.add_option("--asimov", dest="asimov", action="store_true", default=False, help="Make Asimov pseudo-data")
@@ -143,13 +169,18 @@ if __name__ == "__main__":
     if options.verbose > 0 and len(args) > 0:
         print 'Arguments', args
 
-    print "Beginning processing..."
-
     # make cut list
     cDict = cutDictCR
     cDict.update(cutDictSR)
     binList = sorted(cDict.keys())
 
+    if options.batch:
+        print "Going to prepare batch jobs..."
+        subargs =  sys.argv
+        submitJobs(subargs, len(binList))
+        exit(0)
+
+    print "Beginning processing locally..."
     if options.chunk == None:
         # execute all bins locally
         for idx,bin in enumerate(binList):
