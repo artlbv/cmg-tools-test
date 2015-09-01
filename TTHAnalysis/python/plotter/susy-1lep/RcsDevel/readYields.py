@@ -25,8 +25,8 @@ def addOptions(options):
         options.bins = "30,0,1500,30,0,1500"
         options.friendTrees = [("sf/t","FriendTrees_MC/evVarFriend_{cname}.root")]
 
-def getYield(tfile,hname = "x_T1tttt_HM_1200_800"):
-#def getYield(tfile,hname = "x_background"):
+#def getYield(tfile,hname = "x_T1tttt_HM_1200_800"):
+def getYield(tfile,hname = "x_background"):
 
     hist = tfile.Get(hname)
 
@@ -41,9 +41,13 @@ def makeBinHisto(ydict, hname = "hYields"):
 
     hist = TH1F(hname,"bin yields for "+hname,nbins,-0.5,nbins+0.5)
 
-    for idx,bin in enumerate(sorted(ydict.keys())):
+    binList = [name for (name,yd,yerr) in ydict]
 
-        (yd,yerr) = ydict[bin]
+    #for idx,bin in enumerate(sorted(ydict.keys())):
+    for idx,bin in enumerate(sorted(binList)):
+
+        #(yd,yerr) = ydict[bin]
+        (name,yd,yerr) = ydict[idx]
 
         hist.SetBinContent(idx+1,yd)
         hist.SetBinError(idx+1,yerr)
@@ -61,22 +65,24 @@ def makeBinHisto(ydict, hname = "hYields"):
 def getYHisto(fileList, hname):
 
     binDict = {}
+    binList = []
 
     for fname in fileList:
         binname = os.path.basename(fname)
         binname = binname.replace('.yields.root','')
 
-        print 'Bin', binname, 'in file', fname
+        print 'Bin', binname, #'in file', fname
 
         tfile = TFile(fname,"READ")
         (yd,yerr) = getYield(tfile)
 
-        print "Signal yield:", yd, "+/-", yerr
+        print "yield:", yd, "+/-", yerr
         tfile.Close()
 
         binDict[binname] = (yd,yerr)
+        binList.append((binname, yd, yerr))
 
-    return makeBinHisto(binDict, hname)
+    return makeBinHisto(binList, hname)
 
 
 def makeRCShist(fileList, hname):
@@ -92,6 +98,8 @@ def makeRCShist(fileList, hname):
     hSR = getYHisto(srList,"hSR"+hname)
     hCR = getYHisto(crList,"hCR"+hname)
 
+    print hSR.GetNbinsX(), hCR.GetNbinsX()
+
     hRcs = hSR.Clone("hRcs")
     hRcs.Divide(hCR)
 
@@ -100,15 +108,34 @@ def makeRCShist(fileList, hname):
 
     return hRcs
 
+def rename(nameList):
+
+    newList = []
+
+    for name in nameList:
+
+        name = name.replace('NJ68','NJ45')
+        name = name.replace('NB2_','NB2p3_')
+        name = name.replace('NB3_','NB2p3_')
+
+        newList.append(name)
+
+    return newList
+
 def makeKappaHists(fileList):
 
-
     # filter
-    fileList = [fname for fname in fileList if 'NB3' not in fname]
+    #fileList = [fname for fname in fileList if 'NB3' not in fname]
 
     # split lists
-    nj45List = [fname for fname in fileList if 'NJ45' in fname]
+    #nj45List = [fname for fname in fileList if 'NJ45' in fname]
     nj68List = [fname for fname in fileList if 'NJ68' in fname]
+    nj45List = rename(nj68List)
+
+    #print len(nj68List)
+    #print rename(nj68List)
+    #print len(nj45List)
+    #print len(nj45List)
 
     hRcsNj45 = makeRCShist(nj45List,"_Nj45")
     hRcsNj45.SetLineColor(kRed)
@@ -120,16 +147,17 @@ def makeKappaHists(fileList):
     hRcsNj68.SetMarkerStyle(22)
     hRcsNj68.SetMarkerColor(kBlue)
 
-    '''
-    hRcsNj45.Draw("histe1")
-    hRcsNj68.Draw("histe1same")
-    '''
+    hRcsNj68.Draw("histe1")
+    hRcsNj45.Draw("histe1same")
+
+    b = raw_input("cont")
+
     hKappa = hRcsNj68.Clone("hKappa")
     hKappa.Divide(hRcsNj45)
     hKappa.GetYaxis().SetRangeUser(0,2)
 
     hKappa.Draw("histe1")
-    b= raw_input("cont")
+    b = raw_input("cont")
 
     return 1
 
