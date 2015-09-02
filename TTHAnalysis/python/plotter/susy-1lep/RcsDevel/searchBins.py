@@ -3,32 +3,32 @@ binsLT = {}
 binsLT['LT1'] = '250 < LT && LT < 350'
 binsLT['LT2'] = '350 < LT && LT < 450'
 binsLT['LT3'] = '450 < LT && LT < 600'
-binsLT['LT4'] = '600 < LT'
-binsLT['LT3p4'] = '450 < LT'
+binsLT['LT3i'] = '450 < LT'
+binsLT['LT4i'] = '600 < LT'
 
 # HT bins
 binsHT = {}
-binsHT['HTi'] = '500 < HT'
+binsHT['HT0i'] = '500 < HT'
 binsHT['HT0'] = '500 < HT && HT < 750'
 binsHT['HT1'] = '750 < HT && HT < 1250'
-binsHT['HT2'] = '1250 < HT'
-binsHT['HT1p2'] = '750 < HT'
-binsHT['HT0p1'] = '500 < HT && HT < 1250'
+binsHT['HT1i'] = '750 < HT'
+binsHT['HT2i'] = '1250 < HT'
+binsHT['HT01'] = '500 < HT && HT < 1250'
 
 # NB bins
 binsNB = {}
-binsNB['NBi'] = 'nBJet >= 0'
 binsNB['NB0'] = 'nBJet == 0'
 binsNB['NB1'] = 'nBJet == 1'
 binsNB['NB2'] = 'nBJet == 2'
-binsNB['NB3'] = 'nBJet >= 3'
+binsNB['NB0i'] = 'nBJet >= 0'
 binsNB['NB1i'] = 'nBJet >= 1'
-binsNB['NB2p3'] = 'nBJet >= 2'
+binsNB['NB2i'] = 'nBJet >= 2'
+binsNB['NB3i'] = 'nBJet >= 3'
 
 # NJ Bins
 binsNJ = {}
-#binsNJ['NJi'] = 'nJet >= 4'
 binsNJ['NJ34'] = '3 <= nJet && nJet <= 4'
+binsNJ['NJ4i'] = '4 <= nJet'
 binsNJ['NJ45'] = '4 <= nJet && nJet <= 5'
 binsNJ['NJ68'] = '6 <= nJet && nJet <= 8'
 binsNJ['NJ9i'] = '9 <= nJet'
@@ -48,12 +48,12 @@ cutQCD = {}
 
 for nj_bin in ['NJ34']:#,'NJ45']:
     nj_cut = binsNJ[nj_bin]
-    ltbins = ['LT1','LT2','LT3','LT4']
+    ltbins = ['LT1','LT2','LT3','LT4i']
 
     for lt_bin in ltbins:
         lt_cut = binsLT[lt_bin]
 
-        for ht_bin in ['HTi']:
+        for ht_bin in ['HT0i']:
             ht_cut = binsHT[ht_bin]
 
             for nb_bin in ['NB0']:
@@ -76,7 +76,7 @@ cutDictNJ9i = {}
 for nj_bin in ['NJ45','NJ68']:#binsNJ.iteritems():
     nj_cut = binsNJ[nj_bin]
 
-    ltbins = ['LT1','LT2','LT3','LT4']
+    ltbins = ['LT1','LT2','LT3','LT4i']
 
     for lt_bin in ltbins:#binsLT.iteritems():
         lt_cut = binsLT[lt_bin]
@@ -84,13 +84,13 @@ for nj_bin in ['NJ45','NJ68']:#binsNJ.iteritems():
         htbins = []
 
         if lt_bin in ['LT1']:
-            htbins += ['HT0','HT1p2']
+            htbins += ['HT0','HT1i']
         if lt_bin in ['LT2']:
             htbins += ['HT0','HT1']
-        if lt_bin in ['LT2','LT3','LT4']:
-            htbins += ['HT2']
-        if lt_bin in ['LT3','LT4']:
-            htbins += ['HT0p1']
+        if lt_bin in ['LT2','LT3','LT4i']:
+            htbins += ['HT2i']
+        if lt_bin in ['LT3','LT4i']:
+            htbins += ['HT01']
 
         #for ht_bin,ht_cut in binsHT.iteritems():
         for ht_bin in htbins:
@@ -99,18 +99,18 @@ for nj_bin in ['NJ45','NJ68']:#binsNJ.iteritems():
             nbbins = []
 
             # Match NB bins
-            if lt_bin in ['LT1','LT2','LT3','LT4']:
+            if lt_bin in ['LT1','LT2','LT3','LT4i']:
                 nbbins += ['NB1'] # NB1 present in all NJ,LT bins
-            if lt_bin in ['LT4']:
-                nbbins += ['NB2p3'] # NB2p3 present in all NJ,LT bins
+            if lt_bin in ['LT4i']:
+                nbbins += ['NB2i'] # NB2i present in all NJ,LT bins
 
             if lt_bin in ['LT1','LT2','LT3']:
                 # Signal region binning
                 if nj_bin in ['NJ68']:
-                    nbbins += ['NB2','NB3']
+                    nbbins += ['NB2','NB3i']
                 # Side band  binning
                 if nj_bin in ['NJ45']:
-                    nbbins += ['NB2p3']
+                    nbbins += ['NB2i']
 
             for nb_bin in nbbins:
                 nb_cut = binsNB[nb_bin]
@@ -136,7 +136,7 @@ for nj_bin in ['NJ45','NJ68']:#binsNJ.iteritems():
 for nj_bin in ['NJ9i']:#binsNJ.iteritems():
     nj_cut = binsNJ[nj_bin]
 
-    ltbins = ['LT1','LT2','LT3p4']
+    ltbins = ['LT1','LT2','LT3i']
 
     for lt_bin in ltbins:#binsLT.iteritems():
         lt_cut = binsLT[lt_bin]
@@ -146,15 +146,15 @@ for nj_bin in ['NJ9i']:#binsNJ.iteritems():
 
         ### FIXME
         if lt_bin in ['LT1']:
-            htbins += ['HT0p1','HT2']
+            htbins += ['HT01','HT2i']
         if lt_bin in ['LT1','LT2']:
             htbins += ['HT0']
         if lt_bin in ['LT2']:
             htbins += ['HT1']
-        if lt_bin in ['LT2','LT3','LT4']:
-            htbins += ['HT2']
-        if lt_bin in ['LT3','LT4']:
-            htbins += ['HT0p1']
+        if lt_bin in ['LT2','LT3','LT4i']:
+            htbins += ['HT2i']
+        if lt_bin in ['LT3','LT4i']:
+            htbins += ['HT01']
 
         #for ht_bin,ht_cut in binsHT.iteritems():
         for ht_bin in htbins:
@@ -164,9 +164,9 @@ for nj_bin in ['NJ9i']:#binsNJ.iteritems():
 
             # Match NB bins
             if lt_bin in ['LT1','LT2']:
-                nbbins += ['NB1','NB2','NB3']
+                nbbins += ['NB1','NB2','NB3i']
 
-            if lt_bin in ['LT3p4']:
+            if lt_bin in ['LT3i']:
                 nbbins += ['NB1i']
 
             for nb_bin in nbbins:
