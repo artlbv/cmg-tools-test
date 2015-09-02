@@ -32,7 +32,7 @@ def addOptions(options):
         options.friendTrees = [("sf/t","FriendTrees_Signal/evVarFriend_{cname}.root")]
 
     if options.grid:
-        options.var =  "(nEl-nMu):Selected"
+        options.var =  "Selected:(nEl-nMu)"
         options.bins = "2,-1.5,1.5,2,-1.5,1.5"
 
 
@@ -180,9 +180,9 @@ if __name__ == "__main__":
         print 'Arguments', args
 
     # make cut list
-    #cDict = cutDictCR
-    #cDict.update(cutDictSR)
-    cDict = cutQCD #QCD
+    cDict = cutDictCR
+    cDict.update(cutDictSR)
+    #cDict = cutQCD #QCD
 
     binList = sorted(cDict.keys())
 
