@@ -131,8 +131,8 @@ def rename(nameList):
     for name in nameList:
 
         name = name.replace('NJ68','NJ45')
-        name = name.replace('NB2_','NB2p3_')
-        name = name.replace('NB3_','NB2p3_')
+        name = name.replace('NB2_','NB2i_')
+        name = name.replace('NB3_','NB2i_')
 
         newList.append(name)
 
