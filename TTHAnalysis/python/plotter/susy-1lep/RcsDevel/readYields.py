@@ -6,7 +6,7 @@ from math import hypot
 from ROOT import *
 
 
-def getYield(tfile, hname = "x_background",bindir = "", ytype = ('lep','sele')):
+def getYield(tfile, hname = "x_background",bindir = "", leptype = ('lep','sele')):
 
     if bindir != '': bindir += "/"
 
@@ -17,17 +17,17 @@ def getYield(tfile, hname = "x_background",bindir = "", ytype = ('lep','sele')):
 
     elif hist.GetNbinsX() == 2 and hist.GetNbinsY() == 2:
 
-        if ytype == ('mu','anti'):
+        if leptype == ('mu','anti'):
             return (hist.GetBinContent(1,1),hist.GetBinError(1,1))
-        elif ytype == ('mu','sele'):
+        elif leptype == ('mu','sele'):
             return (hist.GetBinContent(1,2),hist.GetBinError(1,2))
-        elif ytype == ('ele','anti'):
+        elif leptype == ('ele','anti'):
             return (hist.GetBinContent(2,1),hist.GetBinError(2,1))
-        elif ytype == ('ele','sele'):
+        elif leptype == ('ele','sele'):
             return (hist.GetBinContent(2,2),hist.GetBinError(2,2))
-        elif ytype == ('lep','anti'):
+        elif leptype == ('lep','anti'):
             return (hist.GetBinContent(1,1)+hist.GetBinContent(1,2),hypot(hist.GetBinError(1,1),hist.GetBinError(1,2)))
-        elif ytype == ('lep','sele'):
+        elif leptype == ('lep','sele'):
             return (hist.GetBinContent(2,1)+hist.GetBinContent(2,2),hypot(hist.GetBinError(2,1),hist.GetBinError(2,2)))
     else:
         return (hist.Integral(),TMath.sqrt(hist.Integral()))
@@ -40,7 +40,6 @@ def makeBinHisto(ydict, hname = "hYields"):
 
     binList = [name for (name,yd,yerr) in ydict]
 
-    #for idx,bin in enumerate(sorted(ydict.keys())):
     for idx,bin in enumerate(sorted(binList)):
 
         #(yd,yerr) = ydict[bin]
@@ -59,9 +58,7 @@ def makeBinHisto(ydict, hname = "hYields"):
 
     return hist
 
-def getYHisto(fileList, hname, hyname = "x_background"):
-
-    #hyname = "x_T1tttt_HM_1200_800"
+def getYHisto(fileList, hname, hyname = "x_background", hdir = "", leptype = ("lep","sele")):
 
     binDict = {}
     binList = []
@@ -76,7 +73,7 @@ def getYHisto(fileList, hname, hyname = "x_background"):
         print 'Bin', binname, #'in file', fname
 
         tfile = TFile(fname,"READ")
-        (yd,yerr) = getYield(tfile,hyname)
+        (yd,yerr) = getYield(tfile,hyname,hdir, leptype)
 
         print "yield:", yd, "+/-", yerr
         tfile.Close()
@@ -85,57 +82,6 @@ def getYHisto(fileList, hname, hyname = "x_background"):
         binList.append((binname, yd, yerr))
 
     return makeBinHisto(binList, hname)
-
-def matchSB(bname):
-
-    name = bname+'_'
-
-    if 'NJ68' in name:
-        # match for NJ68
-        name = name.replace('NJ68','NJ45')
-        name = name.replace('NB2_','NB2i_')
-        name = name.replace('NB3i_','NB2i_')
-    elif 'NJ9' in name:
-        # match for NJ9i
-        name = name.replace('NB3i_','NB2i_')
-
-
-    return name[:-1] #to remove the trailing _
-
-def makeRCS(binname):
-
-    # have to supply SR binname:
-    # LTx_HTx_NBx_NJx_SR
-
-    ## Need 5 yields for RCS
-    # * SB SR: sele
-    # * SB CR: sele & anti
-    # * CR: sele & anti
-    ## QCD:
-
-    ## Prediction
-    # SR = (CR-CRqcd) * SB_SR/(SB_CR-SB_CRqcd) * kappa
-
-    # find bin names
-    if '.' in binname:
-        binname = binname[:binname.find('.')]
-    purebname = binname[:binname.find('_NJ')]
-
-    SRname = binname
-    CRname = binname.replace('_SR','_CR')
-
-    print 'replace', purebname, 'to', matchSB(purebname)
-
-    SBname = matchSB(purebname) + '_NJ45'
-    SR_SBname = SBname + '_SR'
-    CR_SBname = SBname + '_CR'
-
-    ## collect files
-    print 'Found these bins matching to', binname
-    print 'SR:', SRname
-    print 'CR:', CRname
-    print 'SR of SB:', SR_SBname
-    print 'CR of SB:', CR_SBname
 
 def makeRCShist(fileList, hname):
 
@@ -233,6 +179,11 @@ if __name__ == "__main__":
     # find files matching pattern
     fileList = glob.glob(pattern+"*.root")
 
-    makeKappaHists(fileList)
+    #makeKappaHists(fileList)
+
+    hKappa = getYHisto(fileList,"hKappa", "Kappa_background",  "Kappa", ("mu","sele"))
+    hKappa.Draw("histe1")
+
+    raw_input("cont")
 
     print 'Finished'
