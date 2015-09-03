@@ -1,51 +1,34 @@
 #!/usr/bin/env python
 #import re, sys, os, os.path
-#from searchBins import *
+
 import glob, os, sys
+from math import hypot
 from ROOT import *
 
 
-def addOptions(options):
+def getYield(tfile, hname = "x_background",bindir = "", ytype = ('lep','sele')):
 
-    # set tree options
-    options.path = Tdir
-    options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
-    options.tree = "treeProducerSusySingleLepton"
+    if bindir != '': bindir += "/"
 
-    # extra options
-    options.doS2V = True
-    options.weight = True
-    options.final  = True
-    options.allProcesses  = True
-    #options.maxEntries = 10000
-
-    # signal scan
-    if options.signal:
-        options.var =  "mLSP:mGo"
-        options.bins = "30,0,1500,30,0,1500"
-        options.friendTrees = [("sf/t","FriendTrees_MC/evVarFriend_{cname}.root")]
-
-def getYield(tfile,hname = "x_background",yclass = 6):
-
-    hist = tfile.Get(hname)
+    hist = tfile.Get(bindir+hname)
 
     if hist.GetNbinsX() == 1:
         return (hist.GetBinContent(1),hist.GetBinError(1))
+
     elif hist.GetNbinsX() == 2 and hist.GetNbinsY() == 2:
 
-        # yield class: 1 (mu,anti); 2 (mu,sel); 3 (ele,anti); 4 (ele,sel); 5 (mu+ele,anti); 6 (mu+ele,sel)
-        if yclass == 1:
+        if ytype == ('mu','anti'):
             return (hist.GetBinContent(1,1),hist.GetBinError(1,1))
-        elif yclass == 2:
+        elif ytype == ('mu','sele'):
             return (hist.GetBinContent(1,2),hist.GetBinError(1,2))
-        elif yclass == 3:
+        elif ytype == ('ele','anti'):
             return (hist.GetBinContent(2,1),hist.GetBinError(2,1))
-        elif yclass == 4:
+        elif ytype == ('ele','sele'):
             return (hist.GetBinContent(2,2),hist.GetBinError(2,2))
-        elif yclass == 5:
-            return (hist.GetBinContent(1,1)+hist.GetBinContent(1,2),hist.GetBinError(1,1)+hist.GetBinError(1,2))
-        elif yclass == 6:
-            return (hist.GetBinContent(2,1)+hist.GetBinContent(2,2),hist.GetBinError(2,1)+hist.GetBinError(2,2))
+        elif ytype == ('lep','anti'):
+            return (hist.GetBinContent(1,1)+hist.GetBinContent(1,2),hypot(hist.GetBinError(1,1),hist.GetBinError(1,2)))
+        elif ytype == ('lep','sele'):
+            return (hist.GetBinContent(2,1)+hist.GetBinContent(2,2),hypot(hist.GetBinError(2,1),hist.GetBinError(2,2)))
     else:
         return (hist.Integral(),TMath.sqrt(hist.Integral()))
 
@@ -85,7 +68,10 @@ def getYHisto(fileList, hname, hyname = "x_background"):
 
     for fname in fileList:
         binname = os.path.basename(fname)
-        binname = binname.replace('.yields.root','')
+        #binname = binname.replace('.yields.root','')
+        binname = binname[:binname.find('.')]
+
+        #makeRCS(binname)
 
         print 'Bin', binname, #'in file', fname
 
@@ -100,6 +86,56 @@ def getYHisto(fileList, hname, hyname = "x_background"):
 
     return makeBinHisto(binList, hname)
 
+def matchSB(bname):
+
+    name = bname+'_'
+
+    if 'NJ68' in name:
+        # match for NJ68
+        name = name.replace('NJ68','NJ45')
+        name = name.replace('NB2_','NB2i_')
+        name = name.replace('NB3i_','NB2i_')
+    elif 'NJ9' in name:
+        # match for NJ9i
+        name = name.replace('NB3i_','NB2i_')
+
+
+    return name[:-1] #to remove the trailing _
+
+def makeRCS(binname):
+
+    # have to supply SR binname:
+    # LTx_HTx_NBx_NJx_SR
+
+    ## Need 5 yields for RCS
+    # * SB SR: sele
+    # * SB CR: sele & anti
+    # * CR: sele & anti
+    ## QCD:
+
+    ## Prediction
+    # SR = (CR-CRqcd) * SB_SR/(SB_CR-SB_CRqcd) * kappa
+
+    # find bin names
+    if '.' in binname:
+        binname = binname[:binname.find('.')]
+    purebname = binname[:binname.find('_NJ')]
+
+    SRname = binname
+    CRname = binname.replace('_SR','_CR')
+
+    print 'replace', purebname, 'to', matchSB(purebname)
+
+    SBname = matchSB(purebname) + '_NJ45'
+    SR_SBname = SBname + '_SR'
+    CR_SBname = SBname + '_CR'
+
+    ## collect files
+    print 'Found these bins matching to', binname
+    print 'SR:', SRname
+    print 'CR:', CRname
+    print 'SR of SB:', SR_SBname
+    print 'CR of SB:', CR_SBname
 
 def makeRCShist(fileList, hname):
 
@@ -132,7 +168,7 @@ def rename(nameList):
 
         name = name.replace('NJ68','NJ45')
         name = name.replace('NB2_','NB2i_')
-        name = name.replace('NB3_','NB2i_')
+        name = name.replace('NB3i_','NB2i_')
 
         newList.append(name)
 
@@ -153,15 +189,15 @@ def makeKappaHists(fileList):
     #print len(nj45List)
     #print len(nj45List)
 
-    hRcsNj45 = makeRCShist(nj45List,"_Nj45")
-    hRcsNj45.SetLineColor(kRed)
-    hRcsNj45.SetMarkerStyle(22)
-    hRcsNj45.SetMarkerColor(kRed)
-
     hRcsNj68 = makeRCShist(nj68List,"_Nj68")
     hRcsNj68.SetLineColor(kBlue)
     hRcsNj68.SetMarkerStyle(22)
     hRcsNj68.SetMarkerColor(kBlue)
+
+    hRcsNj45 = makeRCShist(nj45List,"_Nj45")
+    hRcsNj45.SetLineColor(kRed)
+    hRcsNj45.SetMarkerStyle(22)
+    hRcsNj45.SetMarkerColor(kRed)
 
     hRcsNj68.Draw("histe1")
     hRcsNj45.Draw("histe1same")
