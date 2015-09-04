@@ -32,6 +32,35 @@ def getYield(tfile, hname = "x_background",bindir = "", leptype = ('lep','sele')
     else:
         return (hist.Integral(),TMath.sqrt(hist.Integral()))
 
+def getScanYieldDict(tfile, hname = "x_T1tttt_HM_1200_800",bindir = "", leptype = 'lep'):
+
+    ydict = {}
+
+    print "Cd into", bindir
+    #tfile.cd(bindir)
+    #print gDirectory.ls()
+
+    if bindir != '': bindir += "/"
+    print bindir+hname
+    hist = tfile.Get(bindir+hname)
+
+    #print hist
+    #if not hist: return ydict
+
+    if leptype == 'lep':
+        for xbin in range(1,hist.GetNbinsX()+1):
+            for ybin in range(1,hist.GetNbinsY()+1):
+
+                xpar = hist.GetXaxis().GetBinCenter(xbin); xpar = int(xpar)
+                ypar = hist.GetYaxis().GetBinCenter(ybin); ypar = int(ypar)
+                ycnt = hist.GetBinContent(xbin,ybin)
+                yerr = hist.GetBinError(xbin,ybin)
+
+                ydict[(xpar,ypar)] = (ycnt,yerr)
+
+    #elif leptype== 'ele':
+    return ydict
+
 def makeBinHisto(ydict, hname = "hYields"):
 
     nbins = len(ydict)
@@ -82,6 +111,33 @@ def getYHisto(fileList, hname, hyname = "x_background", hdir = "", leptype = ("l
         binList.append((binname, yd, yerr))
 
     return makeBinHisto(binList, hname)
+
+
+def readScan(fileList, hyname = "x_T1tttt_HM_1200_800", hdir = "", leptype = "lep"):
+
+    for fname in fileList:
+        binname = os.path.basename(fname)
+        binname = binname[:binname.find('.')]
+
+        print 'Bin', binname, #'in file', fname
+
+        tfile = TFile(fname,"READ")
+        ydict =  getScanYieldDict(tfile,hyname,hdir)#, leptype)
+
+        tfile.Close()
+
+        print ydict
+        '''
+        for point,yd in ydict.iteritems():
+            if yd[0] > 0:
+                print point, yd
+
+        #binDict[binname] = (yd,yerr)
+        #binList.append((binname, yd, yerr))
+        '''
+
+    return 1
+
 
 def makeRCShist(fileList, hname):
 
@@ -181,8 +237,11 @@ if __name__ == "__main__":
 
     #makeKappaHists(fileList)
 
-    hKappa = getYHisto(fileList,"hKappa", "Kappa_background",  "Kappa", ("mu","sele"))
-    hKappa.Draw("histe1")
+    #hKappa = getYHisto(fileList,"hKappa", "Kappa_background",  "Kappa", ("mu","sele"))
+    #hKappa.Draw("histe1")
+
+    # read scan
+    readScan(fileList,"x_T1tttt_HM_1200_800","SR_MB")
 
     raw_input("cont")
 
