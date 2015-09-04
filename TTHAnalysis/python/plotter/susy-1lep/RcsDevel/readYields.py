@@ -26,9 +26,9 @@ def getYield(tfile, hname = "x_background",bindir = "", leptype = ('lep','sele')
         elif leptype == ('ele','sele'):
             return (hist.GetBinContent(2,2),hist.GetBinError(2,2))
         elif leptype == ('lep','anti'):
-            return (hist.GetBinContent(1,1)+hist.GetBinContent(1,2),hypot(hist.GetBinError(1,1),hist.GetBinError(1,2)))
+            return (hist.GetBinContent(1,1)+hist.GetBinContent(2,1),hypot(hist.GetBinError(1,1),hist.GetBinError(2,1)))
         elif leptype == ('lep','sele'):
-            return (hist.GetBinContent(2,1)+hist.GetBinContent(2,2),hypot(hist.GetBinError(2,1),hist.GetBinError(2,2)))
+            return (hist.GetBinContent(1,2)+hist.GetBinContent(1,2),hypot(hist.GetBinError(2,1),hist.GetBinError(2,2)))
     else:
         return (hist.Integral(),TMath.sqrt(hist.Integral()))
 
