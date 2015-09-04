@@ -35,6 +35,25 @@ def addOptions(options):
         options.var =  "Selected:(nEl-nMu)"
         options.bins = "2,-1.5,1.5,2,-1.5,1.5"
 
+def makeUpHist(hist, options):
+
+    if options.grid:
+        hist.SetStats(0)
+
+        hist.GetXaxis().SetTitle("")
+        hist.GetYaxis().SetTitle("")
+
+        hist.GetXaxis().SetBinLabel(1,"mu")
+        hist.GetXaxis().SetBinLabel(2,"ele")
+
+        hist.GetYaxis().SetBinLabel(1,"anti")
+        hist.GetYaxis().SetBinLabel(2,"selected")
+
+    if options.signal:
+        hist.SetStats(0)
+
+        hist.GetXaxis().SetTitle("M_{#tildeg}")
+        hist.GetYaxis().SetTitle("M_{LSP}")
 
 def writeYields(options):
 
@@ -95,6 +114,8 @@ def writeYields(options):
         for n,h in report.iteritems():
             if options.verbose > 0:
                 print "\t%s (%8.3f events)" % (h.GetName(),h.Integral())
+
+            makeUpHist(h,options)
             workspace.WriteTObject(h,h.GetName())
     workspace.Close()
 
