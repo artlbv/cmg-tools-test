@@ -30,6 +30,7 @@ def addOptions(options):
         options.var =  "mLSP:mGo"
         options.bins = "30,0,1500,30,0,1500"
         options.friendTrees = [("sf/t","FriendTrees_Signal/evVarFriend_{cname}.root")]
+        options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
 
     if options.grid:
         options.var =  "Selected:(nEl-nMu)"
