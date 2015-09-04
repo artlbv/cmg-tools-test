@@ -96,12 +96,12 @@ def makeKappaHists(fileList):
     print 'Found these hists:', pnames
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
-    print bindirs
+    #print bindirs
 
     for fname in fileList:
         tfile = TFile(fname,"UPDATE")
 
-        getQCDpred(tfile, 'MB')
+        #getQCDpred(tfile, 'MB')
 
         # create Rcs/Kappa dir struct
         if not tfile.GetDirectory("Rcs_MB"):
