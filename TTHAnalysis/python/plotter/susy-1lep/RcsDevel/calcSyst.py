@@ -28,11 +28,15 @@ def getSystHist(tfile, hname, syst = "Xsec"):
     upName = hname + '_' + syst + '-Up'
     dnName = hname + '_' + syst + '-Down'
 
-    print tfile, hname, upName, dnName
+    #print tfile, hname, upName, dnName
 
     hNorm = tfile.Get(hname)
     hUp = tfile.Get(upName)
     hDown = tfile.Get(dnName)
+
+    if not hUp or not hDown:
+        print 'No systematics found!'
+        return 1
 
     hSyst = hNorm.Clone(hNorm.GetName() + '_' + syst + '_syst')
 
@@ -50,17 +54,20 @@ def getSystHist(tfile, hname, syst = "Xsec"):
             hSyst.SetBinContent(xbin,ybin,0)
             hSyst.SetBinError(xbin,ybin,0)
 
+            maxDev = 0
+            maxErr = 0
+
             # fill maximum deviation
             if abs(hPlus.GetBinContent(xbin,ybin)) > abs(hMinus.GetBinContent(xbin,ybin)):
                 maxDev = abs(hPlus.GetBinContent(xbin,ybin))
-                maxErr = abs(hPlus.GetBinError(xbin,ybin))
+                #maxErr = abs(hPlus.GetBinError(xbin,ybin))
             else:
                 maxDev = abs(hMinus.GetBinContent(xbin,ybin))
-                maxErr = abs(hMinus.GetBinError(xbin,ybin))
+                #maxErr = abs(hMinus.GetBinError(xbin,ybin))
 
             if hNorm.GetBinContent(xbin,ybin) > 0:
                 maxDev /= hNorm.GetBinContent(xbin,ybin)
-                maxErr = hypot(maxErr,hNorm.GetBinError(xbin,ybin))
+                #maxErr = hypot(maxErr,hNorm.GetBinError(xbin,ybin))
 
             hSyst.SetBinContent(xbin,ybin,maxDev)
             hSyst.SetBinError(xbin,ybin,maxErr)
@@ -86,6 +93,13 @@ def makeSystHists(fileList):
 
         for bindir in bindirs:
 
+            for hname in hnames:
+                for syst in systNames:
+
+                    hSyst = getSystHist(tfile, bindir+'/'+ hname, syst)
+                    hSyst.Write()
+
+            '''
             # create Syst folder structure
             if not tfile.GetDirectory(bindir+"/Syst"):
                 tfile.mkdir(bindir+"/Syst")
@@ -98,6 +112,7 @@ def makeSystHists(fileList):
                         hSyst.Write()
             else:
                 print 'Already found syst'
+            '''
 
         tfile.Close()
 
