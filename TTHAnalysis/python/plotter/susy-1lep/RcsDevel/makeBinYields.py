@@ -7,9 +7,11 @@ from searchBins import *
 # trees
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/"
 #FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/Friends/"
-Tdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15/"
-FTdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15/Friends/"
+#Tdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15/"
+#FTdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15/Friends/"
 #FTdir = "FriendTrees_MC/"
+Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/"
+FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/Friends/"
 
 def addOptions(options):
 
@@ -23,12 +25,14 @@ def addOptions(options):
     options.weight = True
     options.final  = True
     options.allProcesses  = True
-    #options.maxEntries = 100
+    options.maxEntries = 1000
 
     # signal scan
     if options.signal:
-        options.var =  "mLSP:mGo"
-        options.bins = "30,0,1500,30,0,1500"
+        options.var =  "mLSP:mGo*(nEl-nMu)"
+        #options.bins = "61,-1500,1500,30,0,1500"
+        options.bins = "20,-1500,1500,10,0,1500"
+
         options.friendTrees = [("sf/t","FriendTrees_Signal/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
 
@@ -37,6 +41,8 @@ def addOptions(options):
         options.bins = "2,-1.5,1.5,2,-1.5,1.5"
 
 def makeUpHist(hist, options):
+
+    hist.SetName(hist.GetName().replace('x_','')) # replace x_
 
     if options.grid:
         hist.SetStats(0)
@@ -113,10 +119,11 @@ def writeYields(options):
 
     if not options.pretend:
         for n,h in report.iteritems():
+            makeUpHist(h,options)
+
             if options.verbose > 0:
                 print "\t%s (%8.3f events)" % (h.GetName(),h.Integral())
 
-            makeUpHist(h,options)
             workspace.WriteTObject(h,h.GetName())
     workspace.Close()
 
