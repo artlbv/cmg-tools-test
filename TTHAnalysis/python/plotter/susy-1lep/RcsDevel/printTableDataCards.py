@@ -10,32 +10,41 @@ import glob
 from multiprocessing import Pool
 from ROOT import *
 import math
-from readYields import getYield
+from readYields import getYield, getScanYieldDict
 
-def getYieldDict(cardFnames, region):
+def getYieldDict(cardFnames, region, sig = False):
     yields = {}
     for cardFname in cardFnames:
         binname = os.path.basename(cardFname)
         binname = binname.replace('.merge.root','')
         tfile = TFile(cardFname,"READ")
-        tfile.cd(region)
-        dirList = gDirectory.GetListOfKeys()
-        sourceYield = {}
 
-        for k1 in dirList:
-            h1 = k1.ReadObj().GetName()
-            (yd, yerr)  = getYield(tfile, h1, region)
-            sourceYield[h1] = (yd, yerr)
-        yields[binname] = sourceYield
+        if not sig:
+            tfile.cd(region)
+            dirList = gDirectory.GetListOfKeys()
+            sourceYield = {}
 
+            for k1 in dirList:
+                h1 = k1.ReadObj().GetName()
+                (yd, yerr)  = getYield(tfile, h1, region)
+                sourceYield[h1] = (yd, yerr)
+                yields[binname] = sourceYield
+        elif sig:
+
+            yields[binname] = getScanYieldDict(tfile,"x_T1tttt_HM_1200_800",region, "lep")
     return yields
 
 
-def printBinnedTable(yields, name):
+def printBinnedTable(yields, yieldsSig, name):
+    benchmark = (1275, 175)
     f = open(name + '.tex','w')
     f.write('\\begin{table}[ht] \n ')
     binNames = sorted(yields.keys())
+
     singleSourceNames = sorted([ x.replace('x_','') for x in yields[binNames[0]].keys() if not('EWK' in x)])
+
+    singleSourceNames.append(benchmark)
+
     nSource = len(singleSourceNames)
     nCol = nSource + 3
 
@@ -49,15 +58,18 @@ def printBinnedTable(yields, name):
         (LT0, HT0, B0 ) = ("","","") 
         if i > 0 :
             (LT0, HT0, B0 ) = binNames[i-1].split("_")[0:3]
-
         if LT != LT0:
             f.write(('\\cline{1-%s} ' + LT + ' & ' + HT + ' & ' + B) % (nCol))
         if LT == LT0 and HT != HT0:
             f.write(('\\cline{2-%s}  & ' + HT + ' & ' + B) % (nCol))
         elif LT == LT0 and HT == HT0:
             f.write('  &  & ' + B)
-        for source in singleSourceNames:            
-            f.write((' & %.2f $\pm$ %.2f') % yields[bin]['x_'+source])
+        for source in singleSourceNames:
+            if type(source) == str:
+                f.write((' & %.2f $\pm$ %.2f') % yields[bin]['x_'+source])                
+            elif type(source) == tuple:
+                f.write((' & %.2f $\pm$ %.2f') % yieldsSig[bin][source])
+
         f.write(' \\\ \n')
 
     f.write('\\hline \n')
@@ -66,27 +78,28 @@ def printBinnedTable(yields, name):
     return
 
 
-def printDataCardsFromMC(yields):
-    signalPoint =  {'m1': ('mGlu','1500') , 'm2': ('mLSP','100') }
+def printDataCardsFromMC(yields, yieldsSig, signal):
+    
+    signalPoint =  {'m1': ('mGlu',signal[0]) , 'm2': ('mLSP',signal[1]) }
     signalName = ('%s_%s') % signalPoint['m1'] + ('_%s_%s') % signalPoint['m2']
     dataCardDir = 'datacards_' + signalName
     try:
-        os.stat(inDir + '/' + dataCardDir)
+        os.stat(inDirSig + '/' + dataCardDir)
     except:
-        os.mkdir(inDir + '/' + dataCardDir)
+        os.mkdir(inDirSig + '/' + dataCardDir)
 
     
     binNames = sorted(yields.keys())
     for binName in binNames:
-        sig = {'x_' + signalName: (0.5 , 0.1)}
+        sig = {'x_' + signalName: yieldsSig[binName][signal]}
         myyields = yields[binName]
         myyields.update(sig)
         
         singleSourceNames = sorted([ x.replace('x_','') for x in myyields.keys() if not('EWK' in x or 'background' in x)])
         xsingleSourceNames = sorted([ x for x in myyields.keys() if not('EWK' in x or 'background' in x)])
         iproc = { key: i for (i,key) in enumerate(reversed(xsingleSourceNames))}
-        print 'print ' + binName +'_.card.txt'
-        datacard = open(inDir + '/' + dataCardDir + '/' + binName +'_.card.txt', 'w'); 
+        #print 'print ' + binName +'_.card.txt'
+        datacard = open(inDirSig + '/' + dataCardDir + '/' + binName +'_.card.txt', 'w'); 
         datacard.write("## Datacard for cut file %s (signal %s)\n"%(binName,signalName))
 
         #datacard.write("shapes *        * ../common/%s.input.root x_$PROCESS x_$PROCESS_$SYSTEMATIC\n" % binName)
@@ -122,8 +135,9 @@ def printDataCardsFromMC(yields):
 
 # MAIN
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         cardDirectory = sys.argv[1]
+        cardDirectorySig = sys.argv[2]
     else:
         print "Will stop, give input Dir"
         quit()
@@ -134,8 +148,17 @@ if __name__ == "__main__":
     print 'Using cards from', cardDirName
     inDir = cardDirectory
     cardFnames = glob.glob(inDir+'/*/*.root')
+    inDirSig = cardDirectorySig
+    cardFnamesSig = glob.glob(inDirSig+'/*/*.root')
 
 
-    yields = getYieldDict(cardFnames, "SR_MB")
-    printBinnedTable(yields, 'SR_table')
-    printDataCardsFromMC(yields)
+    sigYields = getYieldDict(cardFnamesSig,"SR_MB",True)
+    mcYields = getYieldDict(cardFnames,"SR_MB",False)
+    
+    printBinnedTable(mcYields, sigYields, 'SR_table')
+    printDataCardsFromMC(mcYields, sigYields, (1225, 775))
+
+    #loop stuff needs fixing
+    #for sig in sigYields['LT1_HT0_NB1_NJ68_SR'].keys():
+    #    print "processing datacards for ", sig
+    #    printDataCardsFromMC(mcYields, sigYields, sig)
