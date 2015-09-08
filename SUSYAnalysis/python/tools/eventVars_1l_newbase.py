@@ -137,9 +137,9 @@ class EventVars1L_base:
         # -- needs to be adjusted manually
         ##############################
         if event.isData:
-            ret['PD_JetHT'] = 1
+            ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
-            ret['PD_SingleMu'] = 0
+            ret['PD_SingleMu'] = 1
         else:
             ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
@@ -455,7 +455,7 @@ class EventVars1L_base:
 
         # BLIND data
         if event.isData and nJetC >= 6:
-            isSR = -1
+            isSR = - isSR
 
         ret['isSR'] = isSR
 
