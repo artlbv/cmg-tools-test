@@ -1,0 +1,8 @@
+#Cross sections need to be double-checked
+
+#Signal samples
+T1tttt_Scan+: T1tttt_mGo1200_mChi800 : susyXsec ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8"
+
+# for Systematics
+T1tttt_Scan_Xsec-Up+: T1tttt_mGo1200_mChi800 : susyXsec*1.1 ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Up)"
+T1tttt_Scan_Xsec-Down+: T1tttt_mGo1200_mChi800 : susyXsec*0.9 ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Down)"
