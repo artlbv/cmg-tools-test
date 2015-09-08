@@ -65,7 +65,8 @@ def getScanYieldDict(tfile, hname = "x_T1tttt_HM_1200_800",bindir = "", leptype 
             if point[0] > 0: # summ ele + mu yield
                 mupoint = (-point[0],point[1])
                 if mupoint in ydict:
-                    ycnt = ydict[point] + ydict[mupoint]
+                    #ycnt = ydict[point] + ydict[mupoint] # wrong: it appends tuples
+                    ycnt = (ydict[point][0] + ydict[mupoint][0], hypot(ydict[point][1], ydict[mupoint][1]))
                 else:
                     ycnt = ydict[point]
                 ret[point] = ycnt
@@ -76,7 +77,7 @@ def getScanYieldDict(tfile, hname = "x_T1tttt_HM_1200_800",bindir = "", leptype 
                 ycnt = ydict[point]
                 ret[point] = ycnt
 
-    elif leptype == 'ele':
+    elif leptype == 'mu':
         for point in ydict:
             if point[0] < 0: # ele + mu yield
                 ycnt = ydict[point]
