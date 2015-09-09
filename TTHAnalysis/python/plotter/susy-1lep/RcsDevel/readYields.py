@@ -6,7 +6,7 @@ from math import hypot
 from ROOT import *
 
 
-def getYield(tfile, hname = "x_background",bindir = "", leptype = ('lep','sele')):
+def getYield(tfile, hname = "background",bindir = "", leptype = ('lep','sele')):
 
     if bindir != '': bindir += "/"
 
@@ -15,24 +15,24 @@ def getYield(tfile, hname = "x_background",bindir = "", leptype = ('lep','sele')
     if hist.GetNbinsX() == 1:
         return (hist.GetBinContent(1),hist.GetBinError(1))
 
-    elif hist.GetNbinsX() == 2 and hist.GetNbinsY() == 2:
+    elif hist.GetNbinsX() == 3 and hist.GetNbinsY() == 2:
 
         if leptype == ('mu','anti'):
             return (hist.GetBinContent(1,1),hist.GetBinError(1,1))
         elif leptype == ('mu','sele'):
             return (hist.GetBinContent(1,2),hist.GetBinError(1,2))
         elif leptype == ('ele','anti'):
-            return (hist.GetBinContent(2,1),hist.GetBinError(2,1))
+            return (hist.GetBinContent(3,1),hist.GetBinError(3,1))
         elif leptype == ('ele','sele'):
-            return (hist.GetBinContent(2,2),hist.GetBinError(2,2))
+            return (hist.GetBinContent(3,2),hist.GetBinError(3,2))
         elif leptype == ('lep','anti'):
-            return (hist.GetBinContent(1,1)+hist.GetBinContent(2,1),hypot(hist.GetBinError(1,1),hist.GetBinError(2,1)))
+            return (hist.GetBinContent(2,1),hist.GetBinError(2,1))
         elif leptype == ('lep','sele'):
-            return (hist.GetBinContent(1,2)+hist.GetBinContent(1,2),hypot(hist.GetBinError(2,1),hist.GetBinError(2,2)))
+            return (hist.GetBinContent(2,2),hist.GetBinError(2,2))
     else:
         return (hist.Integral(),TMath.sqrt(hist.Integral()))
 
-def getScanYieldDict(tfile, hname = "x_T1tttt_HM_1200_800",bindir = "", leptype = 'lep'):
+def getScanYieldDict(tfile, hname = "T1tttt_HM_1200_800",bindir = "", leptype = 'lep'):
 
     ydict = {}
 
@@ -111,7 +111,7 @@ def makeBinHisto(ydict, hname = "hYields"):
 
     return hist
 
-def getYHisto(fileList, hname, hyname = "x_background", hdir = "", leptype = ("lep","sele")):
+def getYHisto(fileList, hname, hyname = "background", hdir = "", leptype = ("lep","sele")):
 
     binDict = {}
     binList = []
@@ -136,8 +136,24 @@ def getYHisto(fileList, hname, hyname = "x_background", hdir = "", leptype = ("l
 
     return makeBinHisto(binList, hname)
 
+def readGrid(fileList, hyname = "background", hdir = "", leptype = ("lep","sele")):
 
-def readScan(fileList, hyname = "x_T1tttt_HM_1200_800", hdir = "", leptype = "lep"):
+    for fname in fileList:
+        binname = os.path.basename(fname)
+        binname = binname[:binname.find('.')]
+
+        print 'Bin', binname, #'in file', fname
+
+        tfile = TFile(fname,"READ")
+        (yd,yerr) = getYield(tfile,hyname,hdir, leptype)
+
+        print "yield:", yd, "+/-", yerr
+        tfile.Close()
+
+    return 1
+
+
+def readScan(fileList, hyname = "T1tttt_HM_1200_800", hdir = "", leptype = "lep"):
 
     for fname in fileList:
         binname = os.path.basename(fname)
@@ -265,7 +281,8 @@ if __name__ == "__main__":
     #hKappa.Draw("histe1")
 
     # read scan
-    readScan(fileList,"x_T1tttt_HM_1200_800","SR_MB")
+    #readScan(fileList,"T1tttt_HM_1200_800","SR_MB")
+    readGrid(fileList)
 
     raw_input("cont")
 
