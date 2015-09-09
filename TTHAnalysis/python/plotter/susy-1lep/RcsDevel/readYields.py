@@ -50,8 +50,8 @@ def getScanYieldDict(tfile, hname = "x_T1tttt_HM_1200_800",bindir = "", leptype 
     for xbin in range(1,hist.GetNbinsX()+1):
         for ybin in range(1,hist.GetNbinsY()+1):
 
-            xpar = hist.GetXaxis().GetBinCenter(xbin); xpar = int(xpar)
-            ypar = hist.GetYaxis().GetBinCenter(ybin); ypar = int(ypar)
+            xpar = hist.GetXaxis().GetBinLowEdge(xbin); xpar = int(xpar)
+            ypar = hist.GetYaxis().GetBinLowEdge(ybin); ypar = int(ypar)
             ycnt = hist.GetBinContent(xbin,ybin)
             yerr = hist.GetBinError(xbin,ybin)
 
