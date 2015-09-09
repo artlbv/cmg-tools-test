@@ -3,6 +3,7 @@ from CMGTools.TTHAnalysis.plotter.mcAnalysis import *
 import sys, os, os.path
 
 from searchBins import *
+from math import hypot
 
 # trees
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/"
@@ -25,12 +26,12 @@ def addOptions(options):
     options.weight = True
     options.final  = True
     options.allProcesses  = True
-    options.maxEntries = 1000
+    #options.maxEntries = 1000
 
     # signal scan
     if options.signal:
         options.var =  "mLSP:mGo*(nEl-nMu)"
-        #options.bins = "61,-1500,1500,30,0,1500"
+        #options.bins = "60,-1500,1500,30,0,1500"
         options.bins = "20,-1500,1500,10,0,1500"
 
         options.friendTrees = [("sf/t","FriendTrees_Signal/evVarFriend_{cname}.root")]
@@ -38,7 +39,20 @@ def addOptions(options):
 
     if options.grid:
         options.var =  "Selected:(nEl-nMu)"
-        options.bins = "2,-1.5,1.5,2,-1.5,1.5"
+        #options.bins = "2,-1.5,1.5,2,-1.5,1.5"
+        options.bins = "3,-1.5,1.5,2,-1.5,1.5"
+
+def makeLepYieldGrid(hist):
+
+    for ybin in range(1,hist.GetNbinsY()+1):
+        ymu = hist.GetBinContent(1,ybin)
+        yele = hist.GetBinContent(3,ybin)
+
+        ymuErr = hist.GetBinError(1,ybin)
+        yeleErr = hist.GetBinError(3,ybin)
+
+        hist.SetBinContent(2,ybin,ymu+yele)
+        hist.SetBinError(2,ybin,hypot(ymuErr,yeleErr))
 
 def makeUpHist(hist, options):
 
@@ -51,10 +65,13 @@ def makeUpHist(hist, options):
         hist.GetYaxis().SetTitle("")
 
         hist.GetXaxis().SetBinLabel(1,"mu")
-        hist.GetXaxis().SetBinLabel(2,"ele")
+        hist.GetXaxis().SetBinLabel(2,"mu+ele")
+        hist.GetXaxis().SetBinLabel(3,"ele")
 
         hist.GetYaxis().SetBinLabel(1,"anti")
         hist.GetYaxis().SetBinLabel(2,"selected")
+
+        makeLepYieldGrid(hist)
 
     if options.signal:
         hist.SetStats(0)
@@ -121,8 +138,10 @@ def writeYields(options):
         for n,h in report.iteritems():
             makeUpHist(h,options)
 
-            if options.verbose > 0:
-                print "\t%s (%8.3f events)" % (h.GetName(),h.Integral())
+            if options.verbose > 0 and options.grid:
+                print "\t%s (%8.3f selected events)" % (h.GetName(),h.GetBinContent(2,2))
+            if options.verbose > 0 and options.signal:
+                print "\t%s (%8.3f total events)" % (h.GetName(),h.Integral())
 
             workspace.WriteTObject(h,h.GetName())
     workspace.Close()
@@ -209,9 +228,10 @@ if __name__ == "__main__":
         print 'Arguments', args
 
     # make cut list
-    cDict = cutDictCR
-    cDict.update(cutDictSR)
+    #cDict = cutDictCR
+    #cDict.update(cutDictSR)
     #cDict = cutQCD #QCD
+    cDict = cutIncl #Inclusive
 
     binList = sorted(cDict.keys())
 
