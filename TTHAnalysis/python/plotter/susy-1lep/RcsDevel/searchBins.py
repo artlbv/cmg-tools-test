@@ -62,6 +62,25 @@ for nj_bin in ['NJ34']:#,'NJ45']:
                 binname = "%s_%s_%s_%s" %(lt_bin,ht_bin,nb_bin,nj_bin)
                 cutQCD[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
 
+### Inclusive NB,NJ,HT
+cutIncl = {}
+
+for nj_bin in ['NJ4i']:#,'NJ45']:
+    nj_cut = binsNJ[nj_bin]
+    ltbins = ['LT1','LT2','LT3','LT4i']
+
+    for lt_bin in ltbins:
+        lt_cut = binsLT[lt_bin]
+
+        for ht_bin in ['HT0i']:
+            ht_cut = binsHT[ht_bin]
+
+            for nb_bin in ['NB0i']:
+                nb_cut = binsNB[nb_bin]
+
+                binname = "%s_%s_%s_%s" %(lt_bin,ht_bin,nb_bin,nj_bin)
+                cutIncl[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
+
 
 ### REAL SEARCH BINS (also for RCS)
 cutDict = {}
