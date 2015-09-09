@@ -97,6 +97,8 @@ def makeSystHists(fileList):
                 for syst in systNames:
 
                     hSyst = getSystHist(tfile, bindir+'/'+ hname, syst)
+
+                    tfile.cd(bindir)
                     hSyst.Write()
 
             '''
