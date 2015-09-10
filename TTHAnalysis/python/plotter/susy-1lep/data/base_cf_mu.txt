@@ -4,9 +4,11 @@ LTNoHF > 250: LTNoHF > 250
 
 ## HLT_MuOR == HLT_MuHT350MET70 || HLT_Mu50
 #Trigger: !isData || (isData && (HLT_MuHT350MET70 || HLT_Mu50))
-Trigger: !isData || (isData && HLT_MuOR)
-XOR: !(HLT_MuOR && HLT_EleOR)
+#Trigger: !isData || (isData && HLT_MuOR)
+#XOR: !(HLT_MuOR && HLT_EleOR)
 #XOR:  !((HLT_EleHT350MET70 || HLT_Ele105) && (HLT_MuHT350MET70 || HLT_Mu50))
+Trigger: !isData || (isData && (!PD_SingleEle && PD_SingleMu && HLT_MuOR))
+
 
 nJet >= 2: nJet >= 2
 LSL JetPt> 80: LSLjetptGT80 == 1

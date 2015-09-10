@@ -2,8 +2,11 @@
 HT > 500: HT > 500
 LTNoHF > 250: LTNoHF > 250
 
-Trigger: !isData || (isData && (HLT_EleHT350MET70 || HLT_Ele105 || HLT_MuHT350MET70 || HLT_Mu50))
-XTrigger: !((HLT_EleHT350MET70 || HLT_Ele105) && (HLT_MuHT350MET70 || HLT_Mu50))
+#Trigger: !isData || (isData && (HLT_EleHT350MET70 || HLT_Ele105 || HLT_MuHT350MET70 || HLT_Mu50))
+#XTrigger: !((HLT_EleHT350MET70 || HLT_Ele105) && (HLT_MuHT350MET70 || HLT_Mu50))
+#XOR Trigger: !isData || (isData && ((PD_SingleEle && !PD_SingleMu && (HLT_EleHT350MET70 || HLT_Ele105)) || (!PD_SingleEle && PD_SingleMu && (HLT_MuHT350MET70 || HLT_Mu50))))
+Trigger: !isData || (isData && ((PD_SingleEle && !PD_SingleMu && HLT_EleOR) || (!PD_SingleEle && PD_SingleMu && HLT_MuOR)))
+
 
 nJet >= 2: nJet >= 2
 LSL JetPt> 80: LSLjetptGT80 == 1
