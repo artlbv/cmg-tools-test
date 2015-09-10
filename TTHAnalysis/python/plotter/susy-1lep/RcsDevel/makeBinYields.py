@@ -16,6 +16,9 @@ FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_5
 
 def addOptions(options):
 
+    # LUMI
+    options.lumi = 3
+
     # set tree options
     options.path = Tdir
     options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
@@ -51,8 +54,17 @@ def makeLepYieldGrid(hist):
         ymuErr = hist.GetBinError(1,ybin)
         yeleErr = hist.GetBinError(3,ybin)
 
-        hist.SetBinContent(2,ybin,ymu+yele)
-        hist.SetBinError(2,ybin,hypot(ymuErr,yeleErr))
+        ylep = ymu+yele
+        ylepErr = hypot(ymuErr,yeleErr)
+
+        hist.SetBinContent(2,ybin,ylep)
+        hist.SetBinError(2,ybin,ylepErr)
+
+        if options.verbose > 1:
+            print 'Summary for', hist.GetName()
+            print 'Mu yields:\t', ymu, ymuErr
+            print 'Ele yields:\t', yele, yeleErr
+            print 'Mu+Ele yields:\t', ylep, ylepErr
 
 def makeUpHist(hist, options):
 
@@ -76,8 +88,8 @@ def makeUpHist(hist, options):
     if options.signal:
         hist.SetStats(0)
 
-        hist.GetXaxis().SetTitle("M_{#tildeg}")
-        hist.GetYaxis().SetTitle("M_{LSP}")
+        hist.GetXaxis().SetTitle("m_{#tildeg}")
+        hist.GetYaxis().SetTitle("m_{LSP}")
 
 def writeYields(options):
 
@@ -228,10 +240,10 @@ if __name__ == "__main__":
         print 'Arguments', args
 
     # make cut list
-    #cDict = cutDictCR
-    #cDict.update(cutDictSR)
+    cDict = cutDictCR
+    cDict.update(cutDictSR)
     #cDict = cutQCD #QCD
-    cDict = cutIncl #Inclusive
+    #cDict = cutIncl #Inclusive
 
     binList = sorted(cDict.keys())
 
