@@ -1,4 +1,5 @@
-1 hard lep: nLep == 1 && Selected == 1 && Lep_pt > 25 && nVeto == 0
+1 hard lep: nLep == 1 && Lep_pt > 25 && nVeto == 0
+#Selected: Selected == 1
 triggHT: HT > 500
 triggLT: LTNoHF > 250
 
