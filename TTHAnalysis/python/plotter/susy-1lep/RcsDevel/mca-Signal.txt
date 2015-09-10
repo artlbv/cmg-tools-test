@@ -2,3 +2,5 @@
 
 #Signal samples
 T1tttt_HM_1200_800+: T1tttt_mGo1200_mChi800 : susyXsec ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8"
+T1tttt_HM_1200_800_norm+: T1tttt_mGo1200_mChi800 : susyXsec/susyNgen*totalNgen ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8"
+T1tttt_HM_1200_800_norm2+: T1tttt_mGo1200_mChi800 : susyXsec/susyNgen*99410 ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8"
