@@ -65,6 +65,10 @@ isoTrackAna.setOff=False
 # store all taus by default
 genAna.allGenTaus = True
 
+#add LHE ana
+from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer 
+LHEAna = LHEAnalyzer.defaultConfig
+
 from CMGTools.TTHAnalysis.analyzers.ttHLepEventAnalyzer import ttHLepEventAnalyzer
 ttHEventAna = cfg.Analyzer(
 	ttHLepEventAnalyzer, name="ttHLepEventAnalyzer",
@@ -126,7 +130,7 @@ isData = False
 
 sample = 'MC'
 #sample = 'data'
-test = 0
+test = 1
 
 if sample == "MC":
 
@@ -278,6 +282,7 @@ hbheFilterAna = cfg.Analyzer(
 #-------- SEQUENCE
 
 sequence = cfg.Sequence(susyCoreSequence+[
+		LHEAna,
 		ttHEventAna,
 		#ttHSTSkimmer,
 		#ttHReclusterJets,
