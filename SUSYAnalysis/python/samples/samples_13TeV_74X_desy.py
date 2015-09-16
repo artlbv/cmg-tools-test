@@ -36,7 +36,7 @@ TTZToQQ_25ns = kreator.makeMCComponentFromDESY("TTZToQQ_25ns","/TTZToQQ_M-10_Tun
 TTWJetsToLNu_25ns = kreator.makeMCComponentFromDESY("TTWJetsToLNu_25ns","/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root", 0.2043 )
 TTWJetsToQQ_25ns = kreator.makeMCComponentFromDESY("TTWJetsToQQ_25ns","/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root", 0.4062 )
 
-TTV = [ TTZToLLNuNu_25ns, TTZToQQ_25ns, TTWJetsQQ_25ns, TTWJetsToLNu_25ns ]
+TTV = [ TTZToLLNuNu_25ns, TTZToQQ_25ns, TTWJetsToQQ_25ns, TTWJetsToLNu_25ns ]
 
 ### W+jets
 
