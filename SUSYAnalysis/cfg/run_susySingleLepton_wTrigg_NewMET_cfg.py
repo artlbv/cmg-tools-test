@@ -48,9 +48,9 @@ jetAna.minLepPt = 10 # --- JET-LEPTON CLEANING ---
 jetAna.jetPt = 25
 jetAna.jetEta = 2.4
 
-#jetAna.mcGT = "Summer15_V5_p6_MC" # use default
-jetAna.mcGT = "Summer15_50nsV4_MC"
-jetAna.dataGT = "Summer15_50nsV4_DATA"
+#use default for 25 ns from susycore Summer15_25nsV2_MC
+#jetAna.mcGT = "Summer15_50nsV4_MC"
+#jetAna.dataGT = "Summer15_50nsV4_DATA"
 
 jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
@@ -136,8 +136,8 @@ if sample == "MC":
 
 	print 'Going to process MC'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_MC.db'
-	jecEra    = 'Summer15_50nsV4_MC'
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV2_MC.db'
+	jecEra    = 'Summer15_25nsV2_MC'
 
 	isData = False
 
@@ -151,12 +151,12 @@ if sample == "MC":
 
 	# select components
 	selectedComponents = [
-		TTJets_LO_50ns,
+		TTJets_LO_25ns,
 	]
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = TTJets_LO_50ns
+		comp = TTJets_LO_25ns
 		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
@@ -186,8 +186,8 @@ elif sample == "data":
 
 	print 'Going to process DATA'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_DATA.db'
-	jecEra    = 'Summer15_50nsV4_DATA'
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV2_DATA.db'
+	jecEra    = 'Summer15_25nsV2_DATA'
 
 
 	isData = True
