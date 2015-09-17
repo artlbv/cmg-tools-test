@@ -276,7 +276,7 @@ treeProducer = cfg.Analyzer(
 # HBHE filter analyzer
 from CMGTools.TTHAnalysis.analyzers.hbheAnalyzer import hbheAnalyzer
 hbheFilterAna = cfg.Analyzer(
-    hbheAnalyzer, name = 'hbheAnalyzer',
+    hbheAnalyzer, name = 'hbheAnalyzer',IgnoreTS4TS5ifJetInLowBVRegion=False
 )
 
 #-------- SEQUENCE
