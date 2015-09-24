@@ -81,7 +81,7 @@ def getScanYieldDict(tfile, hname = "T1tttt_HM_1200_800",bindir = "", leptype = 
         for point in ydict:
             if point[0] < 0: # ele + mu yield
                 ycnt = ydict[point]
-                ret[point] = ycnt
+                ret[(-point[0],point[1])] = ycnt
 
     return ret
 
