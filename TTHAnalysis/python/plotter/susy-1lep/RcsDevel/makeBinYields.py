@@ -8,11 +8,12 @@ from math import hypot
 # trees
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/"
 #FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/Friends/"
-#Tdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15/"
-#FTdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15/Friends/"
+Tdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15_25ns/"
+FTdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15_25ns/Friends/"
 #FTdir = "FriendTrees_MC/"
-Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/"
-FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/Friends/"
+
+#Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/"
+#FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/Friends/"
 
 def addOptions(options):
 
