@@ -11,45 +11,116 @@ from multiprocessing import Pool
 from ROOT import *
 import math
 from readYields import getYield, getScanYieldDict
+######################GLOBAL VARIABLES PUT IN OPTIONS############
+ignoreEmptySignal = True
 
-def getYieldDict(cardFnames, region, sig = False):
+
+def getYieldDict(cardFnames, region, sig = "", lep = "lep"):
     yields = {}
     for cardFname in cardFnames:
         binname = os.path.basename(cardFname)
         binname = binname.replace('.merge.root','')
         tfile = TFile(cardFname,"READ")
-
-        if not sig:
+        if 'Scan' in sig:
+            yields[binname] = getScanYieldDict(tfile, sig ,region, lep)
+            
+        else:
             tfile.cd(region)
             dirList = gDirectory.GetListOfKeys()
             sourceYield = {}
 
             for k1 in dirList:
                 h1 = k1.ReadObj().GetName()
-                (yd, yerr)  = getYield(tfile, h1, region)
-                sourceYield[h1] = (yd, yerr)
+                (yd, yerr)  = getYield(tfile, h1, region, (lep,'sele'))
+                if 'dummy' in sig:
+                    sourceYield[h1] = (0.3, 0)
+                else:
+                    sourceYield[h1] = (yd, yerr)
                 yields[binname] = sourceYield
-        elif sig:
+    return yields
 
-            yields[binname] = getScanYieldDict(tfile,"x_T1tttt_HM_1200_800",region, "lep")
+
+def getPredDict(cardFnames, lep = 'lep'):
+    yields = {}
+    for cardFname in cardFnames:
+        binname = os.path.basename(cardFname)
+        binname = binname.replace('.merge.root','')
+        tfile = TFile(cardFname,"READ")
+        h1 = "background"
+ 
+        (ySR_MB, ySR_MBerr) = getYield(tfile, h1, "SR_MB", (lep,'sele'))
+
+        (yCR_MB, yCR_MBerr) = getYield(tfile, h1, "CR_MB", ('lep','sele'))
+
+        (yCR_SB, yCR_SBerr) = getYield(tfile, h1, "CR_SB", ('lep','sele'))
+        (ySR_SB, ySR_SBerr) = getYield(tfile, h1, "SR_SB", ('lep','sele'))
+        (Rcs_SB, Rcs_SBerr) = getYield(tfile, h1, "Rcs_SB", ('lep','sele'))
+        (kappa, kappaerr) = getYield(tfile, h1, "Kappa", ('lep','sele'))
+        
+#        print  binname, "CR_SB", (yCR_SB, yCR_SBerr), "SR_SB", (ySR_SB, ySR_SBerr),"RCS_SB",(Rcs_SB, Rcs_SBerr), "Kappa", (kappa, kappaerr)
+
+        predSR_MB = yCR_MB * Rcs_SB * kappa
+        if  yCR_MB > 0.01  and kappa > 0.01 and Rcs_SB > 0.01:
+            predSR_MBerr = predSR_MB * math.sqrt( (yCR_MBerr/yCR_MB)**2 + (kappaerr/kappa)**2 + (Rcs_SBerr/Rcs_SB)**2)
+        else: predSR_MBerr =  1.0 * predSR_MB
+        if predSR_MB < 0.001 :
+            predSR_MB = 0.01
+            predSR_MBerr = 0.01
+            #        print  binname, predSR_MB, ySR_MB, yCR_MB, Rcs_SB, kappa
+        sourceYield = {}
+        sourceYield['data'] = getYield(tfile, 'data', "SR_MB", (lep,'sele'))
+        sourceYield['RcsPred'] = (predSR_MB, predSR_MBerr)
+
+        yields[binname] = sourceYield
+
+    return yields
+
+def getSystDict(cardFnames, region, sig = "", lep = "lep", uncert = "default"):
+    yields = {}
+    for cardFname in cardFnames:
+        binname = os.path.basename(cardFname)
+        binname = binname.replace('.merge.root','')
+        tfile = TFile(cardFname,"READ")
+        if 'Scan' in sig:
+            sampleDict = getScanYieldDict(tfile, sig ,region, lep)
+
+            if type(uncert) == float:
+                sampleDict.update({key: ( uncert, 0)  for key in sampleDict.keys() } )
+            
+            yields[binname] = sampleDict
+
+
+        else:
+            tfile.cd(region)
+            dirList = gDirectory.GetListOfKeys()
+            sourceYield = {}
+
+            for k1 in dirList:
+                h1 = k1.ReadObj().GetName()
+                (yd, yerr)  = getYield(tfile, h1, region, (lep,'sele'))
+                if type(uncert) == float:
+                    sourceYield[h1] = (uncert , 0)
+
+                yields[binname] = sourceYield
     return yields
 
 
 def printBinnedTable(yields, yieldsSig, name):
-    benchmark = (1275, 175)
+    benchmark = (1200, 300)
     f = open(name + '.tex','w')
     f.write('\\begin{table}[ht] \n ')
     binNames = sorted(yields.keys())
 
-    singleSourceNames = sorted([ x.replace('x_','') for x in yields[binNames[0]].keys() if not('EWK' in x)])
+    singleSourceNames = sorted([ x for x in yields[binNames[0]].keys() if not('EWK' in x)])
 
     singleSourceNames.append(benchmark)
 
     nSource = len(singleSourceNames)
     nCol = nSource + 3
-
+    f.write('\\tiny \n')
     f.write('\\begin{tabular}{|' + (nCol *'%(align)s | ') % dict(align = 'c') + '} \n')
-    f.write('\\hline')
+
+    f.write('\\hline \n')
     f.write('$L_T$ & $H_T$ & nB & ' +  ' %s ' % ' & '.join(map(str, singleSourceNames)) + ' \\\ \n')
     f.write(' $[$ GeV $]$  &   $[$GeV$]$ &  '  + (nSource *'%(tab)s  ') % dict(tab = '&') + ' \\\ \\hline \n')
     #write out all the counts
@@ -66,7 +137,7 @@ def printBinnedTable(yields, yieldsSig, name):
             f.write('  &  & ' + B)
         for source in singleSourceNames:
             if type(source) == str:
-                f.write((' & %.2f $\pm$ %.2f') % yields[bin]['x_'+source])                
+                f.write((' & %.2f $\pm$ %.2f') % yields[bin][source])                
             elif type(source) == tuple:
                 f.write((' & %.2f $\pm$ %.2f') % yieldsSig[bin][source])
 
@@ -78,8 +149,9 @@ def printBinnedTable(yields, yieldsSig, name):
     return
 
 
-def printDataCardsFromMC(yields, yieldsSig, signal):
+def printDataCardsFromMC(mc, sig, mcSys, sigSys, signal, lep):
     
+   # print sigSys.keys()
     signalPoint =  {'m1': ('mGlu',signal[0]) , 'm2': ('mLSP',signal[1]) }
     signalName = ('%s_%s') % signalPoint['m1'] + ('_%s_%s') % signalPoint['m2']
     dataCardDir = 'datacards_' + signalName
@@ -89,49 +161,77 @@ def printDataCardsFromMC(yields, yieldsSig, signal):
         os.mkdir(inDirSig + '/' + dataCardDir)
 
     
-    binNames = sorted(yields.keys())
+    binNames = sorted(mc.keys())
     for binName in binNames:
-        sig = {'x_' + signalName: yieldsSig[binName][signal]}
-        myyields = yields[binName]
-        myyields.update(sig)
+        sigp = {signalName: sig[binName][signal]}
+        singleBkgNames = sorted([ x for x in mc[binName].keys() if not('EWK' in x or 'background' in x or 'data' in x)])
+        myyields = mc[binName]
+        myyields.update(sigp)
+        print myyields
+
+        singleSourceNames = sorted([ x for x in myyields.keys() if not('EWK' in x or 'background' in x or 'data' in x)])
+
+        allSys = {}
+
+        #make sure we get all systematics together
+        for syst in mcSys.keys():
+            allSys.update( { syst : { p: 1 + mcSys[syst][binName][p][0]  for p in singleBkgNames } })
+            if syst in sigSys:
+                allSys[syst].update( { signalName: 1 + sigSys[syst][binName][signal][0] }  )
+            elif not syst in sigSys:
+                allSys[syst].update( { signalName: '-' } ) 
+
+        for syst in sigSys.keys():
+            allSys.update( { syst : { signalName: 1 + sigSys[syst][binName][signal][0] } } )
+            if syst in mcSys:
+                allSys[syst].update( { p: 1 + mcSys[syst][binName][p][0]  for p in singleBkgNames } )
+            else:
+                allSys[syst].update({ p : '-'  for p in singleSourceNames if p in singleBkgNames } )
         
-        singleSourceNames = sorted([ x.replace('x_','') for x in myyields.keys() if not('EWK' in x or 'background' in x)])
-        xsingleSourceNames = sorted([ x for x in myyields.keys() if not('EWK' in x or 'background' in x)])
-        iproc = { key: i for (i,key) in enumerate(reversed(xsingleSourceNames))}
+        
+            
+
+
+        iproc = { key: i for (i,key) in enumerate(reversed(singleSourceNames))}
         #print 'print ' + binName +'_.card.txt'
-        datacard = open(inDirSig + '/' + dataCardDir + '/' + binName +'_.card.txt', 'w'); 
-        datacard.write("## Datacard for cut file %s (signal %s)\n"%(binName,signalName))
 
-        #datacard.write("shapes *        * ../common/%s.input.root x_$PROCESS x_$PROCESS_$SYSTEMATIC\n" % binName)
-        datacard.write('##----------------------------------\n')
-        datacard.write('bin         %s\n' % binName)
-        datacard.write('observation %s\n' % myyields['x_background'][0])
-        datacard.write('##----------------------------------\n')
-        klen = len(singleSourceNames)
-        kpatt = " %%%ds "  % klen
-        fpatt = " %%%d.%df " % (klen,3)
-        datacard.write('##----------------------------------\n')
-        datacard.write('bin             '+(" ".join([kpatt % binName     for p in xsingleSourceNames]))+"\n")
-        datacard.write('process         '+(" ".join([kpatt % p           for p in singleSourceNames]))+"\n")
-        datacard.write('process         '+(" ".join([kpatt % iproc[p]    for p in xsingleSourceNames]))+"\n")
-        datacard.write('rate            '+(" ".join([fpatt % myyields[p][0] for p in xsingleSourceNames]))+"\n")
-        datacard.write('##----------------------------------\n')
-        
-        '''for name,effmap in systs.iteritems():
-            datacard.write(('%-12s lnN' % name) + " ".join([kpatt % effmap[p]   for p in myprocs]) +"\n")
-        for name,(effmap0,effmap12,mode) in systsEnv.iteritems():
-            if mode == "templates":
-                datacard.write(('%-10s shape' % name) + " ".join([kpatt % effmap0[p]  for p in myprocs]) +"\n")
-            if mode == "envelop":
-                datacard.write(('%-10s shape' % (name+"0")) + " ".join([kpatt % effmap0[p]  for p in myprocs]) +"\n")
-            if mode in ["envelop", "shapeOnly"]:
-                datacard.write(('%-10s shape' % (name+"1")) + " ".join([kpatt % effmap12[p] for p in myprocs]) +"\n")
-                datacard.write(('%-10s shape' % (name+"2")) + " ".join([kpatt % effmap12[p] for p in myprocs]) +"\n")
+        if ignoreEmptySignal and myyields[signalName][0] > 0.01:
+            datacard = open(inDirSig + '/' + dataCardDir + '/' + binName +'_'+lep+'.card.txt', 'w'); 
+            datacard.write("## Datacard for cut file %s (signal %s)\n"%(binName,signalName))
+            
+            #datacard.write("shapes *        * ../common/%s.input.root x_$PROCESS x_$PROCESS_$SYSTEMATIC\n" % binName)
+            datacard.write('##----------------------------------\n')
+            datacard.write('bin         %s\n' % binName)
+            datacard.write('observation %s\n' % myyields['data'][0])
+            datacard.write('##----------------------------------\n')
+            klen = len(singleSourceNames)
+            kpatt = " %%%ds "  % klen
+            fpatt = " %%%d.%df " % (klen,3)
+            datacard.write('##----------------------------------\n')
+            datacard.write('bin             '+(" ".join([kpatt % binName     for p in singleSourceNames]))+"\n")
+            datacard.write('process         '+(" ".join([kpatt % p           for p in singleSourceNames]))+"\n")
+            datacard.write('process         '+(" ".join([kpatt % iproc[p]    for p in singleSourceNames]))+"\n")
+            datacard.write('rate            '+(" ".join([fpatt % myyields[p][0] for p in singleSourceNames]))+"\n")
+            datacard.write('##----------------------------------\n')
+            
+            for syst in allSys:
+                name = syst
+                if 'uBin' in name:
+                    name = name.replace('uBin', binName)
+                if 'uLep' in name:
+                    name = name.replace('uLep', lep) 
+                datacard.write(('%-12s lnN' % name) + " ".join([kpatt % numToBar(allSys[syst][p])  for p in singleSourceNames]) +"\n")             
 
-        '''
-        datacard.close()
+            datacard.close()
         
     return
+
+def numToBar(num):
+    r = num
+    if type(num) == float and abs(num - 1.0) < 0.001:
+        r = '-'
+    return r
+
 
 # MAIN
 if __name__ == "__main__":
@@ -151,13 +251,29 @@ if __name__ == "__main__":
     inDirSig = cardDirectorySig
     cardFnamesSig = glob.glob(inDirSig+'/*/*.root')
 
+    sigYields = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
+    mcYields = getYieldDict(cardFnames,"SR_MB","","lep")
 
-    sigYields = getYieldDict(cardFnamesSig,"SR_MB",True)
-    mcYields = getYieldDict(cardFnames,"SR_MB",False)
-    
+
     printBinnedTable(mcYields, sigYields, 'SR_table')
-    printDataCardsFromMC(mcYields, sigYields, (1225, 775))
+    printBinnedTable(getYieldDict(cardFnames,"Rcs_MB","","lep") , getYieldDict(cardFnamesSig,"Rcs_MB", "T1tttt_Scan", "lep"), 'RCS_MB_table')
+    printBinnedTable(getYieldDict(cardFnames,"Rcs_SB","","lep") , getYieldDict(cardFnamesSig,"Rcs_SB", "T1tttt_Scan", "lep"), 'Rcs_SB_table')
 
+#    for lep in ('ele','mu'):
+#        sig = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", lep)
+ #       mc = getYieldDict(cardFnames,"SR_MB","", lep)
+#        pred = getPredDict(cardFnames, lep)        
+#        mcSys = {"Flat_uBin_Lep": getSystDict(cardFnames,"SR_MB","dummy", lep, 0.3),
+#                 "FlatLumi_Bin_Lep": getSystDict(cardFnames,"SR_MB","dummy", lep, 0.1) }
+        
+#        sigSys  = { "Xsec_Bin_Lep": getSystDict(cardFnamesSig,"SR_MB", "T1tttt_Scan_Xsec_syst",lep),
+#                    "FlatSig_Bin_Lep": getSystDict(cardFnamesSig,"SR_MB", "T1tttt_Scan_Xsec_syst",lep, 0.2),
+#                    "FlatLumi_Bin_Lep": getSystDict(cardFnamesSig,"SR_MB", "T1tttt_Scan_Xsec_syst",lep, 0.1) }
+        
+#        printDataCardsFromMC(pred, sig, {},{},(1200,300), lep)
+        
+#    pred = getPredDict(cardFnames, 'lep')
+#    printBinnedTable(pred, sigYields, 'PredTable')
     #loop stuff needs fixing
     #for sig in sigYields['LT1_HT0_NB1_NJ68_SR'].keys():
     #    print "processing datacards for ", sig
