@@ -105,17 +105,21 @@ def getSystDict(cardFnames, region, sig = "", lep = "lep", uncert = "default"):
     return yields
 
 
-def printBinnedTable(yields, yieldsSig, name):
+def printBinnedTable(yieldsList, yieldsSig, name):
     benchmark = (1200, 300)
     f = open(name + '.tex','w')
     f.write('\\begin{table}[ht] \n ')
-    binNames = sorted(yields.keys())
+    binNames = sorted(yieldsList[0].keys())
+    singleSourceNames = []
 
-    singleSourceNames = sorted([ x for x in yields[binNames[0]].keys() if not('EWK' in x)])
+    for yields in yieldsList:
+        singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if not('EWK' in x) ))
+    SourceNames = singleSourceNames
+    singleSourceNames = sum(singleSourceNames, [])
+    print singleSourceNames
+    
 
-    singleSourceNames.append(benchmark)
-
-    nSource = len(singleSourceNames)
+    nSource = len(singleSourceNames) 
     nCol = nSource + 3
     f.write('\\tiny \n')
     f.write('\\begin{tabular}{|' + (nCol *'%(align)s | ') % dict(align = 'c') + '} \n')
@@ -135,12 +139,15 @@ def printBinnedTable(yields, yieldsSig, name):
             f.write(('\\cline{2-%s}  & ' + HT + ' & ' + B) % (nCol))
         elif LT == LT0 and HT == HT0:
             f.write('  &  & ' + B)
-        for source in singleSourceNames:
-            if type(source) == str:
-                f.write((' & %.2f $\pm$ %.2f') % yields[bin][source])                
-            elif type(source) == tuple:
-                f.write((' & %.2f $\pm$ %.2f') % yieldsSig[bin][source])
-
+        for sources, yields in zip(SourceNames, yieldsList):
+            for source in sources:
+                print source, yields[bin][source]
+                if type(source) == str:
+#                    f.write((' & %.2f $\pm$ %.2f') % yields[bin][source])                
+                    f.write((' & %.2f') % yields[bin][source][0])                
+                elif type(source) == tuple:
+                    f.write((' & %.2f $\pm$ %.2f') % yieldsSig[bin][source])
+        print '--'
         f.write(' \\\ \n')
 
     f.write('\\hline \n')
@@ -255,9 +262,9 @@ if __name__ == "__main__":
     mcYields = getYieldDict(cardFnames,"SR_MB","","lep")
 
 
-    printBinnedTable(mcYields, sigYields, 'SR_table')
-    printBinnedTable(getYieldDict(cardFnames,"Rcs_MB","","lep") , getYieldDict(cardFnamesSig,"Rcs_MB", "T1tttt_Scan", "lep"), 'RCS_MB_table')
-    printBinnedTable(getYieldDict(cardFnames,"Rcs_SB","","lep") , getYieldDict(cardFnamesSig,"Rcs_SB", "T1tttt_Scan", "lep"), 'Rcs_SB_table')
+    printBinnedTable((mcYields, getYieldDict(cardFnames,"SR_MB","","lep"),getYieldDict(cardFnames,"Rcs_MB","","lep")), sigYields, 'SR_table')
+#    printBinnedTable(getYieldDict(cardFnames,"Rcs_MB","","lep") , getYieldDict(cardFnamesSig,"Rcs_MB", "T1tttt_Scan", "lep"), 'RCS_MB_table')
+#    printBinnedTable(getYieldDict(cardFnames,"Rcs_SB","","lep") , getYieldDict(cardFnamesSig,"Rcs_SB", "T1tttt_Scan", "lep"), 'Rcs_SB_table')
 
 #    for lep in ('ele','mu'):
 #        sig = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", lep)
