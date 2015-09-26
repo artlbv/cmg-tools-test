@@ -5,24 +5,13 @@ import os
 
 from CMGTools.RootTools.samples.ComponentCreator import ComponentCreator
 kreator = ComponentCreator()
-
-### ----------------------------- Zero Tesla run  ----------------------------------------
-
 dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"  # use environmental variable, useful for instance to run on CRAB
-json=dataDir+'/json/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON.txt'
+#lumi: delivered= 4.430 (/nb) recorded= 4.013 (/nb)
+###json='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/DCSOnly/json_DCSONLY_Run2015B.txt'
+json=dataDir+'/json/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2.json' # golden json 40.03 pb
+#json=dataDir+'/json/json_DCSONLY_Run2015B.txt'
+#json=dataDir+'/json/Cert_246908-251252_13TeV_PromptReco_Collisions15_JSON.txt' # golden json 5.6/pb
 # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2446.html
-
-
-#jetHT_0T = cfg.DataComponent(
-#    name = 'jetHT_0T',
-#    files = kreator.getFilesFromEOS('jetHT_0T',
-#                                    'firstData_JetHT_v2',
-#                                    '/store/user/pandolf/MINIAOD/%s'),
-#    intLumi = 4.0,
-#    triggers = [],
-#    json = None #json
-#    )
-
 
 ### ----------------------------- Magnetic Field On ----------------------------------------
 

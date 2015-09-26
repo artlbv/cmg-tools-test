@@ -464,6 +464,7 @@ susyCoreSequence = [
     #ttHFatJetAna,  # out of core sequence for now
     #ttHSVAna, # out of core sequence for now
     metAna,
+    metNoHFAna,
     ttHCoreEventAna,
     #ttHJetMETSkim
     triggerFlagsAna,
