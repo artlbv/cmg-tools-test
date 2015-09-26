@@ -13,19 +13,26 @@ susySingleLepton_globalVariables = susyCore_globalVariables + [
             NTupleVariable("nSoftBJetLoose25",  lambda ev: sum([(sv.mva>0.3 and (sv.jet == None or sv.jet.pt() < 25)) for sv in ev.ivf]) + len(ev.bjetsMedium), int, help="Exclusive sum of jets with pt > 25 passing CSV medium and SV from ivf with loose sv mva"),
             NTupleVariable("nSoftBJetMedium25", lambda ev: sum([(sv.mva>0.7 and (sv.jet == None or sv.jet.pt() < 25)) for sv in ev.ivf]) + len(ev.bjetsMedium), int, help="Exclusive sum of jets with pt > 25 passing CSV medium and SV from ivf with medium sv mva"),
             NTupleVariable("nSoftBJetTight25",  lambda ev: sum([(sv.mva>0.9 and (sv.jet == None or sv.jet.pt() < 25)) for sv in ev.ivf]) + len(ev.bjetsMedium), int, help="Exclusive sum of jets with pt > 25 passing CSV medium and SV from ivf with tight sv mva"),
-            ##------------------------------------------------
+            NTupleVariable("metNoHF_rawPt", lambda ev : ev.metNoHF.uncorrectedPt() if  hasattr(ev,'metNoHF') else  0, help="raw noHF met p_{T}"),
+            NTupleVariable("metNoHF_rawPhi", lambda ev : ev.metNoHF.uncorrectedPhi() if  hasattr(ev,'metNoHF') else  0, help="raw noHF met phi"),
+            NTupleVariable("metNoHF_rawSumEt", lambda ev : ev.metNoHF.uncorrectedSumEt() if  hasattr(ev,'metNoHF') else  0, help="raw noHF met sumEt"),
 
+            # ----------------------- MET filter information (temporary)  -------------------------------------------------------------------- #
+            NTupleVariable("Flag_HBHENoiseFilter_fix", lambda ev: ev.hbheFilterNew, help="HBEHE temporary filter decision"),
 
             # ----------------------- HT from LHE event (requires LHE analyzer to have run)  --------------------------------------------------------- #
             NTupleVariable("lheHT", lambda ev : ev.lheHT, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer"),
             NTupleVariable("lheHTIncoming", lambda ev : ev.lheHTIncoming, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer (only LHE status<0 as mothers)"),
             # ---------------------------------------------------------------------------------------------------------------------------------------- #
-
 ]
 susySingleLepton_globalObjects = susyCore_globalObjects.copy()
 susySingleLepton_globalObjects.update({
             # put more here
+        "met" : NTupleObject("met", metType, help="PF E_{T}^{miss}, after type 1 corrections"),
+        "metNoHF" : NTupleObject("metNoHF", metType, help="PF E_{T}^{miss}, after type 1 corrections (NoHF)"),
 })
+
+
 
 susySingleLepton_collections = susyCore_collections.copy()
 susySingleLepton_collections.update({
@@ -40,8 +47,10 @@ susySingleLepton_collections.update({
             ##------------------------------------------------
             "cleanJetsAll"       : NTupleCollection("Jet",     jetTypeSusy, 25, help="Cental jets after full selection and cleaning, sorted by pt"),
             "fatJets"         : NTupleCollection("FatJet",  fatJetType,  15, help="AK8 jets, sorted by pt"),
-            "reclusteredFatJets" : NTupleCollection("RCFatJet",     fourVectorType,20, help="FatJets1.2 reclusterd from ak4 cleanJetsAll pT > 30, eta <5 "),
+            #"reclusteredFatJets" : NTupleCollection("RCFatJet",     fourVectorType,20, help="FatJets1.2 reclusterd from ak4 cleanJetsAll pT > 30, eta <5 "),
             ##------------------------------------------------
             "ivf"       : NTupleCollection("SV",     svType, 20, help="SVs from IVF"),
+
+
 })
 

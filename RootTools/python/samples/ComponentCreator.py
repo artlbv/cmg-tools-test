@@ -5,7 +5,7 @@ import re
 
 class ComponentCreator(object):
     def makeMCComponent(self,name,dataset,user,pattern,xSec=1,useAAA=False):
-        
+
          component = cfg.MCComponent(
              dataset=dataset,
              name = name,
@@ -35,7 +35,30 @@ class ComponentCreator(object):
          )
 
          return component
-    
+
+    def makePrivateMCComponentFromDir(self,name,dataset,filedir,pattern,xSec=1):
+        import glob
+
+        globpath = filedir+dataset+pattern
+        files = glob.glob(globpath)
+
+        if len(files) == 0:
+            raise RuntimeError, "Trying to make a component %s with no files" % name
+        # prefix filenames with dataset unless they start with "/"
+        #dprefix = dataset +"/" if files[0][0] != "/" else ""
+
+        component = cfg.MCComponent(
+            dataset=dataset,
+            name = name,
+            files = files,#[filedir+'%s%s' % (dprefix,f) for f in files],
+            xSection = xSec,
+            nGenEvents = 1,
+            triggers = [],
+            effCorrFactor = 1,
+            )
+
+        return component
+
     def makePrivateDataComponent(self,name,dataset,files,json,xSec=1):
          if len(files) == 0:
             raise RuntimeError, "Trying to make a component %s with no files" % name
@@ -70,7 +93,7 @@ class ComponentCreator(object):
         try:
             files = getDatasetFromCache('EOS%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern))
         except IOError:
-            files = [ 'root://eoscms.cern.ch/'+x for x in eostools.listFiles('/eos/cms'+path) if re.match(pattern,x) ] 
+            files = [ 'root://eoscms.cern.ch/'+x for x in eostools.listFiles('/eos/cms'+path) if re.match(pattern,x) ]
             if len(files) == 0:
                 raise RuntimeError, "ERROR making component %s: no files found under %s matching '%s'" % (name,path,pattern)
             writeDatasetToCache('EOS%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern), files)
@@ -94,7 +117,7 @@ class ComponentCreator(object):
         try:
             files = getDatasetFromCache('PSI%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern))
         except IOError:
-            files = [ 'root://t3se01.psi.ch//'+x.replace("/pnfs/psi.ch/cms/trivcat/","") for x in eostools.listFiles('/pnfs/psi.ch/cms/trivcat/'+path) if re.match(pattern,x) ] 
+            files = [ 'root://t3se01.psi.ch//'+x.replace("/pnfs/psi.ch/cms/trivcat/","") for x in eostools.listFiles('/pnfs/psi.ch/cms/trivcat/'+path) if re.match(pattern,x) ]
             if len(files) == 0:
                 raise RuntimeError, "ERROR making component %s: no files found under %s matching '%s'" % (name,path,pattern)
             writeDatasetToCache('PSI%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern), files)
@@ -109,6 +132,38 @@ class ComponentCreator(object):
             triggers = [],
             effCorrFactor = 1,
         )
+        return component
+
+    def getFilesFromDESY(self, dataset, user, pattern, run_range=None):
+        # print 'getting files for', dataset,user,pattern
+        ds = createDataset( user, dataset, pattern, readcache=True, run_range=run_range )
+        files = ds.listOfGoodFiles()
+        mapping = 'dcap://dcache-cms-dcap.desy.de/pnfs/desy.de/cms/tier2/%s'
+        return [ mapping % f for f in files]
+
+    def makeMCComponentFromDESY(self,name,dataset,path,pattern=".*root",xSec=1):
+        component = cfg.MCComponent(
+            dataset=dataset,
+            name = name,
+            files = self.getFilesFromDESY(dataset,path,pattern),
+            xSection = xSec,
+            nGenEvents = 1,
+            triggers = [],
+            effCorrFactor = 1,
+        )
+        return component
+
+    def makeDataComponentDESY(self,name,dataset,user,pattern,json=None,run_range=None,triggers=[],vetoTriggers=[]):
+        component = cfg.DataComponent(
+            #dataset = dataset,
+            name = name,
+            files = self.getFilesFromDESY(dataset,user,pattern,run_range=run_range),
+            intLumi = 1,
+            triggers = triggers,
+            json = json
+            )
+        component.vetoTriggers = vetoTriggers
+        component.dataset_entries = self.getPrimaryDatasetEntries(dataset,user,pattern)
         return component
 
     def getFilesFromIC(self, dataset, user, pattern):
@@ -136,7 +191,7 @@ class ComponentCreator(object):
         try:
             files = getDatasetFromCache('Local%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern))
         except IOError:
-            files = [ x for x in eostools.listFiles(path,True) if re.match(pattern,x) ] 
+            files = [ x for x in eostools.listFiles(path,True) if re.match(pattern,x) ]
             if len(files) == 0:
                 raise RuntimeError, "ERROR making component %s: no files found under %s matching '%s'" % (name,path,pattern)
             writeDatasetToCache('Local%{path}%{pattern}.pck'.format(path = path.replace('/','_'), pattern = pattern), files)
@@ -194,8 +249,8 @@ class ComponentCreator(object):
         fraction=info.dataset_details['PrimaryDatasetFraction']
         if fraction<0.001:
             print 'ERROR FRACTION IS ONLY ',fraction
-        return fraction 
-        
+        return fraction
+
 
 def testSamples(mcSamples):
    from subprocess import check_output, CalledProcessError
@@ -205,4 +260,3 @@ def testSamples(mcSamples):
             print "\tSample is accessible? ",("events" in check_output(["edmFileUtil","--ls",X.files[0]]))
         except CalledProcessError:
             print "\tERROR trying to access ",X.files[0]
-
