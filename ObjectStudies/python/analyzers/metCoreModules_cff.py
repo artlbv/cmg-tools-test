@@ -75,6 +75,7 @@ eventFlagsAna = cfg.Analyzer(
 from CMGTools.TTHAnalysis.analyzers.hbheAnalyzer import hbheAnalyzer
 hbheFilterAna = cfg.Analyzer(
     hbheAnalyzer, name = 'hbheAnalyzer',
+    IgnoreTS4TS5ifJetInLowBVRegion = False
 )
 
 # Select a list of good primary vertices (generic)
@@ -225,7 +226,10 @@ metAna = cfg.Analyzer(
     metCollection     = "slimmedMETs",
     noPUMetCollection = "slimmedMETs",    
     copyMETsByValue = False,
-    doTkMet = False,
+    doTkMet = True,
+    includeTkMetCHS = True,
+    includeTkMetPVLoose = False,
+    includeTkMetPVTight = False,
     doMetNoPU = False,
     doMetNoMu = False,
     doMetNoEle = False,
@@ -243,6 +247,9 @@ metNoHFAna = cfg.Analyzer(
     noPUMetCollection = "slimmedMETsNoHF",    
     copyMETsByValue = False,
     doTkMet = False,
+    includeTkMetCHS = False,
+    includeTkMetPVLoose = False,
+    includeTkMetPVTight = False,
     doMetNoPU = False,
     doMetNoMu = False,
     doMetNoEle = False,
