@@ -132,7 +132,7 @@ isData = True
 
 #sample = 'MC'
 sample = 'data'
-test = 1
+test = 0
 
 if sample == "MC":
 
@@ -243,7 +243,7 @@ elif sample == "data":
 removeResiduals = False
 # -------------------- Running pre-processor
 preprocessor = None
-doMETpreprocessor = False
+doMETpreprocessor = True
 if doMETpreprocessor:
         import subprocess
         preprocessorFile = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
