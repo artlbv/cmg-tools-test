@@ -109,6 +109,7 @@ triggerFlagsAna.triggerBits = {
 	'MuHT600' : triggers_mu_ht600,
 	'MuHT400MET70' : triggers_mu_ht400_met70,
 	'MuHT350MET70' : triggers_mu_ht350_met70,
+	'MuHT350MET50' : triggers_mu_ht350_met50,
 	'MuHT350' : triggers_mu_ht350,
 	'MuHTMET' : triggers_mu_ht350_met70 + triggers_mu_ht400_met70,
 	'MuMET120' : triggers_mu_met120,
@@ -119,6 +120,7 @@ triggerFlagsAna.triggerBits = {
 	'EleHT600' : triggers_el_ht600,
 	'EleHT400MET70' : triggers_el_ht400_met70,
 	'EleHT350MET70' : triggers_el_ht350_met70,
+	'EleHT350MET50' : triggers_el_ht350_met50,
 	'EleHT350' : triggers_el_ht350,
 	'EleHTMET' : triggers_el_ht350_met70 + triggers_el_ht400_met70,
 	'EleHT200' :triggers_el_ht200,
@@ -132,7 +134,7 @@ isData = True
 
 #sample = 'MC'
 sample = 'data'
-test = 1
+test = 0
 
 if sample == "MC":
 
@@ -147,9 +149,9 @@ if sample == "MC":
 	ttHLepSkim.minLeptons = 1
 
 	# -- new 74X samples
-	from CMGTools.RootTools.samples.samples_13TeV_74X import *
+#	from CMGTools.RootTools.samples.samples_13TeV_74X import *
 	# -- samples at DESY
-#	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
 
 	# select components
 	selectedComponents = [
@@ -191,17 +193,16 @@ elif sample == "data":
 	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV2_DATA.db'
 	jecEra    = 'Summer15_25nsV2_DATA'
 
-
 	isData = True
 
 	# modify skim
-	ttHLepSkim.minLeptons = 1
+	ttHLepSkim.minLeptons = 0
 
 	# central samples
-	from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
+#	from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
 	# samples at DESY
-#	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
-
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
+#
 	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
 	#selectedComponents = [ SingleElectron_Run2015B ]
 #	selectedComponents = [ SingleElectron_Run2015B, SingleElectron_Run2015B_17Jul ]
@@ -209,13 +210,12 @@ elif sample == "data":
 	#selectedComponents = [ JetHT_Run2015B, JetHT_Run2015B_17Jul ]
 	#selectedComponents = [ HTMHT_Run2015B ]
 
-	selectedComponents = [ SingleElectron_Run2015D, SingleMuon_Run2015D ]
-
-
+	selectedComponents = [ JetHT_Run2015D, SingleElectron_Run2015D, SingleMuon_Run2015D ]
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = JetHT_Run2015D
+		#comp = JetHT_Run2015D
+		comp = SingleElectron_Run2015D
 		comp.files = comp.files[:10]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
