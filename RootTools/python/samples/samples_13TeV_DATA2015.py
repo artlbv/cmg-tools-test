@@ -6,12 +6,9 @@ import os
 from CMGTools.RootTools.samples.ComponentCreator import ComponentCreator
 kreator = ComponentCreator()
 dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"  # use environmental variable, useful for instance to run on CRAB
-#lumi: delivered= 4.430 (/nb) recorded= 4.013 (/nb)
-###json='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/DCSOnly/json_DCSONLY_Run2015B.txt'
-#json=dataDir+'/json/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2.json' # golden json 40.03 pb
-#json=dataDir+'/json/json_DCSONLY_Run2015B.txt'
-#json=dataDir+'/json/Cert_246908-251252_13TeV_PromptReco_Collisions15_JSON.txt' # golden json 5.6/pb
-# https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2446.html
+json=dataDir+'/json/Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns_JSON.txt'
+#https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2496.html
+#golden JSON 166.37/pb
 
 #https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2496.html
 #golden JSON 166.37/pb with 2015D
