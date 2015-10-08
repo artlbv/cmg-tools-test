@@ -449,7 +449,7 @@ def plotEff(histList, var = 'HT', doFit = False):
             fturn.SetParameters(expHalfP,expWidth,expPlateau)
 
             ## do fit
-            fitr = gEff.Fit(fturn,'S Q EX0')#EX0
+            fitr = gEff.Fit(fturn,'S Q E EX0')#EX0
 
             SetOwnership(gEff,0)
 
@@ -468,11 +468,16 @@ def plotEff(histList, var = 'HT', doFit = False):
                     xpl = x
                     break
 
-            plattxt = '#varepsilon =  %2.1f#pm%2.1f%%' % (plateau*100, fitr.Error(2)*100)
+            ## asymmetric errors
+            #print 'Upper/Lower error = ', fitr.UpperError(2), fitr.LowerError(2)
+
+            #plattxt = '#varepsilon =  %2.1f#pm%2.1f%%' % (plateau*100, fitr.Error(2)*100) # symmetric errors
+            plattxt = '#varepsilon =  %2.1f^{+%2.1f}_{%2.1f} %%' % (plateau*100, fitr.UpperError(2)*100, fitr.LowerError(2)*100) # asymmetric errors
+
             if xpl > 0:
                 plattxt += ' at %s = %3.0f GeV' % (varToLabel(var),xpl)
 
-            leg.AddEntry(0,"Plateau:","")
+            #leg.AddEntry(0,"Plateau:","")
             leg.AddEntry(fturn,plattxt,"l")
 
             gPad.Update()
