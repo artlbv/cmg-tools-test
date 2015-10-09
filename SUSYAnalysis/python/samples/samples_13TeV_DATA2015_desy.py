@@ -5,9 +5,10 @@ import os
 
 from CMGTools.RootTools.samples.ComponentCreator import ComponentCreator
 kreator = ComponentCreator()
-#dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"  # use environmental variable, useful for instance to run on CRAB
-dataDir = "$CMSSW_BASE/src/CMGTools/RootTools/data"  # use environmental variable, useful for instance to run on CRAB
-json=dataDir+'/json/Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns_JSON.txt' # golden json Run2015C+D
+dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"  # use environmental variable, useful for instance to run on CRAB
+json=dataDir+'/json/Cert_246908-257599_13TeV_PromptReco_Collisions15_25ns_JSON.txt'
+#https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2503.html
+#golden JSON 225.57/pb
 
 ### ----------------------------- Magnetic Field On ----------------------------------------
 
