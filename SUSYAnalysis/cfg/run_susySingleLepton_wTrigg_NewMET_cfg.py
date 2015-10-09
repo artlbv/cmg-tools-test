@@ -11,7 +11,7 @@ from CMGTools.TTHAnalysis.analyzers.susyCore_modules_cff import *
 
 # Lepton Preselection
 # ele
-lepAna.loose_electron_id = "POG_MVA_ID_Run2_NonTrig_VLoose"
+lepAna.loose_electron_id = "POG_MVA_ID_Run2Spring15_NonTrig_VLoose"
 lepAna.loose_electron_pt  = 5
 # mu
 lepAna.loose_muon_pt  = 5
@@ -118,6 +118,7 @@ triggerFlagsAna.triggerBits = {
 	## electrons
 	'IsoEle32' : triggers_1el,
         'IsoEle23' : triggers_1el23,
+        'IsoEle22' : triggers_1el22,
 	'Ele105' : trigger_1el_noiso,
 	'EleHT600' : triggers_el_ht600,
 	'EleHT400MET70' : triggers_el_ht400_met70,
@@ -193,7 +194,8 @@ elif sample == "data":
 	print 'Going to process DATA'
 
 	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV5_DATA.db'
-	jecEra    = 'Summer15_25nsV5'#'Summer15_25nsV2_DATA'
+	jecEra    = 'Summer15_25nsV5_DATA'#'Summer15_25nsV2_DATA'
+#	jecEra    = 'Summer15_25nsV5'#'Summer15_25nsV2_DATA'
 
 	isData = True
 
@@ -219,9 +221,10 @@ elif sample == "data":
 		comp = JetHT_Run2015D
 		#comp = SingleElectron_Run2015D
 		#comp.files = ['dcap://dcache-cms-dcap.desy.de/pnfs/desy.de/cms/tier2//store/data/Run2015D/JetHT/MINIAOD/PromptReco-v3/000/256/587/00000/F664AC07-935D-E511-A019-02163E01424B.root']
-		comp.files = comp.files[:1]
+		comp.files = comp.files[:10]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
+#                if jsonAna in sequence: sequence.remove(jsonAna)
 	elif test==2:
 		# test all components (1 thread per component).
 		for comp in selectedComponents:
