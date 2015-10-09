@@ -218,13 +218,14 @@ elif sample == "data":
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = JetHT_Run2015D
+		comp = SingleMuon_Run2015D #JetHT_Run2015D
 		#comp = SingleElectron_Run2015D
 		#comp.files = ['dcap://dcache-cms-dcap.desy.de/pnfs/desy.de/cms/tier2//store/data/Run2015D/JetHT/MINIAOD/PromptReco-v3/000/256/587/00000/F664AC07-935D-E511-A019-02163E01424B.root']
-		comp.files = comp.files[:10]
+		comp.files = comp.files[20:30]
 		selectedComponents = [comp]
-		comp.splitFactor = 1
-#                if jsonAna in sequence: sequence.remove(jsonAna)
+#		comp.splitFactor = 1
+		comp.splitFactor = len(comp.files)
+                if jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 	elif test==2:
 		# test all components (1 thread per component).
 		for comp in selectedComponents:
