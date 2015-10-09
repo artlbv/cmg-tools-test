@@ -104,6 +104,7 @@ triggerFlagsAna.triggerBits = {
 	## muon
 	'SingleMu' : triggers_1mu,
 	'IsoMu27' : triggers_1mu,
+        'IsoMu20' : triggers_1mu20,
 	'Mu45eta2p1' : trigger_1mu_noiso_r,
 	'Mu50' : trigger_1mu_noiso_w,
 	'MuHT600' : triggers_mu_ht600,
@@ -116,6 +117,7 @@ triggerFlagsAna.triggerBits = {
 	'MuHT400B': triggers_mu_ht400_btag,
 	## electrons
 	'IsoEle32' : triggers_1el,
+        'IsoEle23' : triggers_1el23,
 	'Ele105' : trigger_1el_noiso,
 	'EleHT600' : triggers_el_ht600,
 	'EleHT400MET70' : triggers_el_ht400_met70,
@@ -199,9 +201,9 @@ elif sample == "data":
 	ttHLepSkim.minLeptons = 0
 
 	# central samples
-#	from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
+	from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
 	# samples at DESY
-	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
+#	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
 
 	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
 	#selectedComponents = [ SingleElectron_Run2015B ]
