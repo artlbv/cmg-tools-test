@@ -12,6 +12,8 @@ from CMGTools.TTHAnalysis.analyzers.susyCore_modules_cff import *
 # Lepton Preselection
 # ele
 lepAna.loose_electron_id = "POG_MVA_ID_Run2Spring15_NonTrig_VLoose"
+#for cut based this should work:
+#lepAna.loose_electron_id = "POG_Cuts_ID_SPRING15_25ns_v1_Veto"
 lepAna.loose_electron_pt  = 5
 # mu
 lepAna.loose_muon_pt  = 5
@@ -221,6 +223,8 @@ elif sample == "data":
 	#selectedComponents = [ HTMHT_Run2015B ]
 
 	selectedComponents = [ JetHT_Run2015D, SingleElectron_Run2015D, SingleMuon_Run2015D ]
+        
+        if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 
 	if test==1:
 		# test a single component, using a single thread.
@@ -231,7 +235,6 @@ elif sample == "data":
 		selectedComponents = [comp]
 #		comp.splitFactor = 1
 		comp.splitFactor = len(comp.files)
-                if jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 	elif test==2:
 		# test all components (1 thread per component).
 		for comp in selectedComponents:
@@ -241,14 +244,14 @@ elif sample == "data":
 	elif test==3:
 		# run all components (10 files per component).
 		for comp in selectedComponents:
-			comp.files = comp.files[:10]
-			comp.fineSplitFactor = 1
+			comp.files = comp.files[20:30]
+			comp.fineSplitFactor = 2
 			comp.splitFactor = len(comp.files)
 	elif test==0:
 		# PRODUCTION
 		# run on everything
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 1 # force for DATA (because of pre-processor)
+			comp.fineSplitFactor = 2 
 			comp.splitFactor = len(comp.files)
 
 
