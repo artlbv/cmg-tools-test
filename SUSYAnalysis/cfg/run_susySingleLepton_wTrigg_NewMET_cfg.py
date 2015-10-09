@@ -88,6 +88,13 @@ ttHSTSkimmer = cfg.Analyzer(
 	minST = 200,
 	)
 
+## HT skim
+from CMGTools.TTHAnalysis.analyzers.ttHHTSkimmer import ttHHTSkimmer
+ttHHTSkimmer = cfg.Analyzer(
+	ttHHTSkimmer, name='ttHHTSkimmer',
+	minHT = 350,
+	)
+
 #from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import * # central trigger list
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15_1l import *
 
@@ -300,10 +307,14 @@ sequence = cfg.Sequence(susyCoreSequence+[
 		LHEAna,
 		ttHEventAna,
 		#ttHSTSkimmer,
+		ttHHTSkimmer,
 		#ttHReclusterJets,
 		hbheFilterAna,
 		treeProducer,
 		])
+
+
+if isData: sequence.remove(ttHHTSkimmer)
 
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
