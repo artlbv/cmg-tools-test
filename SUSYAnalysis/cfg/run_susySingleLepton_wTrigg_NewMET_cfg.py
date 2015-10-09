@@ -146,12 +146,6 @@ isData = True
 sample = 'data'
 test = 1
 
-isData = False
-
-sample = 'MC'
-#sample = 'data'
-test = 1
-
 if sample == "MC":
 
 	print 'Going to process MC'
