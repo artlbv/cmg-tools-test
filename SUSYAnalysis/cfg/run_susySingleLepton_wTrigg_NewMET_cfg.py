@@ -146,6 +146,12 @@ isData = True
 sample = 'data'
 test = 1
 
+isData = False
+
+sample = 'MC'
+#sample = 'data'
+test = 1
+
 if sample == "MC":
 
 	print 'Going to process MC'
@@ -159,18 +165,18 @@ if sample == "MC":
 	ttHLepSkim.minLeptons = 1
 
 	# -- new 74X samples
-#	from CMGTools.RootTools.samples.samples_13TeV_74X import *
+	from CMGTools.RootTools.samples.samples_13TeV_74X import *
 	# -- samples at DESY
-	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+#	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
 
 	# select components
 	selectedComponents = [
-		TTJets_LO_25ns,
+		TTJets_LO #_25ns,
 	]
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = TTJets_LO_25ns
+		comp = TTJets_LO #_25ns
 		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
@@ -201,8 +207,7 @@ elif sample == "data":
 	print 'Going to process DATA'
 
 	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV5_DATA.db'
-	jecEra    = 'Summer15_25nsV5_DATA'#'Summer15_25nsV2_DATA'
-#	jecEra    = 'Summer15_25nsV5'#'Summer15_25nsV2_DATA'
+	jecEra    = 'Summer15_25nsV5_DATA'
 
 	isData = True
 
