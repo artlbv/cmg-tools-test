@@ -146,7 +146,7 @@ isData = True
 
 #sample = 'MC'
 sample = 'data'
-test = 1
+test = 0
 
 if sample == "MC":
 
@@ -180,12 +180,12 @@ if sample == "MC":
 		# test all components (1 thread per component).
 		for comp in selectedComponents:
 			comp.splitFactor = 1
-			comp.fineSplitFactor = 1
+			comp.fineSplitFactor = 2
 			comp.files = comp.files[:1]
 	elif test==3:
 		# run all components (1 thread per component).
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 1
+			comp.fineSplitFactor = 2
 			comp.splitFactor = len(comp.files)
 	elif test==0:
 		# PRODUCTION
@@ -195,7 +195,7 @@ if sample == "MC":
 		selectedComponents = QCD_HT
 
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 1
+			comp.fineSplitFactor = 2
 			comp.splitFactor = len(comp.files)
 
 elif sample == "data":
@@ -239,7 +239,7 @@ elif sample == "data":
 		# test all components (1 thread per component).
 		for comp in selectedComponents:
 			comp.splitFactor = 1
-			comp.fineSplitFactor = 1
+			comp.fineSplitFactor = 2
 			comp.files = comp.files[:1]
 	elif test==3:
 		# run all components (10 files per component).
@@ -261,10 +261,13 @@ removeResiduals = False
 preprocessor = None
 doMETpreprocessor = True
 if doMETpreprocessor:
-	import subprocess
-	preprocessorFile = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
-	extraArgs=[]
-	if isData:
+        import tempfile
+        import subprocess
+        tempfile.tempdir=os.environ['CMSSW_BASE']+'/tmp'
+        tfile, tpath = tempfile.mkstemp(suffix='.py',prefix='MET_preproc_')
+        os.close(tfile)
+        extraArgs=[]
+        if isData:
 		extraArgs.append('--isData')
 		GT= '74X_dataRun2_Prompt_v1'
 	else:
@@ -273,13 +276,20 @@ if doMETpreprocessor:
 	args = ['python',
 		os.path.expandvars('$CMSSW_BASE/python/CMGTools/ObjectStudies/corMETMiniAOD_cfgCreator.py'),\
 			'--GT='+GT,
-		'--outputFile='+preprocessorFile,
+		'--outputFile='+tpath,
 		'--jecDBFile='+jecDBFile,
 		'--jecEra='+jecEra
 		] + extraArgs
 #print "Making pre-processorfile:"
 #print " ".join(args)
 	subprocess.call(args)
+        staticname = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
+        import filecmp
+        if os.path.isfile(staticname) and filecmp.cmp(tpath,staticname):
+                os.system("rm %s"%tpath)
+        else:
+                os.system("mv %s %s"%(tpath,staticname))
+        preprocessorFile = staticname
 	from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
 	preprocessor = CmsswPreprocessor(preprocessorFile)
 
