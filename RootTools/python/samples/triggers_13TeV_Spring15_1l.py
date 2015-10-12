@@ -41,9 +41,9 @@ triggers_HT600 = ["HLT_PFHT600_v*"] # prescaled!
 triggers_HT800 = ["HLT_PFHT800_v*"]
 triggers_HT900 = ["HLT_PFHT900_v*"]
 triggers_MET170 = ["HLT_PFMET170_NoiseCleaned_v*"]
-triggers_HTMET = ["HLT_PFHT350_PFMET120_NoiseCleaned_v*"]
-triggers_HT350MET120 = ["HLT_PFHT350_PFMET120_NoiseCleaned_v*"]
-triggers_HT350MET100 = ["HLT_PFHT350_PFMET100_NoiseCleaned_v*"]
+triggers_HTMET = ["HLT_PFHT350_PFMET120_*"] # include all noise cleaning options!
+triggers_HT350MET120 = ["HLT_PFHT350_PFMET120_*"] # include all noise cleaning options!
+triggers_HT350MET100 = ["HLT_PFHT350_PFMET100_*"] # include all noise cleaning options!
 
 #### Combined paths
 
