@@ -286,8 +286,16 @@ class EventVars1L_base:
                 passIso = False
                 passConv = False
 
-                lepMVA = lep.mvaIdPhys14
+                '''
+                ## ELE CutBased ID
+                # check MVA WPs
+                passTightID = (lep.SPRING15_25ns_v1 == 4)
+                passLooseID = (lep.SPRING15_25ns_v1 >= 1)
 
+                '''
+
+                ## ELE MVA ID
+                lepMVA = lep.mvaIdPhys14
                 # check MVA WPs
                 passTightID = checkEleMVA(lepMVA,lepEta,'Tight')
                 passLooseID = checkEleMVA(lepMVA,lepEta,'Loose')
