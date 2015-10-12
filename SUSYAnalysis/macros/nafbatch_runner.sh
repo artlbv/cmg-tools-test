@@ -14,7 +14,7 @@
 ## architecture
 ##$ -l arch=amd64
 ## Job Name
-#$ -N CMGrunner
+#$ -N CMGfriends
 ## stderr and stdout are merged together to stdout
 #$ -j y
 ##(send mail on job's end and abort)

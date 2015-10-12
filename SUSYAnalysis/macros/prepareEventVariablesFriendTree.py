@@ -11,8 +11,8 @@ from CMGTools.SUSYAnalysis.tools.eventVars_1l_triggers import EventVars1L_trigge
 MODULES.append( ('1l_Triggers', EventVars1L_triggers()) )
 
 # for signal masses
-from CMGTools.SUSYAnalysis.tools.eventVars_1l_signal import EventVars1L_signal
-MODULES.append( ('1l_Signal', EventVars1L_signal()) )
+#from CMGTools.SUSYAnalysis.tools.eventVars_1l_signal import EventVars1L_signal
+#MODULES.append( ('1l_Signal', EventVars1L_signal()) )
 
 
 '''
