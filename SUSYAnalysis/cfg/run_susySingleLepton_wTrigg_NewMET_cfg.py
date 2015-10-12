@@ -113,7 +113,7 @@ triggerFlagsAna.triggerBits = {
 	## muon
 	'SingleMu' : triggers_1mu,
 	'IsoMu27' : triggers_1mu,
-        'IsoMu20' : triggers_1mu20,
+	'IsoMu20' : triggers_1mu20,
 	'Mu45eta2p1' : trigger_1mu_noiso_r,
 	'Mu50' : trigger_1mu_noiso_w,
 	'MuHT600' : triggers_mu_ht600,
@@ -126,8 +126,8 @@ triggerFlagsAna.triggerBits = {
 	'MuHT400B': triggers_mu_ht400_btag,
 	## electrons
 	'IsoEle32' : triggers_1el,
-        'IsoEle23' : triggers_1el23,
-        'IsoEle22' : triggers_1el22,
+	'IsoEle23' : triggers_1el23,
+	'IsoEle22' : triggers_1el22,
 	'Ele105' : trigger_1el_noiso,
 	'EleHT600' : triggers_el_ht600,
 	'EleHT400MET70' : triggers_el_ht400_met70,
@@ -144,8 +144,8 @@ triggerFlagsAna.triggerBits = {
 #-------- HOW TO RUN
 isData = True
 
-#sample = 'MC'
-sample = 'data'
+sample = 'MC'
+#sample = 'data'
 test = 0
 
 if sample == "MC":
@@ -161,18 +161,18 @@ if sample == "MC":
 	ttHLepSkim.minLeptons = 1
 
 	# -- new 74X samples
-	from CMGTools.RootTools.samples.samples_13TeV_74X import *
+#	from CMGTools.RootTools.samples.samples_13TeV_74X import *
 	# -- samples at DESY
-#	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
 
 	# select components
 	selectedComponents = [
-		TTJets_LO #_25ns,
+		TTJets_LO_25ns,
 	]
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = TTJets_LO #_25ns
+		comp = TTJets_LO_25ns
 		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
@@ -192,7 +192,8 @@ if sample == "MC":
 		# run on everything
 
 		#selectedComponents = mcSamples_Asymptotic50ns
-		selectedComponents = QCD_HT
+		#selectedComponents =[ TTJets_LO_25ns]#QCD_HT
+		selectedComponents = [  TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 2
@@ -211,9 +212,9 @@ elif sample == "data":
 	ttHLepSkim.minLeptons = 0
 
 	# central samples
-	from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
+#	from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
 	# samples at DESY
-#	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
 
 	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
 	#selectedComponents = [ SingleElectron_Run2015B ]
@@ -223,15 +224,17 @@ elif sample == "data":
 	#selectedComponents = [ HTMHT_Run2015B ]
 
 	selectedComponents = [ JetHT_Run2015D, SingleElectron_Run2015D, SingleMuon_Run2015D ]
-        
-        if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
+
+	if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = SingleMuon_Run2015D #JetHT_Run2015D
-		#comp = SingleElectron_Run2015D
+		#comp = SingleMuon_Run2015D
+		#comp = JetHT_Run2015D
+		comp = SingleElectron_Run2015D
 		#comp.files = ['dcap://dcache-cms-dcap.desy.de/pnfs/desy.de/cms/tier2//store/data/Run2015D/JetHT/MINIAOD/PromptReco-v3/000/256/587/00000/F664AC07-935D-E511-A019-02163E01424B.root']
 		comp.files = comp.files[20:30]
+		#comp.files = comp.files[:1]
 		selectedComponents = [comp]
 #		comp.splitFactor = 1
 		comp.splitFactor = len(comp.files)
@@ -251,7 +254,7 @@ elif sample == "data":
 		# PRODUCTION
 		# run on everything
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 2 
+			comp.fineSplitFactor = 2
 			comp.splitFactor = len(comp.files)
 
 
@@ -261,13 +264,13 @@ removeResiduals = False
 preprocessor = None
 doMETpreprocessor = True
 if doMETpreprocessor:
-        import tempfile
-        import subprocess
-        tempfile.tempdir=os.environ['CMSSW_BASE']+'/tmp'
-        tfile, tpath = tempfile.mkstemp(suffix='.py',prefix='MET_preproc_')
-        os.close(tfile)
-        extraArgs=[]
-        if isData:
+	import tempfile
+	import subprocess
+	tempfile.tempdir=os.environ['CMSSW_BASE']+'/tmp'
+	tfile, tpath = tempfile.mkstemp(suffix='.py',prefix='MET_preproc_')
+	os.close(tfile)
+	extraArgs=[]
+	if isData:
 		extraArgs.append('--isData')
 		GT= '74X_dataRun2_Prompt_v1'
 	else:
@@ -283,13 +286,13 @@ if doMETpreprocessor:
 #print "Making pre-processorfile:"
 #print " ".join(args)
 	subprocess.call(args)
-        staticname = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
-        import filecmp
-        if os.path.isfile(staticname) and filecmp.cmp(tpath,staticname):
-                os.system("rm %s"%tpath)
-        else:
-                os.system("mv %s %s"%(tpath,staticname))
-        preprocessorFile = staticname
+	staticname = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
+	import filecmp
+	if os.path.isfile(staticname) and filecmp.cmp(tpath,staticname):
+		os.system("rm %s"%tpath)
+	else:
+		os.system("mv %s %s"%(tpath,staticname))
+	preprocessorFile = staticname
 	from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
 	preprocessor = CmsswPreprocessor(preprocessorFile)
 
