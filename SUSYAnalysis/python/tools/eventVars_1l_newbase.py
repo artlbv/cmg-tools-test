@@ -34,6 +34,7 @@ btag_MediumWP = 0.890
 btag_TightWP = 0.990
 
 
+## PHYS14 IDs
 ## Non-triggering electron MVA id (Phys14 WP)
 # Tight MVA WP
 Ele_mvaPhys14_eta0p8_T = 0.73;
@@ -48,8 +49,24 @@ Ele_mvaPhys14_eta0p8_L = 0.35;
 Ele_mvaPhys14_eta1p4_L = 0.20;
 Ele_mvaPhys14_eta2p4_L = -0.52;
 
+## SPRING15 IDs
+## Non-triggering electron MVA id (Spring15 WP):
+#see RA5 talk: https://indico.cern.ch/event/452858/contribution/3/attachments/1168129/1685069/RA5_Status_Report_Oct._9_2015.pdf slide 20
+# Tight MVA WP
+Ele_mvaSpring15_eta0p8_T = 0.87;
+Ele_mvaSpring15_eta1p4_T = 0.6;
+Ele_mvaSpring15_eta2p4_T = 0.17;
+# Medium MVA WP  <--- UPDATE
+Ele_mvaSpring15_eta0p8_M = 0.35;
+Ele_mvaSpring15_eta1p4_M = 0.20;
+Ele_mvaSpring15_eta2p4_M = -0.52;
+# Loose MVA WP
+Ele_mvaSpring15_eta0p8_L = -0.7;
+Ele_mvaSpring15_eta1p4_L = -0.83;
+Ele_mvaSpring15_eta2p4_L = -0.92;
+
 ## Ele MVA check
-def checkEleMVA(lepMVA,lepEta,WP = 'Tight'):
+def checkEleMVA(lepMVA,lepEta,WP = 'Tight', era = "Spring15" ):
     # Eta dependent MVA ID check:
     passID = False
 
@@ -59,18 +76,33 @@ def checkEleMVA(lepMVA,lepEta,WP = 'Tight'):
     if lepEta > 2.4:
         return False
 
-    if WP == 'Tight':
-        if lepEta < 0.8: passID = lepMVA > Ele_mvaPhys14_eta0p8_T
-        elif lepEta < 1.44: passID = lepMVA > Ele_mvaPhys14_eta1p4_T
-        elif lepEta >= 1.57: passID = lepMVA > Ele_mvaPhys14_eta2p4_T
-    elif WP == 'Medium':
-        if lepEta < 0.8: passID = lepMVA > Ele_mvaPhys14_eta0p8_M
-        elif lepEta < 1.44: passID = lepMVA > Ele_mvaPhys14_eta1p4_M
-        elif lepEta >= 1.57: passID = lepMVA > Ele_mvaPhys14_eta2p4_M
-    elif WP == 'Loose':
-        if lepEta < 0.8: passID = lepMVA > Ele_mvaPhys14_eta0p8_L
-        elif lepEta < 1.44: passID = lepMVA > Ele_mvaPhys14_eta1p4_L
-        elif lepEta >= 1.57: passID = lepMVA > Ele_mvaPhys14_eta2p4_L
+    if era == "Spring15":
+        if WP == 'Tight':
+            if lepEta < 0.8: passID = lepMVA > Ele_mvaSpring15_eta0p8_T
+            elif lepEta < 1.44: passID = lepMVA > Ele_mvaSpring15_eta1p4_T
+            elif lepEta >= 1.57: passID = lepMVA > Ele_mvaSpring15_eta2p4_T
+        elif WP == 'Medium':
+            if lepEta < 0.8: passID = lepMVA > Ele_mvaSpring15_eta0p8_M
+            elif lepEta < 1.44: passID = lepMVA > Ele_mvaSpring15_eta1p4_M
+            elif lepEta >= 1.57: passID = lepMVA > Ele_mvaSpring15_eta2p4_M
+        elif WP == 'Loose':
+            if lepEta < 0.8: passID = lepMVA > Ele_mvaSpring15_eta0p8_L
+            elif lepEta < 1.44: passID = lepMVA > Ele_mvaSpring15_eta1p4_L
+            elif lepEta >= 1.57: passID = lepMVA > Ele_mvaSpring15_eta2p4_L
+
+    elif era == "Phys14":
+        if WP == 'Tight':
+            if lepEta < 0.8: passID = lepMVA > Ele_mvaPhys14_eta0p8_T
+            elif lepEta < 1.44: passID = lepMVA > Ele_mvaPhys14_eta1p4_T
+            elif lepEta >= 1.57: passID = lepMVA > Ele_mvaPhys14_eta2p4_T
+        elif WP == 'Medium':
+            if lepEta < 0.8: passID = lepMVA > Ele_mvaPhys14_eta0p8_M
+            elif lepEta < 1.44: passID = lepMVA > Ele_mvaPhys14_eta1p4_M
+            elif lepEta >= 1.57: passID = lepMVA > Ele_mvaPhys14_eta2p4_M
+        elif WP == 'Loose':
+            if lepEta < 0.8: passID = lepMVA > Ele_mvaPhys14_eta0p8_L
+            elif lepEta < 1.44: passID = lepMVA > Ele_mvaPhys14_eta1p4_L
+            elif lepEta >= 1.57: passID = lepMVA > Ele_mvaPhys14_eta2p4_L
 
     return passID
 
