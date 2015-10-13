@@ -193,7 +193,8 @@ if sample == "MC":
 
 		#selectedComponents = mcSamples_Asymptotic50ns
 		#selectedComponents =[ TTJets_LO_25ns]#QCD_HT
-		selectedComponents = [  TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
+		#selectedComponents = [  TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
+		selectedComponents = SingleTop
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 2
@@ -260,6 +261,13 @@ elif sample == "data":
 
 
 removeResiduals = False
+
+# use consistent JEC residuals for MET and Jets
+if removeResiduals:
+	applyL2L3Residual = False
+else:
+	applyL2L3Residual = True
+
 # -------------------- Running pre-processor
 preprocessor = None
 doMETpreprocessor = True
