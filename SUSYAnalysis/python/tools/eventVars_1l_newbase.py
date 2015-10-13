@@ -33,6 +33,7 @@ btag_LooseWP = 0.605
 btag_MediumWP = 0.890
 btag_TightWP = 0.990
 
+eleID = 'CB' # 'MVA' or 'CB'
 
 ## PHYS14 IDs
 ## Non-triggering electron MVA id (Phys14 WP)
@@ -51,7 +52,7 @@ Ele_mvaPhys14_eta2p4_L = -0.52;
 
 ## SPRING15 IDs
 ## Non-triggering electron MVA id (Spring15 WP):
-#see RA5 talk: https://indico.cern.ch/event/452858/contribution/3/attachments/1168129/1685069/RA5_Status_Report_Oct._9_2015.pdf slide 20
+#see RA5 talk: https://indico.cern.ch/event/452858/contribution/3/attachments/1168129/1685069/RA5_Status_Report_Oct._9_2015.pdf slide 20 -- wrong loose WP
 # Tight MVA WP
 Ele_mvaSpring15_eta0p8_T = 0.87;
 Ele_mvaSpring15_eta1p4_T = 0.6;
@@ -61,9 +62,13 @@ Ele_mvaSpring15_eta0p8_M = 0.35;
 Ele_mvaSpring15_eta1p4_M = 0.20;
 Ele_mvaSpring15_eta2p4_M = -0.52;
 # Loose MVA WP
-Ele_mvaSpring15_eta0p8_L = -0.7;
-Ele_mvaSpring15_eta1p4_L = -0.83;
-Ele_mvaSpring15_eta2p4_L = -0.92;
+Ele_mvaSpring15_eta0p8_L = -0.16;
+Ele_mvaSpring15_eta1p4_L = -0.65;
+Ele_mvaSpring15_eta2p4_L = -0.74;
+# VLoose MVA WP
+Ele_mvaSpring15_eta0p8_L = -0.11;
+Ele_mvaSpring15_eta1p4_L = -0.55;
+Ele_mvaSpring15_eta2p4_L = -0.74;
 
 ## Ele MVA check
 def checkEleMVA(lepMVA,lepEta,WP = 'Tight', era = "Spring15" ):
@@ -170,8 +175,8 @@ class EventVars1L_base:
         ##############################
         if event.isData:
             ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 0
-            ret['PD_SingleMu'] = 1
+            ret['PD_SingleEle'] = 1
+            ret['PD_SingleMu'] = 0
         else:
             ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
@@ -286,19 +291,18 @@ class EventVars1L_base:
                 passIso = False
                 passConv = False
 
-                '''
-                ## ELE CutBased ID
-                # check MVA WPs
-                passTightID = (lep.SPRING15_25ns_v1 == 4)
-                passLooseID = (lep.SPRING15_25ns_v1 >= 1)
+                if eleID == 'CB':
+                    # ELE CutBased ID
+                    # check MVA WPs
+                    passTightID = (lep.SPRING15_25ns_v1 == 4)
+                    passLooseID = (lep.SPRING15_25ns_v1 >= 1)
 
-                '''
-
-                ## ELE MVA ID
-                lepMVA = lep.mvaIdPhys14
-                # check MVA WPs
-                passTightID = checkEleMVA(lepMVA,lepEta,'Tight')
-                passLooseID = checkEleMVA(lepMVA,lepEta,'Loose')
+                elif eleID == 'MVA':
+                    # ELE MVA ID
+                    lepMVA = lep.mvaIdPhys14
+                    # check MVA WPs
+                    passTightID = checkEleMVA(lepMVA,lepEta,'Tight')
+                    passLooseID = checkEleMVA(lepMVA,lepEta,'Loose')
 
                 # selected
                 if passTightID:
@@ -309,7 +313,10 @@ class EventVars1L_base:
                     # Iso check:
                     if lep.miniRelIso < ele_miniIsoCut: passIso = True
                     # conversion check
-                    if lep.lostHits <= goodEl_lostHits and lep.convVeto and lep.sip3d < goodEl_sip3d: passConv = True
+                    if eleID == 'MVA':
+                        if lep.lostHits <= goodEl_lostHits and lep.convVeto and lep.sip3d < goodEl_sip3d: passConv = True
+                    elif eleID == 'CB':
+                        passConv = True # cuts already included in POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_X
 
                     # fill
                     if passIso and passConv:
