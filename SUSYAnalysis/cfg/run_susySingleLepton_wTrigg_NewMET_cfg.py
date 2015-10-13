@@ -264,9 +264,9 @@ removeResiduals = False
 
 # use consistent JEC residuals for MET and Jets
 if removeResiduals:
-	applyL2L3Residual = False
+	jetAna.applyL2L3Residual = False
 else:
-	applyL2L3Residual = True
+	jetAna.applyL2L3Residual = True
 
 # -------------------- Running pre-processor
 preprocessor = None
