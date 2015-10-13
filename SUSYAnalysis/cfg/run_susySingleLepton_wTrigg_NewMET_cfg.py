@@ -144,8 +144,8 @@ triggerFlagsAna.triggerBits = {
 #-------- HOW TO RUN
 isData = True
 
-sample = 'MC'
-#sample = 'data'
+#sample = 'MC'
+sample = 'data'
 test = 0
 
 if sample == "MC":
@@ -224,7 +224,7 @@ elif sample == "data":
 	#selectedComponents = [ JetHT_Run2015B, JetHT_Run2015B_17Jul ]
 	#selectedComponents = [ HTMHT_Run2015B ]
 
-	selectedComponents = [ JetHT_Run2015D, SingleElectron_Run2015D, SingleMuon_Run2015D ]
+	selectedComponents = [ JetHT_Run2015D ] #, SingleElectron_Run2015D, SingleMuon_Run2015D ]
 
 	if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 
@@ -264,9 +264,9 @@ removeResiduals = False
 
 # use consistent JEC residuals for MET and Jets
 if removeResiduals:
-	applyL2L3Residual = False
+	jetAna.applyL2L3Residual = False
 else:
-	applyL2L3Residual = True
+	jetAna.applyL2L3Residual = True
 
 # -------------------- Running pre-processor
 preprocessor = None
