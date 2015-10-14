@@ -182,9 +182,9 @@ class EventVars1L_base:
         # -- needs to be adjusted manually
         ##############################
         if event.isData:
-            ret['PD_JetHT'] = 1
+            ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
-            ret['PD_SingleMu'] = 0
+            ret['PD_SingleMu'] = 1
         else:
             ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
@@ -311,8 +311,6 @@ class EventVars1L_base:
 
                 elif eleID == 'MVA':
                     # ELE MVA ID
-                    #lepMVA = lep.mvaIdPhys14
-                    #lepMVA = lep.mvaIdSpring15
                     # check MVA WPs
                     passTightID = checkEleMVA(lep,'Tight')
                     passLooseID = checkEleMVA(lep,'VLoose')
