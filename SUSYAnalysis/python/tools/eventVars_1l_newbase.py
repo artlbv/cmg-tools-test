@@ -66,9 +66,9 @@ Ele_mvaSpring15_eta0p8_L = -0.16;
 Ele_mvaSpring15_eta1p4_L = -0.65;
 Ele_mvaSpring15_eta2p4_L = -0.74;
 # VLoose MVA WP
-Ele_mvaSpring15_eta0p8_L = -0.11;
-Ele_mvaSpring15_eta1p4_L = -0.55;
-Ele_mvaSpring15_eta2p4_L = -0.74;
+Ele_mvaSpring15_eta0p8_VL = -0.11;
+Ele_mvaSpring15_eta1p4_VL = -0.55;
+Ele_mvaSpring15_eta2p4_VL = -0.74;
 
 ## Ele MVA check
 def checkEleMVA(lepMVA,lepEta,WP = 'Tight', era = "Spring15" ):
@@ -94,6 +94,10 @@ def checkEleMVA(lepMVA,lepEta,WP = 'Tight', era = "Spring15" ):
             if lepEta < 0.8: passID = lepMVA > Ele_mvaSpring15_eta0p8_L
             elif lepEta < 1.44: passID = lepMVA > Ele_mvaSpring15_eta1p4_L
             elif lepEta >= 1.57: passID = lepMVA > Ele_mvaSpring15_eta2p4_L
+        elif WP == 'VLoose':
+            if lepEta < 0.8: passID = lepMVA > Ele_mvaSpring15_eta0p8_VL
+            elif lepEta < 1.44: passID = lepMVA > Ele_mvaSpring15_eta1p4_VL
+            elif lepEta >= 1.57: passID = lepMVA > Ele_mvaSpring15_eta2p4_VL
 
     elif era == "Phys14":
         if WP == 'Tight':
@@ -302,7 +306,7 @@ class EventVars1L_base:
                     lepMVA = lep.mvaIdPhys14
                     # check MVA WPs
                     passTightID = checkEleMVA(lepMVA,lepEta,'Tight')
-                    passLooseID = checkEleMVA(lepMVA,lepEta,'Loose')
+                    passLooseID = checkEleMVA(lepMVA,lepEta,'VLoose')
 
                 # selected
                 if passTightID:
