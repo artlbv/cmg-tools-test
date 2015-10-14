@@ -33,7 +33,7 @@ btag_LooseWP = 0.605
 btag_MediumWP = 0.890
 btag_TightWP = 0.990
 
-eleID = 'CB' # 'MVA' or 'CB'
+eleID = 'MVA' # 'MVA' or 'CB'
 
 ## PHYS14 IDs
 ## Non-triggering electron MVA id (Phys14 WP)
@@ -71,17 +71,19 @@ Ele_mvaSpring15_eta1p4_VL = -0.55;
 Ele_mvaSpring15_eta2p4_VL = -0.74;
 
 ## Ele MVA check
-def checkEleMVA(lepMVA,lepEta,WP = 'Tight', era = "Spring15" ):
+def checkEleMVA(lep,WP = 'Tight', era = "Spring15" ):
     # Eta dependent MVA ID check:
     passID = False
 
-    lepEta = abs(lepEta)
+    lepEta = abs(lep.eta)
 
     # eta cut
     if lepEta > 2.4:
         return False
 
     if era == "Spring15":
+        lepMVA = lep.mvaIdSpring15
+
         if WP == 'Tight':
             if lepEta < 0.8: passID = lepMVA > Ele_mvaSpring15_eta0p8_T
             elif lepEta < 1.44: passID = lepMVA > Ele_mvaSpring15_eta1p4_T
@@ -100,6 +102,8 @@ def checkEleMVA(lepMVA,lepEta,WP = 'Tight', era = "Spring15" ):
             elif lepEta >= 1.57: passID = lepMVA > Ele_mvaSpring15_eta2p4_VL
 
     elif era == "Phys14":
+        lepMVA = lep.mvaIdPhys14
+
         if WP == 'Tight':
             if lepEta < 0.8: passID = lepMVA > Ele_mvaPhys14_eta0p8_T
             elif lepEta < 1.44: passID = lepMVA > Ele_mvaPhys14_eta1p4_T
@@ -178,8 +182,8 @@ class EventVars1L_base:
         # -- needs to be adjusted manually
         ##############################
         if event.isData:
-            ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 1
+            ret['PD_JetHT'] = 1
+            ret['PD_SingleEle'] = 0
             ret['PD_SingleMu'] = 0
         else:
             ret['PD_JetHT'] = 0
@@ -219,7 +223,11 @@ class EventVars1L_base:
         ## MET FILTERS for data
         if event.isData:
             #ret['METfilters'] = event.Flag_goodVertices and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter)
-            ret['METfilters'] = event.nVert > 0 and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter
+            #ret['METfilters'] = event.nVert > 0 and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter
+            # add HCAL Iso Noise
+            ret['METfilters'] = event.nVert > 0 and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter and event.Flag_HBHENoiseFilter_fix and event.Flag_HBHENoiseIsoFilter
+        else:
+            ret['METfilters'] = 1
 
         ### LEPTONS
         Selected = False
@@ -303,10 +311,11 @@ class EventVars1L_base:
 
                 elif eleID == 'MVA':
                     # ELE MVA ID
-                    lepMVA = lep.mvaIdPhys14
+                    #lepMVA = lep.mvaIdPhys14
+                    #lepMVA = lep.mvaIdSpring15
                     # check MVA WPs
-                    passTightID = checkEleMVA(lepMVA,lepEta,'Tight')
-                    passLooseID = checkEleMVA(lepMVA,lepEta,'VLoose')
+                    passTightID = checkEleMVA(lep,'Tight')
+                    passLooseID = checkEleMVA(lep,'VLoose')
 
                 # selected
                 if passTightID:
