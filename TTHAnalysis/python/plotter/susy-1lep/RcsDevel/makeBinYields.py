@@ -48,6 +48,8 @@ def addOptions(options):
 
     elif options.plot:
 
+        options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for plots
+
         #options.var/bins must be setup by user
         if options.var == "LT":
             options.bins = "[250,350,450,600,1200]"
