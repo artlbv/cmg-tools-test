@@ -1,7 +1,23 @@
 #Background
-TT 	 : TTJets_LO_50ns : xsec*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT_Dilep 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep ==2 && lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT_Dilep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep ==2 ; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TT_Dilep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TT_Dilep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TT_Dilep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
 
-WJets    : WJetsToLNu_50ns :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
+TT_Semilep 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep <2 && lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT_Semilep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep <2  ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT_Semilep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT_Semilep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT_Semilep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+
+WJets    : WJetsToLNu_HT100to200 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
+WJets    : WJetsToLNu_HT200to400 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
+WJets    : WJetsToLNu_HT400to600 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
+WJets    : WJetsToLNu_HT600to800 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
+WJets    : WJetsToLNu_HT800to1200 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
+WJets    : WJetsToLNu_HT1200to2500 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
+WJets    : WJetsToLNu_HT2500toInf :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
 
 # QCD (25ns)
 QCD      : QCD_HT300to500         : xsec*1.0 ; Label ="QCD", FillColor=ROOT.kCyan-6
@@ -11,19 +27,26 @@ QCD      : QCD_HT1000to1500         : xsec*1.0 ; Label ="QCD", FillColor=ROOT.kC
 QCD      : QCD_HT1500to2000         : xsec*1.0 ; Label ="QCD", FillColor=ROOT.kCyan-6
 QCD      : QCD_HT2000toInf         : xsec*1.0 ; Label ="QCD", FillColor=ROOT.kCyan-6
 
-SingleT  :TToLeptons_tch_50ns	 : xsec*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
-SingleT  :TBar_tWch_50ns   	 : xsec*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
-SingleT  :T_tWch_50ns            : xsec*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
+SingleT  : TToLeptons_tch	 : xsec*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
+SingleT  : TToLeptons_sch	 : xsec*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
+SingleT  : T_tWch	 : xsec*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
+SingleT  : TBar_tWch	 : xsec*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
 
-DY       : DYJetsToLL_M50_50ns :  xsec*1.0; Label="DY+jets", FillColor=ROOT.kRed-6
 
-TTV : TTZToLLNuNu_25ns : xsec*1.0 ; FillColor=ROOT.kOrange-3, Label="ttV(W/Z/H)", NormSystematic=0.2
+DY       : DYJetsToLL_M50_HT100to200 :  xsec*1.0 ; Label="DY+jets", FillColor=ROOT.kRed-6, NormSystematic=0.5
+DY       : DYJetsToLL_M50_HT200to400 :   xsec*1.0 ; Label="DY+jets", FillColor=ROOT.kRed-6, NormSystematic=0.5
+DY       : DYJetsToLL_M50_HT400to600 :    xsec*1.0 ; Label="DY+jets", FillColor=ROOT.kRed-6, NormSystematic=0.5
+DY       : DYJetsToLL_M50_HT600toInf :    xsec*1.0 ; Label="DY+jets", FillColor=ROOT.kRed-6, NormSystematic=0.5
+
 TTV : TTWJetsToLNu_25ns : xsec*1.0 ; FillColor=ROOT.kOrange-3, Label="ttV(W/Z/H)", NormSystematic=0.2
-#TTV     : TTH : xsec*1.0 ; FillColor=ROOT.kOrange-3, Label="ttV(W/Z/H)", NormSystematic=0.2
+TTV : TTWJetsToQQ_25ns : xsec*1.0 ; FillColor=ROOT.kOrange-3, Label="ttV(W/Z/H)", NormSystematic=0.2
+TTV : TTZToLLNuNu_25ns : xsec*1.0 ; FillColor=ROOT.kOrange-3, Label="ttV(W/Z/H)", NormSystematic=0.2
+TTV : TTZToQQ_25ns : xsec*1.0 ; FillColor=ROOT.kOrange-3, Label="ttV(W/Z/H)", NormSystematic=0.2
+
 
 # DATA
-data: SingleElectron_Run2015B
-data: SingleElectron_Run2015B_17Jul
+#data: SingleElectron_Run2015B
+#data: SingleElectron_Run2015B_17Jul
 
-data: SingleMuon_Run2015B
-data: SingleMuon_Run2015B_17Jul
+#data: SingleMuon_Run2015B
+#data: SingleMuon_Run2015B_17Jul
