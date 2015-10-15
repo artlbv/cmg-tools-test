@@ -1,11 +1,13 @@
 1 hard lep: nLep == 1 && Lep_pt > 25 && nVeto == 0
 #Selected: Selected == 1
 triggHT: HT > 500
-triggLT: LTNoHF > 250
+triggLT: LT > 250
 
-Trigger: !isData || (isData && ((PD_SingleEle && !PD_SingleMu && HLT_EleOR) || (!PD_SingleEle && PD_SingleMu && HLT_MuOR)))
+Trigger: !isData || (isData && (HLT_EleHT350 || HLT_MuHT350))
+# use the following line to pick leptons only from the corresponding PD
+XOR: !isData || (isData && ((PD_SingleEle && nEl==1) || (PD_SingleMu && nMu==1)))
 
-nJetBase: nJet >= 4
+nJetBase: nJet >= 3
 2.JetPt > 80: Jet2_pt > 80
-
+Filters: !isData || (isData && Flag_goodVertices && Flag_HBHENoiseFilter_fix && Flag_CSCTightHaloFilter && Flag_eeBadScFilter)
 base: 1

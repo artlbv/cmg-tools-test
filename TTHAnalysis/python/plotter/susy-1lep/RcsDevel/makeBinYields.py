@@ -8,8 +8,8 @@ from math import hypot
 # trees
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/"
 #FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/Friends/"
-Tdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15_25ns/"
-FTdir = "/nfs/dust/cms/group/susy-desy/Run2/MC/CMGtuples/Spring15_25ns/FriendsForCards/"
+Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns"
+FTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID"
 #FTdir = "FriendTrees_MC/"
 
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/"
@@ -38,7 +38,7 @@ def addOptions(options):
         #options.bins = "60,-1500,1500,30,0,1500"
         options.bins = "20,-1500,1500,10,0,1500"
 
-        options.friendTrees = [("sf/t","FriendTrees_Signal/evVarFriend_{cname}.root")]
+        options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
 
     if options.grid:
