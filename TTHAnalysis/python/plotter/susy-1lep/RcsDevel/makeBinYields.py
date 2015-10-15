@@ -41,10 +41,19 @@ def addOptions(options):
         options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
 
-    if options.grid:
+    elif options.grid:
         options.var =  "Selected:(nEl-nMu)"
         #options.bins = "2,-1.5,1.5,2,-1.5,1.5"
         options.bins = "3,-1.5,1.5,2,-1.5,1.5"
+
+    elif options.plot:
+
+        #options.var/bins must be setup by user
+        if options.var == "LT":
+            options.bins = "[250,350,450,600,1200]"
+        elif options.var == "HT":
+            #options.bins = "[500,750,1000,1250,1600]"
+            options.bins = "50,500,1500"
 
 def makeLepYieldGrid(hist):
 
@@ -206,7 +215,7 @@ if __name__ == "__main__":
     addMCAnalysisOptions(parser)
 
     # extra options for tty
-    parser.add_option("--mca", dest="mcaFile",default="mca-PAS.txt",help="MCA sample list")
+    parser.add_option("--mca", dest="mcaFile",default="mca-Spring15.txt",help="MCA sample list")
     parser.add_option("--cuts", dest="cutFile",default="trig_base.txt",help="Baseline cuts file")
     parser.add_option("--binname", dest="binname",default="test",help="Binname")
 
@@ -231,6 +240,10 @@ if __name__ == "__main__":
     parser.add_option("--asimov", dest="asimov", action="store_true", default=False, help="Make Asimov pseudo-data")
     parser.add_option("--signal", dest="signal", action="store_true", default=False, help="Is signal scan")
     parser.add_option("--grid", dest="grid", action="store_true", default=False, help="Plot 2d grid: ele/mu vs selected/anti")
+
+    # make normal plots
+    parser.add_option("--plot", dest="plot", action="store_true", default=False, help="Do normal plot")
+
     #parser.add_option("--dummy",  dest="dummyYieldsForZeroBkg", action="store_true", default=False, help="Set dummy yields such it corresponds to 0.01 for 4/fb");
     #parser.add_option("--ignoreEmptySignal",  dest="ignoreEmptySignal", action="store_true", default=False, help="Do not write out a datacard if the expected signal is less than 0.01");
 
@@ -241,13 +254,20 @@ if __name__ == "__main__":
         print 'Arguments', args
 
     # make cut list
+    cDict = {}
+    '''
     cDict = cutDictCR
     cDict.update(cutDictSR)
     cDict.update(cutDictSRf9)
     cDict.update(cutDictCRf9)
+    '''
 
     #cDict = cutQCD #QCD
     #cDict = cutIncl #Inclusive
+
+    # for LT/HT plots
+    cDict = cutLTbinsSR
+    cDict.update(cutLTbinsCR)
 
     binList = sorted(cDict.keys())
 
