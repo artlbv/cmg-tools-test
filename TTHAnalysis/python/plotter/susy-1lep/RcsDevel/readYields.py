@@ -36,12 +36,12 @@ def getScanYieldDict(tfile, hname = "T1tttt_HM_1200_800",bindir = "", leptype = 
 
     ydict = {}
 
-    print "Cd into", bindir
+#    print "Cd into", bindir
     #tfile.cd(bindir)
     #print gDirectory.ls()
 
     if bindir != '': bindir += "/"
-    print bindir+hname
+#    print bindir+hname
     hist = tfile.Get(bindir+hname)
 
     #print hist
