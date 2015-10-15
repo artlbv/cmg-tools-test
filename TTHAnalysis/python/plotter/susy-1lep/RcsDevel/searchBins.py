@@ -83,6 +83,54 @@ for nj_bin in ['NJ4i']:#,'NJ45']:
                 binname = "%s_%s_%s_%s" %(lt_bin,ht_bin,nb_bin,nj_bin)
                 cutIncl[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
 
+### Bins for Rcs plots vs HT/LT
+
+cutLTbinsSR = {}
+cutLTbinsCR = {}
+
+for nj_bin in ['NJ45f6','NJ68']:
+    nj_cut = binsNJ[nj_bin][0]
+
+    ltbins = ['LT1','LT2','LT3','LT4i']
+
+    for lt_bin in ltbins:
+        lt_cut = binsLT[lt_bin][0]
+
+        nbbins = ['NB0','NB1i']
+
+        '''
+        # Match NB bins
+        if lt_bin in ['LT1','LT2','LT3','LT4i']:
+            nbbins += ['NB1'] # NB1 present in all NJ,LT bins
+        if lt_bin in ['LT4i']:
+            nbbins += ['NB2i'] # NB2i present in all NJ,LT bins
+
+        if lt_bin in ['LT1','LT2','LT3']:
+            # Signal region binning
+            if nj_bin in ['NJ68']:
+                nbbins += ['NB2','NB3i']
+            # Side band  binning
+            if nj_bin in ['NJ45f6']:
+                nbbins += ['NB2i']
+        '''
+
+        for nb_bin in nbbins:
+            nb_cut = binsNB[nb_bin][0]
+
+            # split to SR/CR
+            for sr_bin in ['SR']:
+                sr_cut = binsSR[sr_bin][0]
+
+                binname = "%s_%s_%s_%s" %(lt_bin,nb_bin,nj_bin,sr_bin)
+                cutLTbinsSR[binname] = [("base",lt_bin,lt_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut),("base",sr_bin,sr_cut)]
+
+            for cr_bin in ['CR']:
+                cr_cut = binsCR[cr_bin][0]
+
+                binname = "%s_%s_%s_%s" %(lt_bin,nb_bin,nj_bin,cr_bin)
+                cutLTbinsCR[binname] = [("base",lt_bin,lt_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut),("base",cr_bin,cr_cut)]
+
+
 
 ### REAL SEARCH BINS (also for RCS)
 cutDict = {}
