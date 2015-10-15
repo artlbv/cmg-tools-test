@@ -11,11 +11,13 @@ from multiprocessing import Pool
 from ROOT import *
 import math
 from readYields import getYield, getScanYieldDict
+from searchBins import *
 ######################GLOBAL VARIABLES PUT IN OPTIONS############
 ignoreEmptySignal = True
 
 
 def getYieldDict(cardFnames, region, sig = "", lep = "lep"):
+    print "getting dict", sig
     yields = {}
     for cardFname in cardFnames:
         binname = os.path.basename(cardFname)
@@ -59,8 +61,10 @@ def getPredDict(cardFnames, lep = 'lep'):
         
 #        print  binname, "CR_SB", (yCR_SB, yCR_SBerr), "SR_SB", (ySR_SB, ySR_SBerr),"RCS_SB",(Rcs_SB, Rcs_SBerr), "Kappa", (kappa, kappaerr)
 
-        predSR_MB = yCR_MB * Rcs_SB * kappa
+        #predSR_MB = yCR_MB * Rcs_SB * kappa
+        predSR_MB = yCR_MB * Rcs_SB
         if  yCR_MB > 0.01  and kappa > 0.01 and Rcs_SB > 0.01:
+#            predSR_MBerr = predSR_MB * math.sqrt( (yCR_MBerr/yCR_MB)**2 + (kappaerr/kappa)**2 + (Rcs_SBerr/Rcs_SB)**2)
             predSR_MBerr = predSR_MB * math.sqrt( (yCR_MBerr/yCR_MB)**2 + (kappaerr/kappa)**2 + (Rcs_SBerr/Rcs_SB)**2)
         else: predSR_MBerr =  1.0 * predSR_MB
         if predSR_MB < 0.001 :
@@ -106,7 +110,7 @@ def getSystDict(cardFnames, region, sig = "", lep = "lep", uncert = "default"):
 
 
 def printBinnedTable(yieldsList, yieldsSig, printSource, name):
-    benchmark = (1200, 300)
+    benchmark = (1200, 800)
     precision = 2
     if 'Rcs' in name:
         precision = 4
@@ -128,7 +132,7 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
 
     nSource = len(singleSourceNames) 
     nCol = nSource + 3
-    f.write('\\tiny \n')
+#    f.write('\\tiny \n')
     f.write('\\begin{tabular}{|' + (nCol *'%(align)s | ') % dict(align = 'c') + '} \n')
 
     f.write('\\hline \n')
@@ -136,10 +140,12 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
     f.write(' $[$ GeV $]$  &   $[$GeV$]$ &  '  + (nSource *'%(tab)s  ') % dict(tab = '&') + ' \\\ \\hline \n')
     #write out all the counts
     for i,bin in enumerate(binNames):
-        (LT, HT, B ) = bin.split("_")[0:3]        
+        (LTbin, HTbin, Bbin ) = bin.split("_")[0:3]        
+        (LT, HT, B) = (binsLT[LTbin][1],binsHT[HTbin][1],binsNB[Bbin][1])           
         (LT0, HT0, B0 ) = ("","","") 
         if i > 0 :
-            (LT0, HT0, B0 ) = binNames[i-1].split("_")[0:3]
+            (LT0bin, HT0bin, B0bin ) = binNames[i-1].split("_")[0:3]
+            (LT0, HT0, B0) = (binsLT[LT0bin][1],binsHT[HT0bin][1],binsNB[B0bin][1])           
         if LT != LT0:
             f.write(('\\cline{1-%s} ' + LT + ' & ' + HT + ' & ' + B) % (nCol))
         if LT == LT0 and HT != HT0:
@@ -174,7 +180,7 @@ def printDataCardsFromMC(mc, sig, mcSys, sigSys, signal, lep):
     except:
         os.mkdir(inDirSig + '/' + dataCardDir)
 
-    
+    print sig['LT1_HT1i_NB3i_NJ68_SR'].keys()
     binNames = sorted(mc.keys())
     for binName in binNames:
         sigp = {signalName: sig[binName][signal]}
@@ -216,7 +222,7 @@ def printDataCardsFromMC(mc, sig, mcSys, sigSys, signal, lep):
             #datacard.write("shapes *        * ../common/%s.input.root x_$PROCESS x_$PROCESS_$SYSTEMATIC\n" % binName)
             datacard.write('##----------------------------------\n')
             datacard.write('bin         %s\n' % binName)
-            datacard.write('observation %s\n' % myyields['data'][0])
+            datacard.write('observation %s\n' % myyields['background'][0])
             datacard.write('##----------------------------------\n')
             klen = len(singleSourceNames)
             kpatt = " %%%ds "  % klen
@@ -266,46 +272,43 @@ if __name__ == "__main__":
     inDirSig = cardDirectorySig
     cardFnamesSig = glob.glob(inDirSig+'/*/*.root')
 
-
-    sigYields = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
-    mcYields = getYieldDict(cardFnames,"SR_MB","","lep")
-
-
-    printBinnedTable((mcYields,), sigYields, [],'SR_table')
-    dictRcs_MB = getYieldDict(cardFnames,"Rcs_MB","","lep")
-    dictRcs_SB = getYieldDict(cardFnames,"Rcs_SB","","lep")
-    dictKappa = getYieldDict(cardFnames,"Kappa","","lep")
-    tableList = ['EWK','TT','WJets','TTV']
-    for name in tableList:
-        printBinnedTable((dictRcs_MB, dictRcs_SB, dictKappa), sigYields, [name],'Rcs_table_'+name)
+    if 1==1:
+        sigYields = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
+        mcYields = getYieldDict(cardFnames,"SR_MB","","lep")
 
 
-    sigYields9 = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
-    mcYields9 = getYieldDict(cardFnames9,"SR_MB","","lep")
-    printBinnedTable((mcYields9,), sigYields9, [],'SR_table_9')
-    dictRcs_MB9 = getYieldDict(cardFnames9,"Rcs_MB","","lep")
-    dictRcs_SB9 = getYieldDict(cardFnames9,"Rcs_SB","","lep")
-    dictKappa9 = getYieldDict(cardFnames9,"Kappa","","lep")
-    tableList = ['EWK','TT','WJets','TTV']
-    for name in tableList:
-        printBinnedTable((dictRcs_MB9, dictRcs_SB9, dictKappa9), sigYields, [name],'Rcs_table_9_'+name)
-
-
-#    printBinnedTable(getYieldDict(cardFnames,"Rcs_MB","","lep") , getYieldDict(cardFnamesSig,"Rcs_MB", "T1tttt_Scan", "lep"), 'RCS_MB_table')
-#    printBinnedTable(getYieldDict(cardFnames,"Rcs_SB","","lep") , getYieldDict(cardFnamesSig,"Rcs_SB", "T1tttt_Scan", "lep"), 'Rcs_SB_table')
-
-#    for lep in ('ele','mu'):
-#        sig = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", lep)
- #       mc = getYieldDict(cardFnames,"SR_MB","", lep)
-#        pred = getPredDict(cardFnames, lep)        
-#        mcSys = {"Flat_uBin_Lep": getSystDict(cardFnames,"SR_MB","dummy", lep, 0.3),
-#                 "FlatLumi_Bin_Lep": getSystDict(cardFnames,"SR_MB","dummy", lep, 0.1) }
+        printBinnedTable((mcYields,), sigYields, [],'SR_table')
+        dictRcs_MB = getYieldDict(cardFnames,"Rcs_MB","","lep")
+        dictRcs_SB = getYieldDict(cardFnames,"Rcs_SB","","lep")
+        dictKappa = getYieldDict(cardFnames,"Kappa","","lep")
+        tableList = ['EWK','TT','WJets','TTV']
+        for name in tableList:
+            printBinnedTable((dictRcs_MB, dictRcs_SB, dictKappa), sigYields, [name],'Rcs_table_'+name)
         
-#        sigSys  = { "Xsec_Bin_Lep": getSystDict(cardFnamesSig,"SR_MB", "T1tttt_Scan_Xsec_syst",lep),
-#                    "FlatSig_Bin_Lep": getSystDict(cardFnamesSig,"SR_MB", "T1tttt_Scan_Xsec_syst",lep, 0.2),
-#                    "FlatLumi_Bin_Lep": getSystDict(cardFnamesSig,"SR_MB", "T1tttt_Scan_Xsec_syst",lep, 0.1) }
+
+        sigYields9 = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
+        mcYields9 = getYieldDict(cardFnames9,"SR_MB","","lep")
+        printBinnedTable((mcYields9,), sigYields9, [],'SR_table_9')
+        dictRcs_MB9 = getYieldDict(cardFnames9,"Rcs_MB","","lep")
+        dictRcs_SB9 = getYieldDict(cardFnames9,"Rcs_SB","","lep")
+        dictKappa9 = getYieldDict(cardFnames9,"Kappa","","lep")
+        tableList = ['EWK','TT','WJets','TTV']
+        for name in tableList:
+            printBinnedTable((dictRcs_MB9, dictRcs_SB9, dictKappa9), sigYields, [name],'Rcs_table_9_'+name)
+
+
+    '''for lep in ('ele','mu'):
+        sig = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", lep)
+        mc = getYieldDict(cardFnames,"SR_MB","", lep)
+        mcSys = {"Flat_uBin_Lep": getSystDict(cardFnames,"SR_MB","dummy", lep, 0.3),
+                 "FlatLumi_Bin_Lep": getSystDict(cardFnames,"SR_MB","dummy", lep, 0.1) }
         
-#        printDataCardsFromMC(pred, sig, {},{},(1200,300), lep)
+        sigSys  = { "Xsec_Bin_Lep": getSystDict(cardFnamesSig,"SR_MB", "T1tttt_Scan_Xsec-Up",lep),
+                    "FlatSig_Bin_Lep": getSystDict(cardFnamesSig,"SR_MB", "T1tttt_Scan_Xsec-Up",lep, 0.2),
+                    "FlatLumi_Bin_Lep": getSystDict(cardFnamesSig,"SR_MB", "T1tttt_Scan_Xsec-Up",lep, 0.1) }
+        
+        printDataCardsFromMC(mc, sig, {},{},(1200,750), lep)
+        '''
         
 #    pred = getPredDict(cardFnames, 'lep')
 #    printBinnedTable(pred, sigYields, 'PredTable')
