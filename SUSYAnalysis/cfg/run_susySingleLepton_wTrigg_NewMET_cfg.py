@@ -8,20 +8,46 @@ import PhysicsTools.HeppyCore.framework.config as cfg
 #Load all analyzers
 from CMGTools.TTHAnalysis.analyzers.susyCore_modules_cff import *
 
-
-# Lepton Preselection
-# ele
-lepAna.loose_electron_id = "POG_MVA_ID_Run2Spring15_NonTrig_VLoose"
-#for cut based this should work:
-#lepAna.loose_electron_id = "POG_Cuts_ID_SPRING15_25ns_v1_Veto"
-lepAna.loose_electron_pt  = 5
-# mu
-lepAna.loose_muon_pt  = 5
-
+####### Leptons  #####
 # lep collection
 lepAna.packedCandidates = 'packedPFCandidates'
 
-# selec Iso
+## ELECTRONS
+lepAna.loose_electron_pt  = 5
+eleID = "CBID"
+
+if eleID == "CBID":
+	lepAna.loose_electron_id  = "POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto_full5x5"
+	lepAna.loose_electron_lostHits = 999. # no cut
+	lepAna.loose_electron_dxy    = 999.
+	lepAna.loose_electron_dz     = 999.
+
+	lepAna.inclusive_electron_id  = ""#"POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto_full5x5"
+	lepAna.inclusive_electron_lostHits = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_dxy    = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
+
+elif eleID == "MVAID":
+	inclusive_electron_id  = "" # same as in susyCore
+
+	#lepAna.loose_electron_id = "POG_MVA_ID_Phys14_NonTrig_VLoose" # Phys14 era
+	lepAna.loose_electron_id = "POG_MVA_ID_Spring15_NonTrig_VLoose" # Spring15 25ns era
+
+elif eleID == "Incl": # as inclusive as possible
+	lepAna.loose_electron_id  = ""
+	lepAna.loose_electron_lostHits = 999. # no cut
+	lepAna.loose_electron_dxy    = 999.
+	lepAna.loose_electron_dz     = 999.
+
+	lepAna.inclusive_electron_id  = ""
+	lepAna.inclusive_electron_lostHits = 999.  # no cut
+	lepAna.inclusive_electron_dxy    = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
+
+## MUONS
+lepAna.loose_muon_pt  = 5
+
+# Isolation
 isolation = "miniIso"
 
 if isolation == "miniIso":
@@ -45,11 +71,17 @@ ttHLepSkim.maxLeptons = 999
 #LepSkim.idCut  = ""
 #LepSkim.ptCuts = []
 
-# JETS
-jetAna.minLepPt = 10 # --- JET-LEPTON CLEANING ---
+####### JETS #########
 jetAna.jetPt = 25
 jetAna.jetEta = 2.4
 
+# --- JET-LEPTON CLEANING ---
+jetAna.cleanSelectedLeptons = False
+
+if jetAna.cleanSelectedLeptons:
+	jetAna.minLepPt = 10
+
+## JEC -- see preprocessor for MET
 #use default for 25 ns from susycore Summer15_25nsV2_MC
 #jetAna.mcGT = "Summer15_50nsV4_MC"
 #jetAna.dataGT = "Summer15_50nsV4_DATA"
@@ -58,7 +90,7 @@ jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
 jetAna.recalibrateJets = True #should be true in susycore, already
 
-## MET
+## MET -- check preprocessor
 metAna.recalibrate = False #should be false in susycore, already
 
 ## Iso Track
@@ -67,7 +99,11 @@ isoTrackAna.setOff=False
 # store all taus by default
 genAna.allGenTaus = True
 
-#add LHE ana
+########################
+###### ANALYZERS #######
+########################
+
+#add LHE ana for HT info
 from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer
 LHEAna = LHEAnalyzer.defaultConfig
 
@@ -101,7 +137,6 @@ ttHHTSkimmer = cfg.Analyzer(
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15_1l import *
 
 triggerFlagsAna.triggerBits = {
-	# put trigger here
 	## hadronic
 	'HT350' : triggers_HT350,
 	'HT600' : triggers_HT600,
@@ -142,11 +177,11 @@ triggerFlagsAna.triggerBits = {
 #-------- SAMPLES AND TRIGGERS -----------
 
 #-------- HOW TO RUN
-isData = True
+isData = True # default, but will be overwritten below
 
-#sample = 'MC'
-sample = 'data'
-test = 0
+sample = 'MC'
+#sample = 'data'
+test = 1
 
 if sample == "MC":
 
@@ -331,13 +366,14 @@ sequence = cfg.Sequence(susyCoreSequence+[
 		ttHEventAna,
 		#ttHSTSkimmer,
 		ttHHTSkimmer,
-		#ttHReclusterJets,
 		hbheFilterAna,
 		treeProducer,
 		])
 
-
-if isData: sequence.remove(ttHHTSkimmer)
+# remove skimming for Data
+if isData:
+	sequence.remove(ttHHTSkimmer)
+	sequence.remove(ttHSTSkimmer)
 
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
