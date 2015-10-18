@@ -1,15 +1,15 @@
 #Background
-TT_Dilep 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep ==2 && lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Dilep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep ==2 ; FillColor=ROOT.kBlue, Label="t\#bar{t}"
-TT_Dilep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
-TT_Dilep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
-TT_Dilep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TT_Dilep 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep ==2 && lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t} ll+jets"
+TT_Dilep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep ==2 ; FillColor=ROOT.kBlue, Label="t\#bar{t} ll+jets"
+TT_Dilep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t} ll+jets"
+TT_Dilep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t} ll+jets"
+TT_Dilep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t} ll+jets"
 
-TT_Semilep 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep <2 && lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Semilep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep <2  ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Semilep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Semilep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Semilep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT_Semilep 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep <2 && lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-2, Label="t\#bar{t} all/l+jets"
+TT_Semilep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep <2  ; FillColor=ROOT.kBlue-2, Label="t\#bar{t} all/l+jets"
+TT_Semilep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-2, Label="t\#bar{t} all/l+jets"
+TT_Semilep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-2, Label="t\#bar{t} all/l+jets"
+TT_Semilep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-2, Label="t\#bar{t} all/l+jets"
 
 WJets    : WJetsToLNu_HT100to200 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
 WJets    : WJetsToLNu_HT200to400 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
