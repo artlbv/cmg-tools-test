@@ -148,7 +148,7 @@ class EventVars1L_base:
             # no HF stuff
             'METNoHF', 'LTNoHF', 'dPhiNoHF',
             ## jets
-            'HT','nJet','nBJet',
+            'HT','nJets','nBJet',
             "htJet30j", "htJet30ja",
             'Jet1_pt','Jet2_pt',
             ## top tags
@@ -438,7 +438,7 @@ class EventVars1L_base:
                 centralJet30.append(j)
 
         nJetC = len(centralJet30)
-        ret['nJet']   = nJetC
+        ret['nJets']   = nJetC
 
         if nJetC > 0:
             ret['Jet1_pt'] = centralJet30[0].pt
