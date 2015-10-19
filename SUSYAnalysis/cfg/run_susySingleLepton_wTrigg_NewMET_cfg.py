@@ -4,7 +4,6 @@
 ##########################################################
 import PhysicsTools.HeppyCore.framework.config as cfg
 
-
 #Load all analyzers
 from CMGTools.TTHAnalysis.analyzers.susyCore_modules_cff import *
 
@@ -14,7 +13,7 @@ lepAna.packedCandidates = 'packedPFCandidates'
 
 ## ELECTRONS
 lepAna.loose_electron_pt  = 5
-eleID = "CBID"
+eleID = "MVAID"
 
 if eleID == "CBID":
 	lepAna.loose_electron_id  = "POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto_full5x5"
@@ -76,10 +75,8 @@ jetAna.jetPt = 25
 jetAna.jetEta = 2.4
 
 # --- JET-LEPTON CLEANING ---
-jetAna.cleanSelectedLeptons = False
-
-if jetAna.cleanSelectedLeptons:
-	jetAna.minLepPt = 10
+jetAna.cleanSelectedLeptons = True
+if jetAna.cleanSelectedLeptons:	jetAna.minLepPt = 10
 
 ## JEC -- see preprocessor for MET
 #use default for 25 ns from susycore Summer15_25nsV2_MC
@@ -179,8 +176,8 @@ triggerFlagsAna.triggerBits = {
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-#sample = 'MC'
-sample = 'data'
+sample = 'MC'
+#sample = 'data'
 test = 0
 
 if sample == "MC":
@@ -229,7 +226,7 @@ if sample == "MC":
 		#selectedComponents = mcSamples_Asymptotic50ns
 		#selectedComponents =[ TTJets_LO_25ns]#QCD_HT
 		#selectedComponents = [  TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
-		selectedComponents = SingleTop
+		selectedComponents = [TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar]#, TTJets_DiLepton]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 2
