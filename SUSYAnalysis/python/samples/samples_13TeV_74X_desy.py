@@ -10,8 +10,8 @@ kreator = ComponentCreator()
 # TTbar cross section: NNLO, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO (172.5)
 TTJets_LO_25ns = kreator.makeMCComponentFromDESY("TTJets_LO_25ns", "/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM", "CMS", ".*root", 831.76)
 # single/di-lepton
-TTJets_SingleLeptonFromT = kreator.makeMCComponentFromDESY("TTJets_SingleLeptonFromT", "/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root", 831.76*(3*0.108))
-TTJets_SingleLeptonFromTbar = kreator.makeMCComponentFromDESY("TTJets_SingleLeptonFromTbar", "/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM", "CMS", ".*root", 831.76*(3*0.108))
+TTJets_SingleLeptonFromT = kreator.makeMCComponentFromDESY("TTJets_SingleLeptonFromT", "/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root", 831.76*(3*0.108)*(1-3*0.108))
+TTJets_SingleLeptonFromTbar = kreator.makeMCComponentFromDESY("TTJets_SingleLeptonFromTbar", "/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM", "CMS", ".*root", 831.76*(3*0.108)*(1-3*0.108))
 TTJets_DiLepton = kreator.makeMCComponentFromDESY("TTJets_DiLepton", "/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM", "CMS", ".*root", 831.76*((3*0.108)**2))
 
 ##HT binned samples
