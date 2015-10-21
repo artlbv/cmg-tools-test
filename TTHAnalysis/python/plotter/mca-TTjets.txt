@@ -1,0 +1,13 @@
+####
+# Background for 25ns
+
+TT_Incl 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep < 2 && lheHTIncoming <= 600 ; FillColor=1, Label="t\#bar{t} HT0-600"
+TT_HT600 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep < 2  ; FillColor=2, Label="t\#bar{t} HT600-800"
+TT_HT800 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep < 2 ; FillColor=3, Label="t\#bar{t} HT800-1200"
+TT_HT1200 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep < 2 ; FillColor=4, Label="t\#bar{t} HT1200-2500"
+TT_HT2500 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep < 2 ; FillColor=5, Label="t\#bar{t} HT2500-inf"
+
+## Di/SemiLep
+#TTJ_Dilep                 : TTJets_DiLepton_full	: xsec*1.0 : ngenTau+ngenLep < 2 && lheHTIncoming <= 600 ; FillColor=ROOT.kRed+1, Label="t\#bar{t} dilept"
+TTJ_Semilep               : TTJets_SingleLeptonFromT_full	: 182.1754*1.0 : ngenTau+ngenLep < 2 && lheHTIncoming <= 600 ; FillColor=ROOT.kRed+2, Label="t\#bar{t} semilept"
+TTJ_Semilep               : TTJets_SingleLeptonFromTbar_full	: 182.1754*1.0 : ngenTau+ngenLep < 2 && lheHTIncoming <= 600 ; FillColor=ROOT.kRed+2, Label="t\#bar{t} semilept"
