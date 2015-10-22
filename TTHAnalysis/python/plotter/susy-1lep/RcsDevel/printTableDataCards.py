@@ -122,17 +122,19 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
     region = ['MB', 'SB', '$\kappa$']
     for i,yields in enumerate(yieldsList):
         if 'Rcs' in name:
-#            singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if (('EWK' in x) or ('TT' in x)) ))
+#            singleSourceNames.append(( x for x in yields[binNames[0]].keys() if (('TT' in x)) ))
             singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if (x in printSource)))
 
         else:
-            singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if not('EWK' in x) ))
+#            singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if not('EWK' in x) ))
+            singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if ('TT' in x and not 'TTV' in x and not 'TTd' in x and not 'TTs' in x)  ))
     SourceNames = singleSourceNames
     singleSourceNames = sum(singleSourceNames, [])
 
     nSource = len(singleSourceNames) 
     nCol = nSource + 3
-#    f.write('\\tiny \n')
+    f.write('\\footnotesize \n')
+    f.write('\\caption{'+name.replace('_',' ')+'} \n')
     f.write('\\begin{tabular}{|' + (nCol *'%(align)s | ') % dict(align = 'c') + '} \n')
 
     f.write('\\hline \n')
@@ -278,10 +280,15 @@ if __name__ == "__main__":
 
 
         printBinnedTable((mcYields,), sigYields, [],'SR_table')
+        printBinnedTable((getYieldDict(cardFnames,"CR_MB","","lep") ,), sigYields, [],'CR_table')
+        printBinnedTable((getYieldDict(cardFnames,"CR_SB","","lep") ,), sigYields, [],'CR_SBtable')
+        printBinnedTable((getYieldDict(cardFnames,"SR_SB","","lep") ,), sigYields, [],'SR_SBtable')
+
         dictRcs_MB = getYieldDict(cardFnames,"Rcs_MB","","lep")
         dictRcs_SB = getYieldDict(cardFnames,"Rcs_SB","","lep")
         dictKappa = getYieldDict(cardFnames,"Kappa","","lep")
-        tableList = ['EWK','TT','WJets','TTV']
+        tableList = ['EWK','TT','TTincl','TTdiLep','TTsemiLep','WJets','TTV']
+        #tableList = ['TT','TTincl']
         for name in tableList:
             printBinnedTable((dictRcs_MB, dictRcs_SB, dictKappa), sigYields, [name],'Rcs_table_'+name)
         
@@ -289,14 +296,16 @@ if __name__ == "__main__":
         sigYields9 = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
         mcYields9 = getYieldDict(cardFnames9,"SR_MB","","lep")
         printBinnedTable((mcYields9,), sigYields9, [],'SR_table_9')
+        printBinnedTable((getYieldDict(cardFnames9,"CR_MB","","lep") ,), sigYields9, [],'CR_table_9')
+        printBinnedTable((getYieldDict(cardFnames9,"CR_SB","","lep") ,), sigYields9, [],'CR_SBtable_9')
+        printBinnedTable((getYieldDict(cardFnames9,"SR_SB","","lep") ,), sigYields9, [],'SR_SBtable_9')
         dictRcs_MB9 = getYieldDict(cardFnames9,"Rcs_MB","","lep")
         dictRcs_SB9 = getYieldDict(cardFnames9,"Rcs_SB","","lep")
         dictKappa9 = getYieldDict(cardFnames9,"Kappa","","lep")
-        tableList = ['EWK','TT','WJets','TTV']
+
         for name in tableList:
             printBinnedTable((dictRcs_MB9, dictRcs_SB9, dictKappa9), sigYields, [name],'Rcs_table_9_'+name)
-
-
+        
     '''for lep in ('ele','mu'):
         sig = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", lep)
         mc = getYieldDict(cardFnames,"SR_MB","", lep)
