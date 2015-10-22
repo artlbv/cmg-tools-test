@@ -144,7 +144,12 @@ for D in glob(args[0]+"/*"):
                 r = xrange(int(i*chunk),min(int((i+1)*chunk),entries))
                 jobs.append((short,fname,"%s/evVarFriend_%s.chunk%05d.root" % (args[1],short,i),data,r,i))
 print "\n"
-print "I have %d tasks to process" % len(jobs)
+
+if len(jobs) != 0:
+    print "I have %d tasks to process" % len(jobs)
+else:
+    print "Found 0 jobs! Exiting"
+    exit()
 
 if options.queue:
     import os, sys
