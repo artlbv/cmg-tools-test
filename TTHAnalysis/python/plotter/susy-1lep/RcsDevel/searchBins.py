@@ -126,7 +126,7 @@ for nj_bin in ['NJ45f6','NJ68']:#binsNJ.iteritems():
 
             # Match NB bins
             if lt_bin in ['LT1','LT2','LT3','LT4i']:
-                nbbins += ['NB1'] # NB1 present in all NJ,LT bins
+                nbbins += ['NB0','NB1'] # NB1 present in all NJ,LT bins
             if lt_bin in ['LT4i']:
                 nbbins += ['NB2i'] # NB2i present in all NJ,LT bins
 
@@ -186,13 +186,13 @@ for nj_bin in ['NJ45f9','NJ9i']:#binsNJ.iteritems():
             if lt_bin in ['LT1','LT2'] and not ht_bin in['HT0i']:
                 # Signal region binning
                 if nj_bin in ['NJ9i']:
-                    nbbins += ['NB1','NB2']
+                    nbbins += ['NB0','NB1','NB2']
                 # Side band  binning
                 if nj_bin in ['NJ45f9']:
-                    nbbins += ['NB1','NB2i']
+                    nbbins += ['NB0','NB1','NB2i']
 
             if lt_bin in ['LT3i']:
-                nbbins += ['NB1i']
+                nbbins += ['NB0','NB1i']
 
             if lt_bin in ['LT1','LT2'] and ht_bin in ['HT0i']:
                 if nj_bin in ['NJ9i']:
