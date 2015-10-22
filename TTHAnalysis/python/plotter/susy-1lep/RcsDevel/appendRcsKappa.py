@@ -31,6 +31,8 @@ def getRcsHist(tfile, hname, band = "SB"):
     hRcs = hSR.Clone(hSR.GetName().replace('x_','Rcs_'))
     hRcs.Divide(hCR)
 
+    hRcs.GetYaxis().SetTitle("Rcs")
+
     return hRcs
 
 
@@ -117,6 +119,8 @@ def makeKappaHists(fileList):
                 # make kappa
                 hKappa = hRcsMB.Clone(hRcsMB.GetName().replace('Rcs','Kappa'))
                 hKappa.Divide(hRcsSB)
+
+                hKappa.GetYaxis().SetTitle("Kappa")
 
                 tfile.cd("Rcs_MB")
                 hRcsMB.Write()
