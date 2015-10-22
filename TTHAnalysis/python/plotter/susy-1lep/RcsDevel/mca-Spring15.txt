@@ -1,15 +1,35 @@
-#Background
-TT_Dilep 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep ==2 && lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Dilep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep ==2 ; FillColor=ROOT.kBlue, Label="t\#bar{t}"
-TT_Dilep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
-TT_Dilep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
-TT_Dilep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
-
-TT_Semilep 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep <2 && lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Semilep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep <2  ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Semilep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Semilep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT_Semilep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+#inclusive low stats sample
+TTincl 	 : TTJets_LO_25ns : xsec*1.0  ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+############################
+#TTbar combined from semi, dilep, and full and different HT bins
+#dileptonic
+TT        : TTJets_DiLepton_full         : xsec*1.0 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} dilept"
+# wrote real xsec because mixed xsec in samples, semileptonic
+TT      : TTJets_SingleLeptonFromT_full        : 182.1754*1.0 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} semilept"
+TT     : TTJets_SingleLeptonFromTbar_full     : 182.1754*1.0 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} semilept"
+#full hadronic from inclusive sample
+TT 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep == 0 && lheHTIncoming <= 600 && HT < 1250; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+#HT bins
+TT 	 : TTJets_HT600to800 : xsec*1.0 ; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TT 	 : TTJets_HT800to1200 : xsec*1.0 ; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TT 	 : TTJets_HT1200to2500 : xsec*1.0; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TT 	 : TTJets_HT2500toInf : xsec*1.0 ; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+##############################
+#dileptoic ttbar
+TTdiLep 	 : TTJets_DiLepton_full : xsec*1.0 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TTdiLep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep ==2 ; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TTdiLep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TTdiLep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TTdiLep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+###############################
+#semileptonic ttbar
+TTsemiLep      : TTJets_SingleLeptonFromT_full        : 182.1754*1.0 : lheHTIncoming <= 600; FillColor=ROOT.kBlue-4, Label="t\#bar{t} semilept"
+TTsemiLep      : TTJets_SingleLeptonFromTbar_full     : 182.1754*1.0 : lheHTIncoming <= 600; FillColor=ROOT.kBlue-4, Label="t\#bar{t} semilept"
+TTsemiLep 	 : TTJets_LO_25ns : xsec*1.0 : ngenTau+ngenLep == 0 && lheHTIncoming <= 600  && HT < 1250; FillColor=ROOT.kBlue, Label="t\#bar{t}"
+TTsemiLep 	 : TTJets_HT600to800 : xsec*1.0 : ngenTau+ngenLep <2  ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TTsemiLep 	 : TTJets_HT800to1200 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TTsemiLep 	 : TTJets_HT1200to2500 : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TTsemiLep 	 : TTJets_HT2500toInf : xsec*1.0 : ngenTau+ngenLep <2 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
 
 WJets    : WJetsToLNu_HT100to200 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
 WJets    : WJetsToLNu_HT200to400 :  xsec*1.0  ; Label="W+jets", FillColor=ROOT.kGreen-2
