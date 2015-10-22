@@ -7,33 +7,46 @@ import PhysicsTools.Heppy.loadlibs
 import array
 import operator
 
+# mc to data pu weight
+def getPUdict(fname, puHistName = "puRatio"):
+    puDict = {}
+
+    puFile = ROOT.TFile(fname,"READ")
+    hPUw = puFile.Get(puHistName)
+
+    if not hPUw:
+        print "PU hist not found!"
+        exit(0)
+
+    for ibin in range(1,hPUw.GetNbinsX()):
+
+        #npv = hPUw.GetXaxis().GetBinLowEdge(ibin)
+        npv = int(hPUw.GetXaxis().GetBinCenter(ibin))
+        rat = hPUw.GetBinContent(ibin)
+
+        puDict[npv] = rat
+
+    puFile.Close()
+
+    return puDict
+
 # pu histo file name
-puFileName = "../python/tools/npv_ratio.root"
-puHistName = "nVert_ratioDataOvMC"
-puDict = {} # mc to data pu weight
+puFileName_norm = "../python/tools/pileup/pu_ratio_80mb.root"
+puFileName_up = "../python/tools/pileup/pu_ratio_84mb.root"
+puFileName_down = "../python/tools/pileup/pu_ratio_76mb.root"
 
-puFile = ROOT.TFile(puFileName,"READ")
-hPUw = puFile.Get(puHistName)
+puNorm =  getPUdict(puFileName_norm)
+puUp =  getPUdict(puFileName_up)
+puDown =  getPUdict(puFileName_down)
 
-if not hPUw:
-    print "PU hist not found!"
-    exit(0)
-
-for ibin in range(1,hPUw.GetNbinsX()):
-
-    npv = hPUw.GetXaxis().GetBinLowEdge(ibin)
-    rat = hPUw.GetBinContent(ibin)
-
-    puDict[npv] = rat
-
-puFile.Close()
-
-print puDict
+print "Loaded PU weights!"
+print puNorm
 
 class EventVars1L_pileup:
     def __init__(self):
         self.branches = [
-            'puRatio', 'nVtx'
+            'nVtx', 'nTrueInt',
+            'puRatio','puRatio_up','puRatio_down'
             ]
 
     def listBranches(self):
@@ -46,18 +59,24 @@ class EventVars1L_pileup:
 
         if not event.isData:
 
-            nVtx = event.nVert
-
             ret['nVtx'] = event.nVert
 
-            if nVtx in puDict:
-                puW = puDict[nVtx]
-            else:
-                puW = 0
+            nTrueInt = event.nTrueInt
+            ret['nTrueInt'] = nTrueInt
 
-            ret['puRatio'] = puW
+            if nTrueInt in puNorm:
+                ret['puRatio'] = puNorm[nTrueInt]
+                ret['puRatio_up'] = puUp[nTrueInt]
+                ret['puRatio_down'] = puDown[nTrueInt]
+            else:
+                ret['puRatio'] = 0
+                ret['puRatio_up'] = 0
+                ret['puRatio_down'] = 0
         else:
             ret['puRatio'] = 1
+            ret['puRatio_up'] = 1
+            ret['puRatio_down'] = 1
+
 
         return ret
 
