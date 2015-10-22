@@ -29,6 +29,7 @@ class EventVars1LWeightsForSystematics:
             SFTop     = exp(0.156    -0.00137*GenTopPt    )
             SFAntiTop = exp(0.156    -0.00137*GenAntiTopPt)
             TopPtWeight = sqrt(SFTop*SFAntiTop)
+            if TopPtWeight<0.5: TopPtWeight=0.5
 
 
             
