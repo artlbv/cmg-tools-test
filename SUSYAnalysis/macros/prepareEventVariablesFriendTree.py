@@ -9,6 +9,9 @@ from CMGTools.SUSYAnalysis.tools.eventVars_1l_newbase import EventVars1L_base
 MODULES.append( ('1l_Basics', EventVars1L_base()) )
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_triggers import EventVars1L_triggers
 MODULES.append( ('1l_Triggers', EventVars1L_triggers()) )
+# for pileup
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_pileup import EventVars1L_pileup
+MODULES.append( ('1l_Pileup', EventVars1L_pileup()) )
 
 # for signal masses
 #from CMGTools.SUSYAnalysis.tools.eventVars_1l_signal import EventVars1L_signal
