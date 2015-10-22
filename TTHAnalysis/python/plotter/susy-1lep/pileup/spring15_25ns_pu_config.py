@@ -4,7 +4,7 @@ from ROOT import *
 # from $CMSSW_RELEASE_BASE/src/SimGeneral/MixingModule/python/mix_2015_25ns_Startup_PoissonOOTPU_cfi.py
 
 nVtxlist = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52]
-nCntslist = [
+nProbslist = [
     4.8551E-07,
     1.74806E-06,
     3.30868E-06,
@@ -56,15 +56,21 @@ nCntslist = [
     4.8551E-07,
     2.42755E-07,
     1.21378E-07,
-    4.8551E-08]
+    4.8551E-08,
+    0 # added by Artur -- missing 53th entry in cfi
+    ]
+
+print len(nVtxlist), len(nProbslist)
 
 # write to file
 fPUmc = TFile("mcSpring15_25ns_pu.root","RECREATE")
 ## define PU Histo
-hPUmc = TH1F("pileup","MC pileup for 25ns Spring15",len(nVtxlist),nVtxlist[0]-0.5,nVtxlist[-1]+0.5)
+#hPUmc = TH1F("pileup","MC pileup for 25ns Spring15",len(nVtxlist),nVtxlist[0]-0.5,nVtxlist[-1]+0.5)
+hPUmc = TH1F("pileup","MC pileup for 25ns Spring15",len(nVtxlist),nVtxlist[0],nVtxlist[-1]+1)
+#hPUmc = TH1F("pileup","MC pileup for 25ns Spring15",53,-0.5,52.5)
 
-for i,nVtx in enumerate(nVtxlist):
-    hPUmc.SetBinContent(i,nCntslist[i-1])
+for i in range(0,len(nVtxlist)):
+    hPUmc.SetBinContent(i+1,nProbslist[i])
 
 hPUmc.Write()
 fPUmc.Close()
