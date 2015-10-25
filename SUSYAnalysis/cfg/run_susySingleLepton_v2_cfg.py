@@ -15,19 +15,19 @@ jsonAna.useLumiBlocks = True
 lepAna.packedCandidates = 'packedPFCandidates'
 
 ## ELECTRONS
-lepAna.loose_electron_pt  = 5
-eleID = "MVAID"
+lepAna.loose_electron_pt  = 10
+eleID = "CBID"
 
 if eleID == "CBID":
 	lepAna.loose_electron_id  = "POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto_full5x5"
-	lepAna.loose_electron_lostHits = 999. # no cut
-	lepAna.loose_electron_dxy    = 999.
-	lepAna.loose_electron_dz     = 999.
+	lepAna.loose_electron_lostHits = 999. # no cut since embedded in ID
+	lepAna.loose_electron_dxy    = 999. # no cut since embedded in ID
+	lepAna.loose_electron_dz     = 999. # no cut since embedded in ID
 
-	lepAna.inclusive_electron_id  = ""#"POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto_full5x5"
-	lepAna.inclusive_electron_lostHits = 999. # no cut since embedded in ID
-	lepAna.inclusive_electron_dxy    = 999. # no cut since embedded in ID
-	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_id  = "" # Keep no ID
+	lepAna.inclusive_electron_lostHits = 5. #
+	lepAna.inclusive_electron_dxy    = 0.5 # very loose (like in core)
+	lepAna.inclusive_electron_dz     = 1.0 # very loose (like in core)
 
 elif eleID == "MVAID":
 	inclusive_electron_id  = "" # same as in susyCore
@@ -47,7 +47,7 @@ elif eleID == "Incl": # as inclusive as possible
 	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
 
 ## MUONS
-lepAna.loose_muon_pt  = 5
+lepAna.loose_muon_pt  = 10
 
 # Isolation
 isolation = "miniIso"
@@ -181,7 +181,7 @@ isData = True # default, but will be overwritten below
 
 #sample = 'MC'
 sample = 'data'
-test = 1
+test = 0
 
 if sample == "MC":
 
@@ -255,11 +255,9 @@ elif sample == "data":
 	#selectedComponents = [ JetHT_Run2015D ] #, SingleElectron_Run2015D, SingleMuon_Run2015D ]
 	#selectedComponents = [ SingleElectron_Run2015D, SingleMuon_Run2015D ]
 
-	miniAODv = "v2"
-
-	if miniAODv == "v2":
-		selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
-
+	# MiniAOD V2
+	selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
+	#selectedComponents = [ SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
 
 	if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 
@@ -279,19 +277,19 @@ elif sample == "data":
 		# test all components (1 thread per component).
 		for comp in selectedComponents:
 			comp.splitFactor = 1
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.files = comp.files[:1]
 	elif test==3:
 		# run all components (10 files per component).
 		for comp in selectedComponents:
 			comp.files = comp.files[20:30]
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 	elif test==0:
 		# PRODUCTION
 		# run on everything
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 
 
