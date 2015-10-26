@@ -110,7 +110,8 @@ def getSystDict(cardFnames, region, sig = "", lep = "lep", uncert = "default"):
 
 
 def printBinnedTable(yieldsList, yieldsSig, printSource, name):
-    benchmark = (1200, 800)
+    benchmark = (1200,750)
+    benchmark2 = (1450,50)
     precision = 2
     if 'Rcs' in name:
         precision = 4
@@ -124,22 +125,27 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
         if 'Rcs' in name:
 #            singleSourceNames.append(( x for x in yields[binNames[0]].keys() if (('TT' in x)) ))
             singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if (x in printSource)))
-
+            
         else:
-#            singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if not('EWK' in x) ))
-            singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if ('TT' in x and not 'TTV' in x and not 'TTd' in x and not 'TTs' in x)  ))
-    SourceNames = singleSourceNames
-    singleSourceNames = sum(singleSourceNames, [])
+            singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if not('EWK' in x) and (x != 'TT' and x != 'TTincl')))
+            #singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if ('TT' in x and not 'TTV' in x and not 'TTd' in x and not 'TTs' in x)  ))
 
+    singleSourceNames = sum(singleSourceNames, [])
+#    singleSourceNames.append(benchmark)    
+#    singleSourceNames.append(benchmark2)    
+    SourceNames = singleSourceNames
+    
+    print type(benchmark)
+    print SourceNames, singleSourceNames
     nSource = len(singleSourceNames) 
-    nCol = nSource + 3
+    nCol = nSource + 4
     f.write('\\footnotesize \n')
     f.write('\\caption{'+name.replace('_',' ')+'} \n')
     f.write('\\begin{tabular}{|' + (nCol *'%(align)s | ') % dict(align = 'c') + '} \n')
 
     f.write('\\hline \n')
-    f.write('$L_T$ & $H_T$ & nB & ' +  ' %s ' % ' & '.join(map(str, singleSourceNames)) + ' \\\ \n')
-    f.write(' $[$ GeV $]$  &   $[$GeV$]$ &  '  + (nSource *'%(tab)s  ') % dict(tab = '&') + ' \\\ \\hline \n')
+    f.write('$L_T$ & $H_T$ & nB & binName &' +  ' %s ' % ' & '.join(map(str, singleSourceNames)) + ' \\\ \n')
+    f.write(' $[$ GeV $]$  &   $[$GeV$]$ & &  '  + (nSource *'%(tab)s  ') % dict(tab = '&') + ' \\\ \\hline \n')
     #write out all the counts
     for i,bin in enumerate(binNames):
         (LTbin, HTbin, Bbin ) = bin.split("_")[0:3]        
@@ -149,20 +155,22 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
             (LT0bin, HT0bin, B0bin ) = binNames[i-1].split("_")[0:3]
             (LT0, HT0, B0) = (binsLT[LT0bin][1],binsHT[HT0bin][1],binsNB[B0bin][1])           
         if LT != LT0:
-            f.write(('\\cline{1-%s} ' + LT + ' & ' + HT + ' & ' + B) % (nCol))
+            f.write(('\\cline{1-%s} ' + LT + ' & ' + HT + ' & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin) % (nCol))
         if LT == LT0 and HT != HT0:
-            f.write(('\\cline{2-%s}  & ' + HT + ' & ' + B) % (nCol))
+            f.write(('\\cline{2-%s}  & ' + HT + ' & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin) % (nCol))
         elif LT == LT0 and HT == HT0:
-            f.write('  &  & ' + B)
-        for sources, yields in zip(SourceNames, yieldsList):
-            for source in sources:
-                print source, yields[bin][source]
+            f.write('  &  & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin)
+#        for sources, yields in zip(SourceNames, yieldsList):
+        for yields in yieldsList:
+            for source in SourceNames:
+                print source
                 if type(source) == str:
                     f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % yields[bin][source])                
 
                 elif type(source) == tuple:
+                    print yieldsSig[bin][source]
                     f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % yieldsSig[bin][source])
-        print '--'
+        #print '--'
         f.write(' \\\ \n')
 
     f.write('\\hline \n')
@@ -182,14 +190,14 @@ def printDataCardsFromMC(mc, sig, mcSys, sigSys, signal, lep):
     except:
         os.mkdir(inDirSig + '/' + dataCardDir)
 
-    print sig['LT1_HT1i_NB3i_NJ68_SR'].keys()
+
     binNames = sorted(mc.keys())
     for binName in binNames:
         sigp = {signalName: sig[binName][signal]}
         singleBkgNames = sorted([ x for x in mc[binName].keys() if not('EWK' in x or 'background' in x or 'data' in x)])
         myyields = mc[binName]
         myyields.update(sigp)
-        print myyields
+        #print myyields
 
         singleSourceNames = sorted([ x for x in myyields.keys() if not('EWK' in x or 'background' in x or 'data' in x)])
 
@@ -277,7 +285,7 @@ if __name__ == "__main__":
     if 1==1:
         sigYields = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
         mcYields = getYieldDict(cardFnames,"SR_MB","","lep")
-
+        
 
         printBinnedTable((mcYields,), sigYields, [],'SR_table')
         printBinnedTable((getYieldDict(cardFnames,"CR_MB","","lep") ,), sigYields, [],'CR_table')
@@ -287,7 +295,7 @@ if __name__ == "__main__":
         dictRcs_MB = getYieldDict(cardFnames,"Rcs_MB","","lep")
         dictRcs_SB = getYieldDict(cardFnames,"Rcs_SB","","lep")
         dictKappa = getYieldDict(cardFnames,"Kappa","","lep")
-        tableList = ['EWK','TT','TTincl','TTdiLep','TTsemiLep','WJets','TTV']
+        tableList = ['EWK','TT','TTincl','TTdiLep','TTsemiLep','WJets','TTV','data']
         #tableList = ['TT','TTincl']
         for name in tableList:
             printBinnedTable((dictRcs_MB, dictRcs_SB, dictKappa), sigYields, [name],'Rcs_table_'+name)
@@ -295,6 +303,7 @@ if __name__ == "__main__":
 
         sigYields9 = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
         mcYields9 = getYieldDict(cardFnames9,"SR_MB","","lep")
+        print sigYields9
         printBinnedTable((mcYields9,), sigYields9, [],'SR_table_9')
         printBinnedTable((getYieldDict(cardFnames9,"CR_MB","","lep") ,), sigYields9, [],'CR_table_9')
         printBinnedTable((getYieldDict(cardFnames9,"CR_SB","","lep") ,), sigYields9, [],'CR_SBtable_9')
