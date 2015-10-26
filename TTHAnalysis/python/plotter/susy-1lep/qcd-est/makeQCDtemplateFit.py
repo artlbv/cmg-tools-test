@@ -166,7 +166,7 @@ def plotHists(binname = 'incl', inclTemplate = False, addHists = True):
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+binname]) # hack to keep arguments alive
     else:
         import re
-        incName = re.sub('ST[0-9]_','',binname)
+        incName = re.sub('LT[0-9]_','',binname)
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+incName]) # hack to keep arguments alive
     _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(2),RooFit.LineStyle(2),RooFit.Name('QCDfit'))
     # plot only EWK
@@ -259,10 +259,10 @@ def getQCDratio(tfile,binname = 'incl', doPlot = False, doClosure = False, inclT
 
     _dhStore['data_'+binname] = data
 
-    # take anti from ST-inclusive QCD:
+    # take anti from LT-inclusive QCD:
     if inclTemplate:
         import re
-        incName = re.sub('ST[0-9]_','',binname)
+        incName = re.sub('LT[0-9]_','',binname)
         print 'Using template', incName, 'instead of', binname
         hQCDanti = _hStore['QCDanti_'+incName]
 
@@ -375,10 +375,10 @@ if __name__ == "__main__":
     #binNames += ['HT500toInf','HT500to1000','HT750to1000','HT500to750']
     #binNames = ['incl','NB1','NB2','NB3']
     #binNames = ['NJ45']
-    #binNames += ['NJ45','ST0_NJ45','ST1_NJ45','ST2_NJ45','ST3_NJ45','ST4_NJ45']
-    #binNames += ['NJ68','ST0_NJ68','ST1_NJ68','ST2_NJ68','ST3_NJ68','ST4_NJ68']
-    #binNames += ['NJ6inf','ST0_NJ6inf','ST1_NJ6inf','ST2_NJ6inf','ST3_NJ6inf','ST4_NJ6inf']
-    binNames += ['NJ45','NJ68','ST0_NJ45','ST0_NJ68','ST1_NJ45','ST1_NJ68','ST2_NJ45','ST2_NJ68','ST3_NJ45','ST3_NJ68','ST4_NJ45','ST4_NJ68']
+    #binNames += ['NJ45','LT0_NJ45','LT1_NJ45','LT2_NJ45','LT3_NJ45','LT4_NJ45']
+    #binNames += ['NJ68','LT0_NJ68','LT1_NJ68','LT2_NJ68','LT3_NJ68','LT4_NJ68']
+    #binNames += ['NJ6inf','LT0_NJ6inf','LT1_NJ6inf','LT2_NJ6inf','LT3_NJ6inf','LT4_NJ6inf']
+    binNames += ['NJ45','NJ68','LT0_NJ45','LT0_NJ68','LT1_NJ45','LT1_NJ68','LT2_NJ45','LT2_NJ68','LT3_NJ45','LT3_NJ68','LT4_NJ45','LT4_NJ68']
 
     resList = []
 
