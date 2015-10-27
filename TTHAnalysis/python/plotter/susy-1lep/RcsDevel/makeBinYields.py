@@ -8,8 +8,11 @@ from math import hypot
 # trees
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/"
 #FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/Friends/"
-Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns"
-FTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID"
+#Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns"
+Tdir = "/nfs/dust/cms/user/clseitz/1LepSUS/CMG74/DESY-SUSY/CMSSW_7_4_12/src/CMGTools/SUSYAnalysis/macros/Signal"
+FTdir = "/nfs/dust/cms/user/clseitz/1LepSUS/CMG74/DESY-SUSY/CMSSW_7_4_12/src/CMGTools/TTHAnalysis/python/plotter/susy-1lep/RcsDevel/Flinks"
+
+#FTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID"
 #FTdir = "FriendTrees_MC/"
 
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/"
@@ -36,7 +39,7 @@ def addOptions(options):
     if options.signal:
         options.var =  "mLSP:mGo*(nEl-nMu)"
         #options.bins = "60,-1500,1500,30,0,1500"
-        options.bins = "20,-1500,1500,10,0,1500"
+        options.bins = "34,-1700,1700,10,0,1500"
 
         options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
@@ -138,8 +141,8 @@ def writeYields(options):
                     print 'adding for ewk', p
                     ewkMC.append(report[p])
 
-        report['x_background'] = mergePlots("x_background", totalMC)
-        report['x_EWK'] = mergePlots("x_EWK", ewkMC)
+            report['x_background'] = mergePlots("x_background", totalMC)
+            report['x_EWK'] = mergePlots("x_EWK", ewkMC)
 
     '''
     if options.asimov:
@@ -259,19 +262,19 @@ if __name__ == "__main__":
 
     # make cut list
     cDict = {}
-    '''
+    
     cDict = cutDictCR
     cDict.update(cutDictSR)
     cDict.update(cutDictSRf9)
     cDict.update(cutDictCRf9)
-    '''
+    
 
     #cDict = cutQCD #QCD
     #cDict = cutIncl #Inclusive
 
     # for LT/HT plots
-    cDict = cutLTbinsSR
-    cDict.update(cutLTbinsCR)
+    #cDict = cutLTbinsSR
+    #cDict.update(cutLTbinsCR)
 
     binList = sorted(cDict.keys())
 
