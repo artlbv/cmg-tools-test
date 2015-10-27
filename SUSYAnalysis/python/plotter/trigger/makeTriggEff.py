@@ -17,6 +17,14 @@ _fitrStore = []
 
 _colorList = [2,4,8,9,7,3,6] + range(10,50)
 
+def getLumiFromName(name):
+
+    if 'pb' in name or 'fb' in name:
+        pass
+    else:
+        print 'No lumi in name!'
+        return 666
+
 def getHistsFromTree(tree, var = 'MET', refTrig = '', cuts = '', testTrig = '', maxEntries = -1, lumi = -1):
 
     # maximum number of entries to process
@@ -410,6 +418,7 @@ def plotEff(histList, var = 'HT', doFit = False):
             raxis.SetLabelColor(hCol)
             raxis.SetTitleColor(hCol)
             raxis.SetTitle("Events")
+            raxis.SetMaxDigits(4)
             raxis.Draw()
             SetOwnership(raxis, 0)
 
@@ -595,7 +604,7 @@ if __name__ == "__main__":
     ###################
     ###################
 
-    basecuts = 'METfilters && '
+    basecuts = 'METfilters && nLep == 1 &&'
     #basecuts = 'METfilters && nLep == 1 && nVeto == 0 &&'
     #basecuts = ''
 
@@ -611,10 +620,52 @@ if __name__ == "__main__":
             lumi = 205.0
         elif 'golden205p1pb' in fileName:
             lumi = 205.1
+        elif '133p0pb' in fileName:
+            lumi = 133.0
+        elif '133p1pb' in fileName:
+            lumi = 133.1
+        elif '133p2pb' in fileName:
+            lumi = 133.2
         elif 'test' in fileName:
             lumi = 666
+        elif '1261' in fileName:
+            lumi = 1261
+        elif '1260pb' in fileName:
+            lumi = 1260
         else:
             lumi = 666
+
+        refTrig = 'HLT_IsoEle23'
+        testTrig = ['EleHT350']#,'EleHT350MET50']
+
+        varList = ['HT']
+        cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 25'# && MET  > 50'
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        refTrig = 'HLT_EleHT350'
+        testTrig = ['HT800']
+
+        varList = ['HT']
+        cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 25'# && MET  > 50'
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        #varList = ['MET']
+        #cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 25 && HT  > 500'
+        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        #varList = ['METNoHF']
+        #cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 25 && HT  > 500'
+        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        '''
+        #refTrig = 'HLT_IsoEle32'
+        testTrig = ['Ele105','EleHT350']
+
+        varList = ['Lep_eta']
+        cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 130 && HT > 500'
+        #cuts = basecuts + 'nEl >= 1 && Lep_pt > 5'
+        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        '''
 
         refTrig = 'HLT_IsoEle23'
         testTrig = ['HT800']
@@ -625,29 +676,6 @@ if __name__ == "__main__":
         refTrig = 'HLT_EleHT350'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
-        refTrig = 'HLT_IsoEle23'
-        testTrig = ['EleHT350']#,'EleHT350MET50']
-
-        varList = ['HT']
-        #cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && METNoHF  > 200'
-        cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 25 && MET  > 50'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        varList = ['MET']
-        cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 25 && HT  > 500'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        varList = ['METNoHF']
-        cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 25 && HT  > 500'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        #refTrig = 'HLT_IsoEle32'
-        testTrig = ['Ele105','EleHT350']
-
-        varList = ['Lep_eta']
-        cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 130 && HT > 500'
-        #cuts = basecuts + 'nEl >= 1 && Lep_pt > 5'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
     elif 'SingleMu' in fileName:
         ## Muons
@@ -657,17 +685,29 @@ if __name__ == "__main__":
 
         if 'golden209pb' in fileName:
             lumi = 209
+        elif '133pb' in fileName:
+            lumi = 133
+        elif '1260pb' in fileName:
+            lumi = 1260
         elif 'test' in fileName:
             lumi = 666
 
-        refTrig = 'HLT_IsoMu20'
-        testTrig = ['MuHT350']
-
+        ## measure HT
         varList = ['HT']
-        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25'# && MET  > 200'
-        #cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && METNoHF  > 200'
+
+        refTrig = 'HLT_IsoMu20'
+        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25'
+
+        testTrig = ['MuHT350']
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        testTrig = ['HT800']
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
+        refTrig = 'HLT_MuHT350'
+        testTrig = ['HT800']
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
+        '''
         varList = ['MET']
         cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && HT  > 500'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
@@ -680,22 +720,20 @@ if __name__ == "__main__":
         cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && HT  > 500'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
-        testTrig = ['Mu50']
-        varList = ['Lep_pt']
-        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
-        '''
-        ## measure HT
-        refTrig = 'HLT_IsoMu20'
-        testTrig = ['HT800']
-        varList = ['HT']
-        cuts = basecuts + 'Selected == 1 && nMu == 1 && Lep_pt > 25'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        ## Mu pt
+        varList = ['Lep_pt']
+
+        testTrig = ['Mu50']
+        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25'
+        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         refTrig = 'HLT_MuHT350'
+        cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        '''
 
+        '''
         '''
 
     elif 'SingleLep' in fileName:
@@ -730,35 +768,50 @@ if __name__ == "__main__":
             lumi = 147.0
         elif 'golden209pb' in fileName:
             lumi = 209
+        elif '133p0pb' in fileName:
+            lumi = 133.0
+        elif '133p1pb' in fileName:
+            lumi = 133.1
+        elif '133p2pb' in fileName:
+            lumi = 133.2
         elif '209p0pb' in fileName:
             lumi = 209.0
         elif '209p1pb' in fileName:
             lumi = 209.1
+        elif '209p2pb' in fileName:
+            lumi = 209.2
+        elif '552pb' in fileName:
+            lumi = 552
+        elif '1264pb' in fileName:
+            lumi = 1264
+        elif '1260pb' in fileName:
+            lumi = 1260
         elif 'test' in fileName:
             lumi = 666
         else:
             lumi = 147.0
 
 
-        ## LT
-
-        '''
-
-        varList = ['LT'] #LTNoHF
-        #refTrig = 'JetHT'#-CBID'
+        ### Reference trigger
         refTrig = 'HLT_HT800'
+        #refTrig = 'HLT_HT350MET100'
+        #refTrig = 'JetHT'#-eleCBID'
+        #refTrig = 'JetHT-CBID'
+        #refTrig = 'JetHT-MVAID'
+        #refTrig = 'HLT_MET170'
 
+        ## LT
+        varList = ['LT'] #LTNoHF
         cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && HT > 500'
-        testTrig = ['MuHT350']#['Mu50||MuHT350MET50']
+        testTrig = ['MuHT350']#,'Mu50||MuHT350MET50']
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && HT > 500'
-        testTrig = ['EleHT350']#['Ele105||EleHT350MET50']
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        testTrig = ['EleHT350']#,'Ele105||EleHT350MET50']
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
+        '''
         varList = ['LTNoHF']
-        refTrig = 'JetHT'
-        #refTrig = 'HLT_HT800'
 
         testTrig = ['Mu50||MuHT350MET50||Ele105||EleHT350MET50']
         cuts = basecuts + 'Selected == 1 && nLep == 1 && nVeto == 0 && Lep_pt > 25 && HT > 400'
@@ -776,19 +829,21 @@ if __name__ == "__main__":
 
         cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && HT > 500'
         testTrig = ['Mu50||MuHT350MET50']
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && HT > 500'
         testTrig = ['Ele105||EleHT350MET50']
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
         '''
+
 
         #### LEPTON LEG
-        '''
+
         #refTrig = 'JetHT_EE'#HLT_HT800'#||HLT_HT350MET100'
-        refTrig = 'JetHT'#HLT_HT800'
+        #refTrig = 'JetHT'#HLT_HT800'
 
         ## Lep PT
+        '''
         varList = ['Lep_pt']
 
         testTrig = ['Ele105']
@@ -813,45 +868,36 @@ if __name__ == "__main__":
 
         ## more triggers
 
-        #refTrig = 'HLT_HT800'
-        #refTrig = 'HLT_HT350MET100'
-        #refTrig = 'JetHT'
-        #refTrig = 'JetHT-CBID'
-        refTrig = 'JetHT-MVAID'
-        #refTrig = 'HLT_MET170'
-
+        '''
+        ### LEPTON PT
         varList = ['Lep_pt']
 
         testTrig = ['EleHT350']
+        #cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 5 && HT > 500 && MET > 50 && nJet > 2 && nBJet > 0'
+        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
-        cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 5 && HT > 500 && MET > 50 && nJet > 2 && nBJet > 0'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        #testTrig = ['EleHT350MET50','Ele105','EleHT350']
         testTrig = ['Ele105','EleHT350']
         #testTrig = ['EleHT350MET50||Ele105']
 
         cuts = basecuts + 'Selected == 1 && nEl == 1 && Lep_pt > 5 && HT > 500'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         testTrig = ['Mu50','MuHT350']
         cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 5 && HT > 500'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+
 
         ## more triggers
         varList = ['Lep_eta']
         testTrig = ['Ele105','EleHT350']
 
-        cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 125 && HT > 500'# && MET > 150 && HT > 500'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        cuts = basecuts + 'Selected == 1 && nEl >= 1 && Lep_pt > 120 && HT > 500'
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         ## muons
         testTrig = ['Mu50','MuHT350']
-        #cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 55 && MET > 150 && HT > 400'
         cuts = basecuts + 'Selected == 1 && nMu >= 1 && Lep_pt > 55 && HT > 500'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        '''
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         refTrig = 'HLT_HT350MET100'
 
