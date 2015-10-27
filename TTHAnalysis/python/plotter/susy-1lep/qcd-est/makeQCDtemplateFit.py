@@ -125,7 +125,11 @@ def getHistsFromFile(tfile, binname = 'incl', mcData = True):
 
     # get full BKG, QCD and EWK histos
     QCDseleName = 'Lp_sel_'+binname+'_QCD'
-    QCDantiName = 'Lp_anti_'+binname+'_QCD'
+
+    if mcData:
+        QCDantiName = 'Lp_anti_'+binname+'_QCD' # anti shape from MC
+    else:
+        QCDantiName = 'Lp_anti_'+binname+'_data' # anti shape from DATA
     #QCDantiName = 'Lp_anti_incl_QCD'
 
     hQCDsele = tfile.Get(QCDseleName).Clone('QCDsel_'+binname)
@@ -152,7 +156,7 @@ def getHistsFromFile(tfile, binname = 'incl', mcData = True):
     # return data hist, EWK and QCD templates
     return (hData,hEWKsele,hQCDsele,hQCDanti)
 
-def plotHists(binname = 'incl', inclTemplate = False, addHists = True):
+def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = True):
 
     # frame
     frame = _varStore['Lp'].frame(RooFit.Title('Lp distributions and fit in bin '+binname))
@@ -174,12 +178,16 @@ def plotHists(binname = 'incl', inclTemplate = False, addHists = True):
     _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset2),RooFit.LineColor(3),RooFit.LineStyle(2),RooFit.Name('EWKfit'))
 
     # PLOT
-    canv = TCanvas("canv"+binname,"canvas for bin "+binname,800,600)
+    canv = TCanvas("cQCDfit_"+binname,"canvas for bin "+binname,800,600)
     frame.Draw()
 
     if addHists:
         _hStore['EWKsel_'+binname].SetFillStyle(3001)
         _hStore['QCDsel_'+binname].SetFillStyle(3002)
+
+        alpha = 0.35
+        _hStore['EWKsel_'+binname].SetFillColorAlpha(_hStore['EWKsel_'+binname].GetFillColor(),alpha)
+        _hStore['QCDsel_'+binname].SetFillColorAlpha(_hStore['QCDsel_'+binname].GetFillColor(),alpha)
 
         stack = THStack('hs','hstack')
         stack.Add(_hStore['QCDsel_'+binname])
@@ -196,7 +204,11 @@ def plotHists(binname = 'incl', inclTemplate = False, addHists = True):
 
     # LEGEND
     leg = doLegend()
-    leg.AddEntry(frame.findObject('data'),'Pseudo Data','lp')
+
+    if mcData:
+        leg.AddEntry(frame.findObject('data'),'Pseudo Data','lp')
+    else:
+        leg.AddEntry(frame.findObject('data'),'Data','lp')
 
     if addHists:
         leg.AddEntry(_hStore['EWKsel_'+binname],'EWK selected','f')
@@ -216,7 +228,7 @@ def plotHists(binname = 'incl', inclTemplate = False, addHists = True):
 
     if '-b' not in sys.argv:
         # wait for input
-        answ = ['c']
+        answ = ['']
         while 'c' not in answ:
             answ.append(raw_input("Enter 'c' to continue: "))
 
@@ -224,13 +236,11 @@ def plotHists(binname = 'incl', inclTemplate = False, addHists = True):
 
     return canv
 
-def getQCDratio(tfile,binname = 'incl', doPlot = False, doClosure = False, inclTemplate = False):
+def getQCDratio(tfile,binname = 'incl', doPlot = False, mcData = False, doClosure = False, inclTemplate = False):
 
     print 80*'#'
     print 'Going to calculate F-ratio in bin', binname
     print 80*'#'
-
-    mcData = True # take data from file or generate toys
 
     if mcData:
         print 'Data is taken from toys!'
@@ -250,7 +260,7 @@ def getQCDratio(tfile,binname = 'incl', doPlot = False, doClosure = False, inclT
     print 10*'-'
 
     # Create Lp var from hist
-    lp = getVarFromHist(hData, "Lp")
+    lp = getVarFromHist(hData, "L_{p}")
 
     _varStore['Lp'] = lp
 
@@ -288,7 +298,7 @@ def getQCDratio(tfile,binname = 'incl', doPlot = False, doClosure = False, inclT
         nQCDantiErr = getHistIntError(hQCDanti)
 
         # calculate error
-        fRatioErr = fRatio*sqrt(nQCDselErr/nQCDsel*nQCDselErr/nQCDsel + nQCDantiErr/nQCDanti*nQCDantiErr/nQCDanti)
+        fRatioErr = fRatio*TMath.Sqrt(nQCDselErr/nQCDsel*nQCDselErr/nQCDsel + nQCDantiErr/nQCDanti*nQCDantiErr/nQCDanti)
     else:
         print '#!CLOSURE: F-ratio is QCD selected(fit)/selected(data/mc)'
         #determine F ratio as selected(fit)/selected(data/mc)
@@ -298,13 +308,13 @@ def getQCDratio(tfile,binname = 'incl', doPlot = False, doClosure = False, inclT
         nQCDseleErr = getHistIntError(hQCDsele)
 
         # calculate error
-        fRatioErr = fRatio*sqrt(nQCDselErr/nQCDsel*nQCDselErr/nQCDsel + nQCDseleErr/nQCDsele*nQCDseleErr/nQCDsele)
+        fRatioErr = fRatio*TMath.Sqrt(nQCDselErr/nQCDsel*nQCDselErr/nQCDsel + nQCDseleErr/nQCDsele*nQCDseleErr/nQCDsele)
 
     print 'F_ratio =', fRatio, '+/-', fRatioErr
 
     if doPlot:
         print 10*'-'
-        canv = plotHists(binname, inclTemplate)
+        canv = plotHists(binname, inclTemplate, mcData)
 
     return (fRatio,fRatioErr)
 
@@ -358,6 +368,7 @@ if __name__ == "__main__":
     doClosure = False
     doPlots = True
     inclTemplate = True
+    mcData = False #True # take data from file or generate toys
 
     infileName = "../lp_only_plots.root"
 
@@ -375,15 +386,18 @@ if __name__ == "__main__":
     #binNames += ['HT500toInf','HT500to1000','HT750to1000','HT500to750']
     #binNames = ['incl','NB1','NB2','NB3']
     #binNames = ['NJ45']
+    #binNames = ['NJ34']
+    binNames = ['NJ34','LT1_NJ34','LT2_NJ34','LT3_NJ34','LT4_NJ34']
+
     #binNames += ['NJ45','LT0_NJ45','LT1_NJ45','LT2_NJ45','LT3_NJ45','LT4_NJ45']
     #binNames += ['NJ68','LT0_NJ68','LT1_NJ68','LT2_NJ68','LT3_NJ68','LT4_NJ68']
     #binNames += ['NJ6inf','LT0_NJ6inf','LT1_NJ6inf','LT2_NJ6inf','LT3_NJ6inf','LT4_NJ6inf']
-    binNames += ['NJ45','NJ68','LT0_NJ45','LT0_NJ68','LT1_NJ45','LT1_NJ68','LT2_NJ45','LT2_NJ68','LT3_NJ45','LT3_NJ68','LT4_NJ45','LT4_NJ68']
+    #binNames += ['NJ45','NJ68','LT0_NJ45','LT0_NJ68','LT1_NJ45','LT1_NJ68','LT2_NJ45','LT2_NJ68','LT3_NJ45','LT3_NJ68','LT4_NJ45','LT4_NJ68']
 
     resList = []
 
     for binName in binNames:
-        (fRat,err) = getQCDratio(tfile,binName, doPlots, doClosure, inclTemplate)
+        (fRat,err) = getQCDratio(tfile,binName, doPlots, mcData, doClosure, inclTemplate)
         resList.append((binName,fRat,err))
 
     print 80*'='
