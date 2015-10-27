@@ -18,17 +18,21 @@ susySingleLepton_globalVariables = susyCore_globalVariables + [
             NTupleVariable("metNoHF_rawPhi", lambda ev : ev.metNoHF.uncorPhi() if  hasattr(ev,'metNoHF') else  0, help="raw noHF met phi"),
             NTupleVariable("metNoHF_rawSumEt", lambda ev : ev.metNoHF.uncorSumEt() if  hasattr(ev,'metNoHF') else  0, help="raw noHF met sumEt"),
 
-            # ----------------------- MET filter information (temporary)  -------------------------------------------------------------------- #
-            NTupleVariable("Flag_HBHENoiseFilter_fix", lambda ev: ev.hbheFilterNew, help="HBEHE temporary filter decision"),
+            ##--------------------------------------------------
+            ## MET filter information (temporary)
+            ##--------------------------------------------------
+            NTupleVariable("Flag_HBHENoiseFilter_fix", lambda ev: ev.hbheFilterNew, help="HBEHE baseline temporary filter decision"),
+            NTupleVariable("Flag_HBHEIsoNoiseFilter_fix", lambda ev: ev.hbheFilterIso, help="HBEHE isolation temporary filter decision"),
 
             # ----------------------- HT from LHE event (requires LHE analyzer to have run)  --------------------------------------------------------- #
             NTupleVariable("lheHT", lambda ev : ev.lheHT, mcOnly=True, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer"),
             NTupleVariable("lheHTIncoming", lambda ev : ev.lheHTIncoming, mcOnly=True, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer (only LHE status<0 as mothers)"),
             # ---------------------------------------------------------------------------------------------------------------------------------------- #
 ]
+
 susySingleLepton_globalObjects = susyCore_globalObjects.copy()
 susySingleLepton_globalObjects.update({
-            # put more here
+        # put more here
         "met" : NTupleObject("met", metType, help="PF E_{T}^{miss}, after type 1 corrections"),
         "metNoHF" : NTupleObject("metNoHF", metType, help="PF E_{T}^{miss}, after type 1 corrections (NoHF)"),
 })
