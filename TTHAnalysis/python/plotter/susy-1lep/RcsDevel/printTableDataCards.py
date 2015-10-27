@@ -111,7 +111,8 @@ def getSystDict(cardFnames, region, sig = "", lep = "lep", uncert = "default"):
 
 def printBinnedTable(yieldsList, yieldsSig, printSource, name):
     benchmark = (1200,750)
-    benchmark2 = (1450,50)
+    benchmark2 = (1500,0)
+    factor = {benchmark2 : 145296.0/45886.0*0.0141903,benchmark:145296.0/99410.0*0.0856418}
     precision = 2
     if 'Rcs' in name:
         precision = 4
@@ -131,15 +132,17 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
             #singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if ('TT' in x and not 'TTV' in x and not 'TTd' in x and not 'TTs' in x)  ))
 
     singleSourceNames = sum(singleSourceNames, [])
-#    singleSourceNames.append(benchmark)    
-#    singleSourceNames.append(benchmark2)    
+    
+    if not 'Rcs' in name:
+        singleSourceNames.append(benchmark)    
+        singleSourceNames.append(benchmark2)    
     SourceNames = singleSourceNames
     
     print type(benchmark)
     print SourceNames, singleSourceNames
     nSource = len(singleSourceNames) 
     nCol = nSource + 4
-    f.write('\\footnotesize \n')
+    f.write('\\tiny \n')
     f.write('\\caption{'+name.replace('_',' ')+'} \n')
     f.write('\\begin{tabular}{|' + (nCol *'%(align)s | ') % dict(align = 'c') + '} \n')
 
@@ -168,8 +171,8 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
                     f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % yields[bin][source])                
 
                 elif type(source) == tuple:
-                    print yieldsSig[bin][source]
-                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % yieldsSig[bin][source])
+                    print yieldsSig[bin][source], factor[source]
+                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yieldsSig[bin][source][0] *  factor[source], yieldsSig[bin][source][1] *  factor[source]))
         #print '--'
         f.write(' \\\ \n')
 
@@ -284,13 +287,16 @@ if __name__ == "__main__":
 
     if 1==1:
         sigYields = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
+        sigYieldsCR = getYieldDict(cardFnamesSig,"CR_MB", "T1tttt_Scan", "lep")
+        sigYieldsSB = getYieldDict(cardFnamesSig,"SR_SB", "T1tttt_Scan", "lep")
+        sigYieldsCR_SB = getYieldDict(cardFnamesSig,"CR_SB", "T1tttt_Scan", "lep")
         mcYields = getYieldDict(cardFnames,"SR_MB","","lep")
         
-
-        printBinnedTable((mcYields,), sigYields, [],'SR_table')
-        printBinnedTable((getYieldDict(cardFnames,"CR_MB","","lep") ,), sigYields, [],'CR_table')
-        printBinnedTable((getYieldDict(cardFnames,"CR_SB","","lep") ,), sigYields, [],'CR_SBtable')
-        printBinnedTable((getYieldDict(cardFnames,"SR_SB","","lep") ,), sigYields, [],'SR_SBtable')
+        print sigYields
+        printBinnedTable((mcYields,),  sigYields, [],'SR_table')
+        printBinnedTable((getYieldDict(cardFnames,"CR_MB","","lep") ,),  sigYieldsCR, [],'CR_table')
+        printBinnedTable((getYieldDict(cardFnames,"CR_SB","","lep") ,),  sigYieldsCR_SB, [],'CR_SBtable')
+        printBinnedTable((getYieldDict(cardFnames,"SR_SB","","lep") ,),  sigYieldsSB, [],'SR_SBtable')
 
         dictRcs_MB = getYieldDict(cardFnames,"Rcs_MB","","lep")
         dictRcs_SB = getYieldDict(cardFnames,"Rcs_SB","","lep")
@@ -302,12 +308,15 @@ if __name__ == "__main__":
         
 
         sigYields9 = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
+        sigYields9CR = getYieldDict(cardFnamesSig,"CR_MB", "T1tttt_Scan", "lep")
+        sigYields9SB = getYieldDict(cardFnamesSig,"SR_SB", "T1tttt_Scan", "lep")
+        sigYields9CR_SB = getYieldDict(cardFnamesSig,"CR_SB", "T1tttt_Scan", "lep")
         mcYields9 = getYieldDict(cardFnames9,"SR_MB","","lep")
         print sigYields9
         printBinnedTable((mcYields9,), sigYields9, [],'SR_table_9')
-        printBinnedTable((getYieldDict(cardFnames9,"CR_MB","","lep") ,), sigYields9, [],'CR_table_9')
-        printBinnedTable((getYieldDict(cardFnames9,"CR_SB","","lep") ,), sigYields9, [],'CR_SBtable_9')
-        printBinnedTable((getYieldDict(cardFnames9,"SR_SB","","lep") ,), sigYields9, [],'SR_SBtable_9')
+        printBinnedTable((getYieldDict(cardFnames9,"CR_MB","","lep") ,), sigYields9CR, [],'CR_table_9')
+        printBinnedTable((getYieldDict(cardFnames9,"CR_SB","","lep") ,), sigYields9SB, [],'CR_SBtable_9')
+        printBinnedTable((getYieldDict(cardFnames9,"SR_SB","","lep") ,), sigYields9CR_SB, [],'SR_SBtable_9')
         dictRcs_MB9 = getYieldDict(cardFnames9,"Rcs_MB","","lep")
         dictRcs_SB9 = getYieldDict(cardFnames9,"Rcs_SB","","lep")
         dictKappa9 = getYieldDict(cardFnames9,"Kappa","","lep")
