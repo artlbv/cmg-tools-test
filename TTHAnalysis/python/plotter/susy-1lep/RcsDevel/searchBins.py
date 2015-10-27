@@ -27,12 +27,12 @@ binsNB['NB3i'] = ('nBJet >= 3','$\geq$ 3')
 
 # NJ Bins
 binsNJ = {}
-binsNJ['NJ34'] = ('3 <= nJet && nJet <= 4','[3, 4]')
-binsNJ['NJ4i'] = ('4 <= nJet','$\geq$ 4')
-binsNJ['NJ45f9'] = ('4 <= nJet && nJet <= 5','[4, 5]')
-binsNJ['NJ45f6'] = ('4 <= nJet && nJet <= 5','[4, 5]')
-binsNJ['NJ68'] = ('6 <= nJet && nJet <= 8','[6, 8]')
-binsNJ['NJ9i'] = ('9 <= nJet','$\geq$ 9')
+binsNJ['NJ34'] = ('3 <= nJets && nJet <= 4','[3, 4]')
+binsNJ['NJ4i'] = ('4 <= nJets','$\geq$ 4')
+binsNJ['NJ45f9'] = ('4 <= nJets && nJets <= 5','[4, 5]')
+binsNJ['NJ45f6'] = ('4 <= nJets && nJets <= 5','[4, 5]')
+binsNJ['NJ68'] = ('6 <= nJets && nJets <= 8','[6, 8]')
+binsNJ['NJ9i'] = ('9 <= nJets','$\geq$ 9')
 
 ## Signal/Control region (wrt dPhi)
 binsSR = {}
@@ -172,19 +172,30 @@ for nj_bin in ['NJ45f6','NJ68']:#binsNJ.iteritems():
 
             nbbins = []
 
-            # Match NB bins
-            if lt_bin in ['LT1','LT2','LT3','LT4i']:
-                nbbins += ['NB0','NB1'] # NB1 present in all NJ,LT bins
-            if lt_bin in ['LT4i']:
-                nbbins += ['NB2i'] # NB2i present in all NJ,LT bins
 
-            if lt_bin in ['LT1','LT2','LT3']:
-                # Signal region binning
-                if nj_bin in ['NJ68']:
-                    nbbins += ['NB2','NB3i']
-                # Side band  binning
-                if nj_bin in ['NJ45f6']:
-                    nbbins += ['NB2i']
+            if nj_bin in ['NJ45f6'] and ht_bin not in ['HT2i']:
+                nbbins += ['NB1','NB2i']
+            if nj_bin in ['NJ45f6'] and ht_bin in ['HT2i']:
+                nbbins += ['NB1i']
+            if nj_bin in ['NJ68']:
+                if lt_bin in ['LT1','LT2','LT3']:
+                    nbbins += ['NB1','NB2','NB3i'] # NB1 present in all NJ,LT bins
+                if lt_bin in ['LT4i']:
+                    nbbins += ['NB1','NB2i'] # NB2i present in all NJ,LT bins
+
+            # Match NB bins
+            #if lt_bin in ['LT1','LT2','LT3','LT4i']:
+            #    nbbins += ['NB0','NB1'] # NB1 present in all NJ,LT bins
+            #if lt_bin in ['LT4i']:
+            #    nbbins += ['NB2i'] # NB2i present in all NJ,LT bins
+
+            #if lt_bin in ['LT1','LT2','LT3']:
+            #    # Signal region binning
+            #    if nj_bin in ['NJ68']:
+            #        nbbins += ['NB2','NB3i']
+            #    # Side band  binning
+            #    if nj_bin in ['NJ45f6']:
+            #        nbbins += ['NB2i']
 
             for nb_bin in nbbins:
                 nb_cut = binsNB[nb_bin][0]
@@ -223,6 +234,7 @@ for nj_bin in ['NJ45f9','NJ9i']:#binsNJ.iteritems():
             htbins += ['HT0i','HT01','HT2i']
         if lt_bin in ['LT3i']:
             htbins += ['HT0i']
+            #htbins += ['HT0','HT1','HT2i']
 
         #for ht_bin,ht_cut in binsHT.iteritems():
         for ht_bin in htbins:
@@ -231,23 +243,20 @@ for nj_bin in ['NJ45f9','NJ9i']:#binsNJ.iteritems():
             nbbins = []
 
             # Match NB bins
-            if lt_bin in ['LT1','LT2'] and not ht_bin in['HT0i']:
-                # Signal region binning
-                if nj_bin in ['NJ9i']:
-                    nbbins += ['NB0','NB1','NB2']
-                # Side band  binning
-                if nj_bin in ['NJ45f9']:
-                    nbbins += ['NB0','NB1','NB2i']
-
-            if lt_bin in ['LT3i']:
-                nbbins += ['NB0','NB1i']
-
-            if lt_bin in ['LT1','LT2'] and ht_bin in ['HT0i']:
-                if nj_bin in ['NJ9i']:
+            if nj_bin in ['NJ9i']:
+                if lt_bin in ['LT1','LT2'] and not ht_bin in['HT0i']:
+                    nbbins += ['NB1','NB2']
+                    
+                if lt_bin in ['LT3i']:
+                    nbbins += ['NB1','NB2i']
+                if lt_bin in ['LT1','LT2'] and ht_bin in ['HT0i']:
                     nbbins += ['NB3i']
-                # Side band  binning
-                if nj_bin in ['NJ45f9']:
-                    nbbins += ['NB2i']
+
+            if nj_bin in ['NJ45f9']:
+                if lt_bin in['LT2'] and ht_bin in ['HT2i']:
+                    nbbins += ['NB1i']
+                else:
+                    nbbins += ['NB1','NB2i']
 
 
 
