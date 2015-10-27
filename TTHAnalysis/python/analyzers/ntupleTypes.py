@@ -1,14 +1,14 @@
 #!/bin/env python
 from math import *
-from PhysicsTools.Heppy.analyzers.core.autovars import NTupleObjectType  
+from PhysicsTools.Heppy.analyzers.core.autovars import NTupleObjectType
 from PhysicsTools.Heppy.analyzers.objects.autophobj import  *
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
 
 from CMGTools.TTHAnalysis.signedSip import *
 
-##------------------------------------------  
+##------------------------------------------
 ## LEPTON
-##------------------------------------------  
+##------------------------------------------
 
 leptonTypeSusy = NTupleObjectType("leptonSusy", baseObjectTypes = [ leptonType ], variables = [
     #NTupleVariable("eleMVAId",     lambda x : (x.electronID("POG_MVA_ID_NonTrig_full5x5") + 2*x.electronID("POG_MVA_ID_Trig_full5x5")) if abs(x.pdgId()) == 11 else -1, int, help="Electron mva id working point (2012, full5x5 shapes): 0=none, 1=non-trig, 2=trig, 3=both"),
@@ -17,8 +17,6 @@ leptonTypeSusy = NTupleObjectType("leptonSusy", baseObjectTypes = [ leptonType ]
     NTupleVariable("mvaIdPhys14",   lambda lepton : lepton.mvaRun2("NonTrigPhys14") if abs(lepton.pdgId()) == 11 else 1, help="EGamma POG MVA ID for non-triggering electrons, Phys14 re-training; 1 for muons"),
     NTupleVariable("mvaIdSpring15",   lambda lepton : lepton.mvaRun2("NonTrigSpring15") if abs(lepton.pdgId()) == 11 else 1, help="EGamma POG MVA ID for non-triggering electrons, Spring15 re-training; 1 for muons"),
     # Lepton MVA-id related variables
-    NTupleVariable("SPRING15_25ns_v1", lambda x : (1*x.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto") + 1*x.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Loose") + 1*x.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Medium") + 1*x.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Tight")) if abs(x.pdgId()) == 11 else -1, int, help="Electron cut-based id (POG_SPRING15_25ns_v1_ConvVetoDxyDy): 0=none, 1=veto, 2=loose, 3=medium, 4=tight"),
-
     NTupleVariable("mvaTTH",    lambda lepton : getattr(lepton, 'mvaValueTTH', -1), help="Lepton MVA (TTH version)"),
     NTupleVariable("jetPtRatiov1", lambda lepton : lepton.pt()/lepton.jet.pt() if hasattr(lepton,'jet') else -1, help="pt(lepton)/pt(nearest jet)"),
     NTupleVariable("jetPtRelv1", lambda lepton : ptRelv1(lepton.p4(),lepton.jet.p4()) if hasattr(lepton,'jet') else -1, help="pt of the lepton transverse to the jet axis (subtracting the lepton)"),
@@ -27,6 +25,14 @@ leptonTypeSusy = NTupleObjectType("leptonSusy", baseObjectTypes = [ leptonType ]
     NTupleVariable("jetBTagCSV", lambda lepton : lepton.jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags') if hasattr(lepton,'jet') and hasattr(lepton.jet, 'btag') else -99, help="CSV btag of nearest jet"),
     NTupleVariable("jetBTagCMVA", lambda lepton : lepton.jet.btag('pfCombinedMVABJetTags') if hasattr(lepton,'jet') and hasattr(lepton.jet, 'btag') else -99, help="CMA btag of nearest jet"),
     NTupleVariable("jetDR",      lambda lepton : deltaR(lepton.eta(),lepton.phi(),lepton.jet.eta(),lepton.jet.phi()) if hasattr(lepton,'jet') else -1, help="deltaR(lepton, nearest jet)"),
+
+    # ID variables
+    NTupleVariable("SPRING15_25ns_v1", lambda x : (1*x.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto") + 1*x.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Loose") + 1*x.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Medium") + 1*x.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Tight")) if abs(x.pdgId()) == 11 else -1, int, help="Electron cut-based id (POG_SPRING15_25ns_v1_ConvVetoDxyDy): 0=none, 1=veto, 2=loose, 3=medium, 4=tight"),
+
+    # Low level vars -- duplicates of leptonSusyExtra
+    NTupleVariable("hOverE", lambda x : x.hadronicOverEm() if abs(x.pdgId())==11 else 0, help="Electron hadronicOverEm"),
+    NTupleVariable("ooEmooP",  lambda x : ((1.0/x.ecalEnergy() - x.eSuperClusterOverP()/x.ecalEnergy()) if x.ecalEnergy()>0. else 9e9) if abs(x.pdgId())==11 else 0, help="Electron 1/E - 1/p  (without absolute value!)"),
+
 ])
 
 
@@ -72,7 +78,7 @@ leptonTypeSusyExtra = NTupleObjectType("leptonSusyExtra", baseObjectTypes = [ le
     NTupleVariable("jetCorrFactor_L1", lambda x: x.jet.CorrFactor_L1 if hasattr(x.jet,'CorrFactor_L1') else 1, help="matched jet L1 correction factor"),
     NTupleVariable("jetCorrFactor_L1L2", lambda x: x.jet.CorrFactor_L1L2 if hasattr(x.jet,'CorrFactor_L1L2') else 1, help="matched jet L1L2 correction factor"),
     NTupleVariable("jetCorrFactor_L1L2L3", lambda x: x.jet.CorrFactor_L1L2L3 if hasattr(x.jet,'CorrFactor_L1L2L3') else 1, help="matched jet L1L2L3 correction factor"),
-    NTupleVariable("jetCorrFactor_L1L2L3Res", lambda x: x.jet.CorrFactor_L1L2L3Res if hasattr(x.jet,'CorrFactor_L1L2L3Res') else 1, help="matched jet L1L2L3Res correction factor"),        
+    NTupleVariable("jetCorrFactor_L1L2L3Res", lambda x: x.jet.CorrFactor_L1L2L3Res if hasattr(x.jet,'CorrFactor_L1L2L3Res') else 1, help="matched jet L1L2L3Res correction factor"),
     NTupleVariable("jetPtRatio_Raw", lambda lepton : -1 if not hasattr(lepton,'jet') else lepton.pt()/lepton.jet.pt() if not hasattr(lepton.jet,'rawFactor') else lepton.pt()/(lepton.jet.pt()*lepton.jet.rawFactor()), help="pt(lepton)/rawpt(nearest jet)"),
     NTupleVariable("jetPtRelHv2", lambda lepton : ptRelHv2(lepton) if hasattr(lepton,'jet') else -1, help="pt of the jet (subtracting the lepton) transverse to the lepton axis - v2"),
     # variables for isolated electron trigger matching cuts
@@ -86,24 +92,24 @@ leptonTypeSusyExtra.addSubObjects([
         ])
 
 
-##------------------------------------------  
+##------------------------------------------
 ## TAU
-##------------------------------------------  
+##------------------------------------------
 
 tauTypeSusy = NTupleObjectType("tauSusy",  baseObjectTypes = [ tauType ], variables = [
 ])
 
-##------------------------------------------  
+##------------------------------------------
 ##  ISOTRACK
-##------------------------------------------  
+##------------------------------------------
 
 isoTrackTypeSusy = NTupleObjectType("isoTrackSusy",  baseObjectTypes = [ isoTrackType ], variables = [
 ])
 
 
-##------------------------------------------  
+##------------------------------------------
 ## PHOTON
-##------------------------------------------  
+##------------------------------------------
 
 photonTypeSusy = NTupleObjectType("gammaSusy", baseObjectTypes = [ photonType ], variables = [
     NTupleVariable("genIso04",  lambda x : getattr(x, 'genIso04', -1.0), float, mcOnly=True, help="sum pt of all status 1 particles within DeltaR = 0.4 of the photon"),
@@ -113,13 +119,13 @@ photonTypeSusy = NTupleObjectType("gammaSusy", baseObjectTypes = [ photonType ],
     NTupleVariable("drMinParton",  lambda x : getattr(x, 'drMinParton', -1.0), float, mcOnly=True, help="deltaR min between photon and parton"),
 ])
 
-##------------------------------------------  
+##------------------------------------------
 ## JET
-##------------------------------------------  
+##------------------------------------------
 
 jetTypeSusy = NTupleObjectType("jetSusy",  baseObjectTypes = [ jetTypeExtra ], variables = [
     NTupleVariable("mcMatchFlav",  lambda x : getattr(x,'mcMatchFlav',-99), int, mcOnly=True, help="Flavour of associated parton from hard scatter (if any)"),
-    NTupleVariable("charge", lambda x : x.jetCharge(), float, help="Jet charge") 
+    NTupleVariable("charge", lambda x : x.jetCharge(), float, help="Jet charge")
 ])
 
 jetTypeSusyExtra = NTupleObjectType("jetSusyExtra",  baseObjectTypes = [ jetTypeSusy ], variables = [
@@ -128,12 +134,12 @@ jetTypeSusyExtra = NTupleObjectType("jetSusyExtra",  baseObjectTypes = [ jetType
     NTupleVariable("mcNumLeptons", lambda x : getattr(x,'mcNumLeptons',-1),int, mcOnly=True, help="Number of matched leptons"),
     NTupleVariable("mcNumTaus", lambda x : getattr(x,'mcNumTaus',-1),int, mcOnly=True, help="Number of matched taus"),
     NTupleVariable("mcAnyPartonMass", lambda x : getattr(x,"mcAnyPartonMass",-1),float, mcOnly=True, help="Mass of associated partons, leptons, taus"),
-    NTupleVariable("nSubJets", lambda x : getattr(x, "nSubJets", 0), int, help="Number of subjets (kt, R=0.2)"), 
-    NTupleVariable("nSubJets25", lambda x : getattr(x, "nSubJets25", 0), int, help="Number of subjets with pt > 25 (kt, R=0.2)"), 
-    NTupleVariable("nSubJets30", lambda x : getattr(x, "nSubJets30", 0), int, help="Number of subjets with pt > 30 (kt, R=0.2)"), 
-    NTupleVariable("nSubJets40", lambda x : getattr(x, "nSubJets40", 0), int, help="Number of subjets with pt > 40 (kt, R=0.2)"), 
-    NTupleVariable("nSubJetsZ01", lambda x : getattr(x, "nSubJetsZ01", 0), int, help="Number of subjets with pt > 0.1 * pt(jet) (kt, R=0.2)"), 
-    # --------------- 
+    NTupleVariable("nSubJets", lambda x : getattr(x, "nSubJets", 0), int, help="Number of subjets (kt, R=0.2)"),
+    NTupleVariable("nSubJets25", lambda x : getattr(x, "nSubJets25", 0), int, help="Number of subjets with pt > 25 (kt, R=0.2)"),
+    NTupleVariable("nSubJets30", lambda x : getattr(x, "nSubJets30", 0), int, help="Number of subjets with pt > 30 (kt, R=0.2)"),
+    NTupleVariable("nSubJets40", lambda x : getattr(x, "nSubJets40", 0), int, help="Number of subjets with pt > 40 (kt, R=0.2)"),
+    NTupleVariable("nSubJetsZ01", lambda x : getattr(x, "nSubJetsZ01", 0), int, help="Number of subjets with pt > 0.1 * pt(jet) (kt, R=0.2)"),
+    # ---------------
     NTupleVariable("chHEF", lambda x : x.chargedHadronEnergyFraction(), float, mcOnly = False, help="chargedHadronEnergyFraction (relative to uncorrected jet energy)"),
     NTupleVariable("neHEF", lambda x : x.neutralHadronEnergyFraction(), float, mcOnly = False,help="neutralHadronEnergyFraction (relative to uncorrected jet energy)"),
     NTupleVariable("phEF", lambda x : x.photonEnergyFraction(), float, mcOnly = False,help="photonEnergyFraction (relative to corrected jet energy)"),
@@ -165,22 +171,22 @@ fatJetType = NTupleObjectType("fatJet",  baseObjectTypes = [ jetType ], variable
     NTupleVariable("minMass", lambda x : (x.tagInfo("caTop").properties().minMass if x.tagInfo("caTop") else -99), float, help="CA8 jet minMass"),
     NTupleVariable("nSubJets", lambda x : (x.tagInfo("caTop").properties().nSubJets if x.tagInfo("caTop") else -99), float, help="CA8 jet nSubJets"),
 ])
-      
-##------------------------------------------  
+
+##------------------------------------------
 ## MET
-##------------------------------------------  
-  
+##------------------------------------------
+
 metTypeSusy = NTupleObjectType("metSusy", baseObjectTypes = [ metType ], variables = [
 ])
 
-##------------------------------------------  
+##------------------------------------------
 ## GENPARTICLE
-##------------------------------------------  
+##------------------------------------------
 
 
-##------------------------------------------  
+##------------------------------------------
 ## SECONDARY VERTEX CANDIDATE
-##------------------------------------------  
+##------------------------------------------
 svType = NTupleObjectType("sv", baseObjectTypes = [ fourVectorType ], variables = [
     NTupleVariable("charge",   lambda x : x.charge(), int),
     NTupleVariable("ntracks", lambda x : x.numberOfDaughters(), int, help="Number of tracks (with weight > 0.5)"),
@@ -227,7 +233,7 @@ heavyFlavourHadronType = NTupleObjectType("heavyFlavourHadron", baseObjectTypes 
     NTupleVariable("jetPt",  lambda x : x.jet.pt() if x.jet != None else 0, help="Jet: pT"),
     NTupleVariable("jetBTagCSV",  lambda x : x.jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags') if x.jet != None else -99, help="CSV b-tag of associated jet"),
     NTupleVariable("jetBTagCMVA",  lambda x : x.jet.btag('pfCombinedMVABJetTags') if x.jet != None else -99, help="CMVA b-tag of associated jet"),
-    
+
 ])
 
 
@@ -260,4 +266,3 @@ def ptRelHv2(lep): # use only if jetAna.calculateSeparateCorrections==True
     p4l = lep.p4()
     l = ROOT.TLorentzVector(p4l.Px(),p4l.Py(),p4l.Pz(),p4l.E())
     return (m-l).Perp(l.Vect())
-   

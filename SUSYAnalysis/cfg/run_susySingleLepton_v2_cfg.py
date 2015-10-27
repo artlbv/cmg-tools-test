@@ -88,7 +88,7 @@ if jetAna.cleanSelectedLeptons:	jetAna.minLepPt = 10
 
 jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
-jetAna.recalibrateJets = True #should be true in susycore, already
+jetAna.recalibrateJets = False # false for miniAOD v2!
 
 ## MET -- check preprocessor
 metAna.recalibrate = False #should be false in susycore, already
@@ -179,8 +179,8 @@ triggerFlagsAna.triggerBits = {
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-sample = 'MC'
-#sample = 'data'
+#sample = 'MC'
+sample = 'data'
 test = 0
 
 if sample == "MC":
@@ -226,12 +226,10 @@ if sample == "MC":
 		# PRODUCTION
 		# run on everything
 
-		#selectedComponents =[ TTJets_LO_25ns ]
-		#selectedComponents = [ TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
-		#selectedComponents += [TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar, TTJets_DiLepton]
-		#selectedComponents = [TTJets_DiLepton]
-		#selectedComponents = [TTJets_DiLepton_ext1]
-		selectedComponents = SingleTop
+		#selectedComponents = mcSamples_Asymptotic50ns
+		#selectedComponents =[ TTJets_LO_25ns]#QCD_HT
+		#selectedComponents = [  TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
+		selectedComponents = [TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar]#, TTJets_DiLepton]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 2
@@ -246,7 +244,7 @@ elif sample == "data":
 
 	isData = True
 
-	# modify skim
+	# modify skim -- don't skim data!
 	ttHLepSkim.minLeptons = 0
 
 	# central samples
@@ -254,26 +252,24 @@ elif sample == "data":
 	# samples at DESY
 	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
 
-	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
-	#selectedComponents = [ SingleElectron_Run2015B ]
-	#selectedComponents = [ SingleElectron_Run2015B, SingleElectron_Run2015B_17Jul ]
-	#selectedComponents = [ SingleMuon_Run2015B, SingleMuon_Run2015B_17Jul ]
-	#selectedComponents = [ JetHT_Run2015B, JetHT_Run2015B_17Jul ]
-	#selectedComponents = [ HTMHT_Run2015B ]
-
-	selectedComponents = [ JetHT_Run2015D ] #, SingleElectron_Run2015D, SingleMuon_Run2015D ]
+	#selectedComponents = [ JetHT_Run2015D ] #, SingleElectron_Run2015D, SingleMuon_Run2015D ]
 	#selectedComponents = [ SingleElectron_Run2015D, SingleMuon_Run2015D ]
+
+	# MiniAOD V2
+	selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
+	#selectedComponents = [ SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
 
 	if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 
 	if test==1:
 		# test a single component, using a single thread.
 		#comp = SingleMuon_Run2015D
-		#comp = JetHT_Run2015D
-		comp = SingleElectron_Run2015D
+		comp = JetHT_Run2015D_Promptv4
+		#comp = SingleElectron_Run2015D
 		#comp.files = ['dcap://dcache-cms-dcap.desy.de/pnfs/desy.de/cms/tier2//store/data/Run2015D/JetHT/MINIAOD/PromptReco-v3/000/256/587/00000/F664AC07-935D-E511-A019-02163E01424B.root']
-		comp.files = comp.files[20:30]
-		#comp.files = comp.files[:1]
+
+		#comp.files = comp.files[20:30]
+		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 #		comp.splitFactor = 1
 		comp.splitFactor = len(comp.files)
@@ -281,19 +277,19 @@ elif sample == "data":
 		# test all components (1 thread per component).
 		for comp in selectedComponents:
 			comp.splitFactor = 1
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.files = comp.files[:1]
 	elif test==3:
 		# run all components (10 files per component).
 		for comp in selectedComponents:
 			comp.files = comp.files[20:30]
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 	elif test==0:
 		# PRODUCTION
 		# run on everything
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 
 
@@ -306,6 +302,7 @@ if removeResiduals:
 else:
 	jetAna.applyL2L3Residual = True
 
+'''
 # -------------------- Running pre-processor
 preprocessor = None
 doMETpreprocessor = True
@@ -341,6 +338,7 @@ if doMETpreprocessor:
 	preprocessorFile = staticname
 	from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
 	preprocessor = CmsswPreprocessor(preprocessorFile)
+'''
 
 #--------- Tree Producer
 from CMGTools.TTHAnalysis.analyzers.treeProducerSusySingleLepton import *
@@ -382,5 +380,5 @@ from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
 		     sequence = sequence,
 		     services = [],
-		     preprocessor=preprocessor,
+		     #preprocessor=preprocessor,
 		     events_class = Events)
