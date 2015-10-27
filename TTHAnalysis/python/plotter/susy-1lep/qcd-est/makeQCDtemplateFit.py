@@ -2,6 +2,7 @@
 
 import sys
 import os
+from math import hypot
 
 #tmpArg = sys.argv
 #sys.argv = ['-b']
@@ -228,7 +229,7 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
 
     if '-b' not in sys.argv:
         # wait for input
-        answ = ['']
+        answ = ['c']
         while 'c' not in answ:
             answ.append(raw_input("Enter 'c' to continue: "))
 
@@ -236,28 +237,31 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
 
     return canv
 
-def getQCDratio(tfile,binname = 'incl', doPlot = False, mcData = False, doClosure = False, inclTemplate = False):
+#def getQCDratio(tfile,binname = 'incl', doPlot = False, mcData = False, doClosure = False, inclTemplate = False):
+def getQCDratio(tfile, options, binname = 'incl'):
 
-    print 80*'#'
-    print 'Going to calculate F-ratio in bin', binname
-    print 80*'#'
+    if options.verbose > 0:
+        print 80*'#'
+        print 'Going to calculate F-ratio in bin', binname
+        print 80*'#'
 
-    if mcData:
+    if options.mcData and options.verbose > 0:
         print 'Data is taken from toys!'
 
     # get full BKG, QCD and EWK histos
-    (hData,hEWKsele,hQCDsele,hQCDanti) = getHistsFromFile(tfile, binname,  mcData)
+    (hData,hEWKsele,hQCDsele,hQCDanti) = getHistsFromFile(tfile, binname,  options.mcData)
 
-    # Print some info
-    print 10*'-'
-    print 'Number of events in anti-selected bin'
-    print 'QCD: ', hQCDanti.Integral(), '+/-', getHistIntError(hQCDanti)
-    print 10*'-'
-    print 'Number of events in selected bin'
-    print 'Data:', hData.Integral()
-    print 'EWK: ', hEWKsele.Integral()
-    print 'QCD: ', hQCDsele.Integral(), '+/-', getHistIntError(hQCDsele)
-    print 10*'-'
+    if options.verbose > 0:
+        # Print some info
+        print 10*'-'
+        print 'Number of events in anti-selected bin'
+        print 'QCD: %.3f +/- %.3f' % ( hQCDanti.Integral(), getHistIntError(hQCDanti))
+        print 10*'-'
+        print 'Number of events in selected bin'
+        print 'Data: %.3f' % hData.Integral()
+        print 'EWK: %.3f' % hEWKsele.Integral()
+        print 'QCD: %.3f +/- %.3f' %( hQCDsele.Integral(), getHistIntError(hQCDsele))
+        print 10*'-'
 
     # Create Lp var from hist
     lp = getVarFromHist(hData, "L_{p}")
@@ -265,15 +269,16 @@ def getQCDratio(tfile,binname = 'incl', doPlot = False, mcData = False, doClosur
     _varStore['Lp'] = lp
 
     # Deal with data (pseudo or real)
-    data = getDataFromHist(hData,lp, mcData)
+    data = getDataFromHist(hData,lp, options.mcData)
 
     _dhStore['data_'+binname] = data
 
     # take anti from LT-inclusive QCD:
-    if inclTemplate:
+    if options.inclTemplate:
         import re
         incName = re.sub('LT[0-9]_','',binname)
-        print 'Using template', incName, 'instead of', binname
+        if options.verbose > 0:
+            print 'Using template', incName, 'instead of', binname
         hQCDanti = _hStore['QCDanti_'+incName]
 
     # Get QCD prediction in the selected region
@@ -281,16 +286,18 @@ def getQCDratio(tfile,binname = 'incl', doPlot = False, mcData = False, doClosur
 
     nQCDsel = nQCD.getValV()
     nQCDselErr = nQCD.getError()
-    print 'Fit result:'
-    print 'QCD: ', nQCDsel, '+/-', nQCDselErr
+
+    if options.verbose > 0:
+        print 'Fit result:'
+        print 'QCD: %.3f +/- %.3f ' % (nQCDsel, nQCDselErr)
 
 
     # get correct QCD anti
-    if inclTemplate:
+    if options.inclTemplate:
         hQCDanti = _hStore['QCDanti_'+binname]
 
 
-    if not doClosure:
+    if not options.doClosure:
         #determine F ratio as selected(fit)/anti-selected(data/mc)
         fRatio = nQCDsel/hQCDanti.Integral()
 
@@ -298,9 +305,11 @@ def getQCDratio(tfile,binname = 'incl', doPlot = False, mcData = False, doClosur
         nQCDantiErr = getHistIntError(hQCDanti)
 
         # calculate error
-        fRatioErr = fRatio*TMath.Sqrt(nQCDselErr/nQCDsel*nQCDselErr/nQCDsel + nQCDantiErr/nQCDanti*nQCDantiErr/nQCDanti)
+        #fRatioErr = fRatio*TMath.Sqrt(nQCDselErr/nQCDsel*nQCDselErr/nQCDsel + nQCDantiErr/nQCDanti*nQCDantiErr/nQCDanti)
+        fRatioErr = fRatio*hypot(nQCDselErr/nQCDsel,nQCDantiErr/nQCDanti)
     else:
-        print '#!CLOSURE: F-ratio is QCD selected(fit)/selected(data/mc)'
+        if options.verbose > 0:
+            print '#!CLOSURE: F-ratio is QCD selected(fit)/selected(data/mc)'
         #determine F ratio as selected(fit)/selected(data/mc)
         fRatio = nQCDsel/hQCDsele.Integral()
 
@@ -308,20 +317,26 @@ def getQCDratio(tfile,binname = 'incl', doPlot = False, mcData = False, doClosur
         nQCDseleErr = getHistIntError(hQCDsele)
 
         # calculate error
-        fRatioErr = fRatio*TMath.Sqrt(nQCDselErr/nQCDsel*nQCDselErr/nQCDsel + nQCDseleErr/nQCDsele*nQCDseleErr/nQCDsele)
+        #fRatioErr = fRatio*TMath.Sqrt(nQCDselErr/nQCDsel*nQCDselErr/nQCDsel + nQCDseleErr/nQCDsele*nQCDseleErr/nQCDsele)
+        fRatioErr = fRatio*hypot(nQCDselErr/nQCDsel,nQCDseleErr/nQCDsele)
 
-    print 'F_ratio =', fRatio, '+/-', fRatioErr
+    if options.verbose > 0:
+        print 'F_ratio = %.3f +/- %.3f'%(fRatio,fRatioErr)
 
-    if doPlot:
-        print 10*'-'
-        canv = plotHists(binname, inclTemplate, mcData)
+    if options.doPlot:
+        if options.verbose > 0: print 10*'-'
+        canv = plotHists(binname, options.inclTemplate, options.mcData)
 
     return (fRatio,fRatioErr)
 
 def plotFratios(resList, isClosure = False):
 
     nbins = len(resList)
-    hist = TH1F('hRatios','F-Ratios',nbins,0,nbins)
+
+    if not isClosure:
+        hist = TH1F('hRatios','F-Ratios',nbins,0,nbins)
+    else:
+        hist = TH1F('hClosure','MC/Fit ratios',nbins,0,nbins)
 
     for i,(bin,val,err) in enumerate(resList):
         #print bin, val
@@ -365,10 +380,49 @@ if __name__ == "__main__":
     RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
 
     # OPTIONS
+
+    from optparse import OptionParser
+    parser = OptionParser()
+
+    parser.usage = '%prog [options]'
+    parser.description="""
+    Make QCD fits with Lp
+    """
+
+    parser.add_option("-b","--batch", dest="batch",default=False, action="store_true", help="Batch mode")
+    parser.add_option("-c","--closure", dest="doClosure",default=False, action="store_true", help="Do closure of MC/Fit")
+    parser.add_option("-p","--plot", dest="doPlot",default=True, action="store_true", help="Make Lp plots")
+    parser.add_option("-i","--inclTempl", dest="inclTemplate",default=True, action="store_true", help="Use Lp template from inclusive LT bin")
+    parser.add_option("--mc","--mcData", dest="mcData",default=False, action="store_true", help="Use pseudo-data from MC")
+
+    parser.add_option("-v","--verbose",  dest="verbose",  default=1,  type="int",    help="Verbosity level (0 = quiet, 1 = verbose, 2+ = more)")
+
+    # Read options and args
+    (options,args) = parser.parse_args()
+
+    '''
     doClosure = False
     doPlots = True
     inclTemplate = True
     mcData = False #True # take data from file or generate toys
+    '''
+
+    # Check options
+    if options.doClosure and not options.mcData:
+        #print "Do you really want to make a closure test with Data? [y/n]"
+
+        answ = []
+        answ.append(raw_input("Do you really want to make a closure test with Data? [y/n] "))
+
+        while( 'y' not in answ or 'n' not in answ):
+            if 'y' in answ:
+                break
+            elif 'n' in answ:
+                print 'Switching to pseudo-data from MC'
+                options.mcData = True
+                break
+            else:
+                answ.append(raw_input("Enter 'y' or 'n'"))
 
     infileName = "../lp_only_plots.root"
 
@@ -397,13 +451,14 @@ if __name__ == "__main__":
     resList = []
 
     for binName in binNames:
-        (fRat,err) = getQCDratio(tfile,binName, doPlots, mcData, doClosure, inclTemplate)
+        #(fRat,err) = getQCDratio(tfile,binName, doPlots, mcData, doClosure, inclTemplate)
+        (fRat,err) = getQCDratio(tfile, options, binName)
         resList.append((binName,fRat,err))
 
     print 80*'='
 
     # Plot results in one histo
-    hRatio = plotFratios(resList,doClosure)
+    hRatio = plotFratios(resList,options.doClosure)
 
     print 'Finished fitting. Saving Canvases...'
 
@@ -423,7 +478,7 @@ if __name__ == "__main__":
     print 'Compact results'
     for (bin,fRat,err) in resList:
         #(fRat, err) = ratioDict[bin]
-        print 'Bin\t %s has F ratio\t %f +/- %f (%f %% error)' %(bin, fRat, err, 100*err/fRat)
+        print 'Bin\t %s has F ratio\t %.3f +/- %.3f (%.2f %% error)' %(bin, fRat, err, 100*err/fRat)
         #print '%s\t%.3f\t%.3f' % (bin, fRat, err)
     print 40*'\\/'
 
@@ -431,7 +486,7 @@ if __name__ == "__main__":
         # wait for input
         answ = []
         while 'q' not in answ:
-            answ.append(raw_input("Enter 'q' to continue: "))
+            answ.append(raw_input("Enter 'q' to exit: "))
 
     # close
     tfile.Close()
