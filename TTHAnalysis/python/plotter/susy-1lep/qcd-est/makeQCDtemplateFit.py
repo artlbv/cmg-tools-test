@@ -47,7 +47,7 @@ def decryptBinName(binname):
     elif "LT1" in binname: binname = binname.replace("LT1","L_{T} #in [250,350]")
     elif "LT2" in binname: binname = binname.replace("LT2","L_{T} #in [350,450]")
     elif "LT3" in binname: binname = binname.replace("LT3","L_{T} #in [450,650]")
-    elif "LT4" in binname: binname = binname.replace("LT4","L_{T} #geq 650")
+    elif "LT4" in binname: binname = binname.replace("LT4","L_{T} #geq 600")
 
     #print 'Binname after', binname
     return binname
@@ -202,7 +202,7 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
     _dhStore['data_'+binname].plotOn(frame,RooFit.Name('data'),RooFit.DataError(RooAbsData.SumW2) )#,RooLinkedList())
 
     # plot full template fit
-    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.LineColor(4),RooFit.Name('FullFit'))
+    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.LineColor(2),RooFit.Name('FullFit'))
     # plot only QCD component
     if not inclTemplate:
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+binname]) # hack to keep arguments alive
@@ -210,10 +210,10 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
         import re
         incName = re.sub('LT[0-9]_','',binname)
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+incName]) # hack to keep arguments alive
-    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(2),RooFit.LineStyle(2),RooFit.Name('QCDfit'))
+    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(3),RooFit.LineStyle(2),RooFit.Name('QCDfit'))
     # plot only EWK
     argset2 = RooArgSet(_pdfStore['pdfEWKsel_'+binname]) # hack to keep arguments alive
-    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset2),RooFit.LineColor(3),RooFit.LineStyle(2),RooFit.Name('EWKfit'))
+    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset2),RooFit.LineColor(4),RooFit.LineStyle(2),RooFit.Name('EWKfit'))
 
     # PLOT
     canv = TCanvas("cQCDfit_"+binname,"canvas for bin "+binname,800,600)
@@ -257,8 +257,8 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
         leg.AddEntry(frame.findObject('data'),'Data','lp')
 
     leg.AddEntry(frame.findObject('FullFit'),'Full fit','l')
-    leg.AddEntry(frame.findObject('QCDfit'),'QCD fit','l')
-    leg.AddEntry(frame.findObject('EWKfit'),'EWK fit','l')
+    leg.AddEntry(frame.findObject('QCDfit'),'QCD fit (Data)','l')
+    leg.AddEntry(frame.findObject('EWKfit'),'EWK fit (MC)','l')
 
 
     if addHists:
