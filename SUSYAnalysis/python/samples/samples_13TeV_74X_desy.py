@@ -121,6 +121,10 @@ SingleTop_50ns = [
     TToLeptons_tch_50ns, TBar_tWch_50ns, T_tWch_50ns
 ]
 
+### OFFICIAL SMS SIGNALS
+T1tttt_mGo_1500to1525_mLSP_50to1125 = kreator.makeMCComponent("T1tttt_mGo_1500to1525_mLSP_50to1125", "/SMS-T1tttt_mGluino-1500to1525_mLSP-50to1125_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15FSPremix-MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root")
+
+
 ### ----------  Reprocessed PHYS14 SIGNAL samples ------------
 # location: /nfs/dust/cms/group/susy-desy/Run2/MC/MiniAOD/RunIISpring15DR74/FromGiovanni
 T1tttt_mGo1500_mChi100 = kreator.makePrivateMCComponentFromDir('T1tttt_mGo1500_mChi100', '/T1tttt_mGo1500_mChi100/', '/nfs/dust/cms/group/susy-desy/Run2/MC/MiniAOD/RunIISpring15DR74/FromGiovanni/', '*.root', 0.0141903)
@@ -135,9 +139,11 @@ mcSamples_Asymptotic50ns = [ TTJets_LO_50ns, WJetsToLNu_50ns, DYJetsToLL_M50_50n
 
 mcSamples = mcSamples_Asymptotic25ns + mcSamples_Asymptotic50ns
 
+mcSamplesSignal = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
+
 mcSamplesPriv = T1tttt_priv
 
-samples = mcSamples + mcSamplesPriv
+samples = mcSamplesSignal + mcSamples + mcSamplesPriv
 
 dataSamples = []
 

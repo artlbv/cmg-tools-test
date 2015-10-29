@@ -27,7 +27,7 @@ binsNB['NB3i'] = ('nBJet >= 3','$\geq$ 3')
 
 # NJ Bins
 binsNJ = {}
-binsNJ['NJ34'] = ('3 <= nJets && nJet <= 4','[3, 4]')
+binsNJ['NJ34'] = ('3 <= nJets && nJets <= 4','[3, 4]')
 binsNJ['NJ4i'] = ('4 <= nJets','$\geq$ 4')
 binsNJ['NJ45f9'] = ('4 <= nJets && nJets <= 5','[4, 5]')
 binsNJ['NJ45f6'] = ('4 <= nJets && nJets <= 5','[4, 5]')
