@@ -536,7 +536,7 @@ if __name__ == "__main__":
     # save plots to root file
     pureFname = os.path.basename(infileName)
 
-    outfile = TFile('plots/'+pureFname.replace('.root','_plots'+suff+'.root'),'RECREATE')
+    outfile = TFile('plots/Fits/'+pureFname.replace('.root','_plots'+suff+'.root'),'RECREATE')
     print 'Saving plots to file', outfile.GetName()
 
     extList = ['.png','.pdf']
