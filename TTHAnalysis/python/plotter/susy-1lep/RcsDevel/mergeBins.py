@@ -25,14 +25,24 @@ def matchSB(bname):
     if 'NJ68' in name:
         # match for NJ68
         name = name.replace('NJ68','NJ45f6')
-        name = name.replace('NB2_','NB2i_')
-        name = name.replace('NB3i','NB2i')
+        if 'HT2i' in name:
+            name = name.replace('NB1_','NB1i_')
+            name = name.replace('NB2_','NB1i_')
+            name = name.replace('NB2i_','NB1i_')
+            name = name.replace('NB3i','NB1i')
+        elif 'HT2i' not in name:
+            name = name.replace('NB2_','NB2i_')
+            name = name.replace('NB3i','NB2i')
     elif 'NJ9' in name:
         # match for NJ9i
         name = name.replace('NJ9i','NJ45f9')
-        name = name.replace('NB2_','NB2i_')
-        name = name.replace('NB3i_','NB2i_')
-
+        if 'LT2' in name and 'HT2i' in name:
+            name = name.replace('NB1_','NB1i_')
+            name = name.replace('NB2_','NB1i_')
+            name = name.replace('NB3i_','NB1i_')
+        else:
+            name = name.replace('NB2_','NB2i_')
+            name = name.replace('NB3i_','NB2i_')
     name = name[:-1]
 
     if options.verbose > 0:

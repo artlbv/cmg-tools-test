@@ -1,6 +1,6 @@
-<<<<<<< HEAD
+
 #inclusive low stats sample
-TTincl 	 : TTJets_LO_25ns : xsec*1.0  ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+#TTincl 	 : TTJets_LO_25ns : xsec*1.0  ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
 ############################
 #TTbar combined from semi, dilep, and full and different HT bins
 #dileptonic
@@ -66,9 +66,8 @@ TTV : TTZToLLNuNu_25ns : xsec*1.0 ; FillColor=ROOT.kOrange-3, Label="ttV(W/Z/H)"
 TTV : TTZToQQ_25ns : xsec*1.0 ; FillColor=ROOT.kOrange-3, Label="ttV(W/Z/H)", NormSystematic=0.2
 
 
-# DATA
-#data: SingleElectron_Run2015B
-#data: SingleElectron_Run2015B_17Jul
+#data: SingleElectron_Run2015D_05Oct
+#data: SingleElectron_Run2015D_v4
 
-#data: SingleMuon_Run2015B
-#data: SingleMuon_Run2015B_17Jul
+#data: SingleMuon_Run2015D_05Oct
+#data: SingleMuon_Run2015D_v4
