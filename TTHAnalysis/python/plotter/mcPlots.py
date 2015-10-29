@@ -129,16 +129,22 @@ def getLumiText(lumi = None):
 
     return lumitext
 
-def doCMSlumi(canv):
+def doCMSlumi(canv, isMC = False):
 
     CMS_lumi.writeExtraText = 1
-    CMS_lumi.extraText = "Preliminary"
+
+    if isMC:
+        CMS_lumi.extraText = "Simulation"
+    else:
+        CMS_lumi.extraText = "Preliminary"
+
     iPos = 0
     if( iPos==0 ): CMS_lumi.relPosX = 0.12
 
     iPeriod = 4 #13TeV
 
     CMS_lumi.lumi_13TeV = getLumiText()
+    #CMS_lumi.lumi_13TeV = "MC"
     CMS_lumi.CMS_lumi(canv, iPeriod, iPos)
 
 
@@ -778,7 +784,11 @@ class PlotMaker:
                 if not options.cmslumi:
                     doTinyCmsPrelim(hasExpo = total.GetMaximum() > 9e4 and not c1.GetLogy(),textSize=(0.045 if doRatio else 0.033))
                 else:
-                    doCMSlumi(c1)
+                    if 'data' in pmap:
+                        doCMSlumi(c1)
+                    else:
+                        doCMSlumi(c1,True)
+
                 if not options.extraLabel=="": printExtraLabel(options.extraLabel,pspec.getOption('Legend','TR'))
                 signorm = None; datnorm = None; sfitnorm = None
                 if options.showSigShape or options.showIndivSigShapes or options.showIndivSigs: 
