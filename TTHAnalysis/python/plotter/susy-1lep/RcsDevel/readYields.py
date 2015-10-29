@@ -85,6 +85,15 @@ def getScanYieldDict(tfile, hname = "T1tttt_HM_1200_800",bindir = "", leptype = 
 
     return ret
 
+#########################
+### For QCD estimation
+#########################
+
+
+#########################
+### Old stuff for testing
+#########################
+
 def makeBinHisto(ydict, hname = "hYields"):
 
     nbins = len(ydict)
@@ -216,7 +225,7 @@ def rename(nameList):
 
     return newList
 
-def makeKappaHists(fileList):
+def makeKappaHists_old(fileList):
 
     # filter
     #fileList = [fname for fname in fileList if 'NB3' not in fname]
@@ -275,7 +284,7 @@ if __name__ == "__main__":
     # find files matching pattern
     fileList = glob.glob(pattern+"*.root")
 
-    #makeKappaHists(fileList)
+    #makeKappaHists_old(fileList)
 
     #hKappa = getYHisto(fileList,"hKappa", "Kappa_background",  "Kappa", ("mu","sele"))
     #hKappa.Draw("histe1")

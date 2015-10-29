@@ -505,24 +505,37 @@ class EventVars1L_base:
         ret['dPhiNoHF'] = dPhiNoHF
         ret['LTNoHF'] = LTNoHF
 
-        #############
-        ## Playground
-        #############
+        #####################
+        ## SIGNAL REGION FLAG
+        #####################
 
         ## Signal region flag
         # isSR SR vs CR flag
         isSR = 0
 
-        if LT < 250:   isSR = 0
-        elif LT < 350: isSR = dPhi > 1.0
-        elif LT < 600: isSR = dPhi > 0.75
-        elif LT > 600: isSR = dPhi > 0.5
+        # 0-B SRs -- simplified dPhi
+        if ret['nBJet'] == 0:
+            if LT < 250:   isSR = 0
+            elif LT > 250: isSR = dPhi > 0.75
+            # BLIND data
+            if event.isData and nJetC >= 5:
+                isSR = - isSR
+        # Multi-B SRs
+        else:
+            if LT < 250:   isSR = 0
+            elif LT < 350: isSR = dPhi > 1.0
+            elif LT < 600: isSR = dPhi > 0.75
+            elif LT > 600: isSR = dPhi > 0.5
 
-        # BLIND data
-        if event.isData and nJetC >= 6:
-            isSR = - isSR
+            # BLIND data
+            if event.isData and nJetC >= 6:
+                isSR = - isSR
 
         ret['isSR'] = isSR
+
+        #############
+        ## Playground
+        #############
 
         # di-lepton mass: opposite-sign, same flavour
         Mll = 0

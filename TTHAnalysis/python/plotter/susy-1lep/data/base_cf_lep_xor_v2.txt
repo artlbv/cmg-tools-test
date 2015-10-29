@@ -1,13 +1,20 @@
+# blind data
+blind: !isData || (isData && run <= 257599)
+#CR: isSR == 0
+
 HTskim > 350: HT > 350
 HT > 500: HT > 500
-== 1 hard lep: nLep == 1 && Selected == 1 && Lep_pt > 25 && nVeto == 0
+== 1 hard lep: nLep == 1 && Selected == 1 && Lep_pt > 25
+XOR: !isData || (isData && ((PD_SingleEle && nEl==1) || (PD_SingleMu && nMu==1)))
+veto: nVeto == 0
 
 Trigger: !isData || (isData && (HLT_EleHT350 || HLT_MuHT350))
 ## use the following line to pick leptons only from the corresponding PD
-XOR: !isData || (isData && ((PD_SingleEle && nEl==1) || (PD_SingleMu && nMu==1)))
 
-#nJet >= 2: nJet >= 2
-nJet >= 4: nJet >= 4
+#nJets = 4,5: 4 <= nJets && nJets <= 5
+#nJets >= 6: nJets >= 6
+nJets >= 4: nJets >= 4
+
 #LSL JetPt> 80: LSLjetptGT80 == 1
 2.JetPt > 80: Jet2_pt > 80
 
