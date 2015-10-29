@@ -23,7 +23,7 @@ def getPnames(fname,tdir):
 
     return pnames
 
-def getRcsHist(tfile, hname, band = "SB"):
+def getRcsHist(tfile, hname, band = "SB", merge = False):
 
     hSR = tfile.Get("SR_"+band+"/"+hname)
     hCR = tfile.Get("CR_"+band+"/"+hname)
@@ -32,6 +32,15 @@ def getRcsHist(tfile, hname, band = "SB"):
     hRcs.Divide(hCR)
 
     hRcs.GetYaxis().SetTitle("Rcs")
+
+    # merge means ele/mu values are overwritten by the combined Rcs
+    if 'data' in hname: merge = True
+
+    if merge:
+        rcs = hRcs.GetBinContent(2,2); err = hRcs.GetBinError(2,2) # lep sele
+
+        hRcs.SetBinContent(1,2,rcs); hRcs.SetBinError(1,2,err) # mu sele
+        hRcs.SetBinContent(3,2,rcs); hRcs.SetBinError(3,2,err) # ele sele
 
     return hRcs
 
@@ -302,6 +311,37 @@ def makePredictHists(fileList):
 
     return 1
 
+def makeClosureHists(fileList):
+
+    pnames = getPnames(fileList[0],'SR_MB') # get process names from file
+    #print 'Found these hists:', pnames
+
+    bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
+
+    for fname in fileList:
+        tfile = TFile(fname,"UPDATE")
+
+        # create Closure dir
+        if not tfile.GetDirectory("Closure"):
+            tfile.mkdir("Closure")
+
+        for pname in pnames:
+
+            hPred = tfile.Get("SR_MB_predict/"+pname+"_pred")
+            hExp = tfile.Get("SR_MB/"+pname)
+
+            hDiff = hExp.Clone(hExp.GetName()+"_diff")
+            hDiff.Add(hPred,-1)
+
+            hDiff.GetYaxis().SetTitle("Expected - Predicted")
+
+            tfile.cd("Closure")
+            hDiff.Write()
+
+        tfile.Close()
+
+    return 1
+
 if __name__ == "__main__":
 
     ## remove '-b' option
@@ -324,6 +364,7 @@ if __name__ == "__main__":
     makeQCDsubtraction(fileList)
     makeKappaHists(fileList)
     makePredictHists(fileList)
+    makeClosureHists(fileList)
 
     #tfile = TFile(fileList[0],"UPDATE")
     #getQCDsubtrHisto(tfile,"background","")
