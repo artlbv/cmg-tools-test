@@ -68,17 +68,22 @@ class EventVars1L_signal:
         if not event.isData:
 
             ## MASS POINT
+            mGo = 0
+            mLSP = 0
 
             # Gluino Mass
             if hasattr(event,'GenSusyMGluino'):
                 ret['mGo'] = event.GenSusyMGluino
+                mGo = ret['mGo']
 
             # LSP Mass
             if hasattr(event,'GenSusyMNeutralino'):
                 ret['mLSP'] = event.GenSusyMNeutralino
+                mLSP = ret['mLSP']
 
             # Fill for testing
-            if True:
+            pseudoScan = False
+            if pseudoScan:
                 mGo = 0
                 mLSP = 10
 
