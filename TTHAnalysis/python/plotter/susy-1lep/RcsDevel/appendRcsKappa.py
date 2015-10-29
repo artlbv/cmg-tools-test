@@ -35,6 +35,27 @@ def getRcsHist(tfile, hname, band = "SB"):
 
     return hRcs
 
+def getPredHist(tfile, hname):
+
+    hRcsMB = tfile.Get("Rcs_SB/"+hname)
+
+    if 'data' in hname:
+        # use EWK template
+        hKappa = tfile.Get("Kappa/EWK")
+    else:
+        hKappa = tfile.Get("Kappa/"+hname)
+
+    # get yield from CR of MB
+    hCR_MB = tfile.Get("CR_MB/"+hname)
+
+    hPred = hCR_MB.Clone(hCR_MB.GetName()+"_pred")
+    hPred.SetTitle("Predicted yield")
+
+    hPred.Multiply(hRcsMB)
+    hPred.Multiply(hKappa)
+
+    return hPred
+
 def readQCDratios(fname = "lp_LTbins_NJ34_f-ratios_MC.txt"):
 
     fDict = {}
@@ -130,6 +151,7 @@ def getQCDsubtrHisto(tfile, pname = "background", band = "CR_MB/", isMC = True, 
     '''
 
 
+'''
 def getRcsWqcd(tfile, pname, band = "MB", lep = "lep"):
 
     rcsName = "Rcs_" + pname
@@ -154,7 +176,7 @@ def getRcsWqcd(tfile, pname, band = "MB", lep = "lep"):
 
 
     return 1
-
+'''
 
 def makeQCDsubtraction(fileList):
 
@@ -177,9 +199,11 @@ def makeQCDsubtraction(fileList):
                 else: isMC = True
 
                 hNew = getQCDsubtrHisto(tfile,pname,bindir+"/",isMC)
-
-                tfile.cd(bindir)
-                hNew.Write()
+                if not hNew:
+                    print 'Could not create new histo for', pname
+                else:
+                    tfile.cd(bindir)
+                    hNew.Write()
                 tfile.cd()
 
         tfile.Close()
@@ -245,6 +269,38 @@ def makeKappaHists(fileList):
 
     return 1
 
+def makePredictHists(fileList):
+
+    # get process names from file
+    pnames = getPnames(fileList[0],'SR_MB')
+
+    print 'Found these hists:', pnames
+
+    #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
+
+    for fname in fileList:
+        tfile = TFile(fname,"UPDATE")
+
+        # create Rcs/Kappa dir struct
+        if not tfile.GetDirectory("SR_MB_predict"):
+            tfile.mkdir("SR_MB_predict")
+
+            for pname in pnames:
+
+                hPredict = getPredHist(tfile,pname)
+
+                if hPredict:
+                    tfile.cd("SR_MB_predict")
+                    hPredict.Write()
+                    #print "Wrote prediction of", pname
+                else:
+                    print "Failed to make prediction for", pname
+        else:
+            pass
+
+        tfile.Close()
+
+    return 1
 
 if __name__ == "__main__":
 
@@ -267,6 +323,7 @@ if __name__ == "__main__":
 
     makeQCDsubtraction(fileList)
     makeKappaHists(fileList)
+    makePredictHists(fileList)
 
     #tfile = TFile(fileList[0],"UPDATE")
     #getQCDsubtrHisto(tfile,"background","")
