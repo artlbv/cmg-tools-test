@@ -33,7 +33,13 @@ btag_LooseWP = 0.605
 btag_MediumWP = 0.890
 btag_TightWP = 0.990
 
-eleID = 'MVA' # 'MVA' or 'CB'
+eleID = 'CB' # 'MVA' or 'CB'
+
+print
+print 30*'#'
+print 'Going to use', eleID, 'electron ID!'
+print 30*'#'
+print
 
 ## PHYS14 IDs
 ## Non-triggering electron MVA id (Phys14 WP)
@@ -52,7 +58,7 @@ Ele_mvaPhys14_eta2p4_L = -0.52;
 
 ## SPRING15 IDs
 ## Non-triggering electron MVA id (Spring15 WP):
-#see RA5 talk: https://indico.cern.ch/event/452858/contribution/3/attachments/1168129/1685069/RA5_Status_Report_Oct._9_2015.pdf slide 20 -- wrong loose WP
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/SUSLeptonSF#Electrons
 # Tight MVA WP
 Ele_mvaSpring15_eta0p8_T = 0.87;
 Ele_mvaSpring15_eta1p4_T = 0.6;
@@ -148,7 +154,7 @@ class EventVars1L_base:
             # no HF stuff
             'METNoHF', 'LTNoHF', 'dPhiNoHF',
             ## jets
-            'HT','nJets','nBJet',
+            'HT','nJets','nJets30','nBJet',
             "htJet30j", "htJet30ja",
             'Jet1_pt','Jet2_pt',
             ## top tags
@@ -182,9 +188,9 @@ class EventVars1L_base:
         # -- needs to be adjusted manually
         ##############################
         if event.isData:
-            ret['PD_JetHT'] = 0
+            ret['PD_JetHT'] = 1
             ret['PD_SingleEle'] = 0
-            ret['PD_SingleMu'] = 1
+            ret['PD_SingleMu'] = 0
         else:
             ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
@@ -439,6 +445,7 @@ class EventVars1L_base:
 
         nJetC = len(centralJet30)
         ret['nJets']   = nJetC
+        ret['nJets30']   = nJetC
 
         if nJetC > 0:
             ret['Jet1_pt'] = centralJet30[0].pt
@@ -498,24 +505,37 @@ class EventVars1L_base:
         ret['dPhiNoHF'] = dPhiNoHF
         ret['LTNoHF'] = LTNoHF
 
-        #############
-        ## Playground
-        #############
+        #####################
+        ## SIGNAL REGION FLAG
+        #####################
 
         ## Signal region flag
         # isSR SR vs CR flag
         isSR = 0
 
-        if LT < 250:   isSR = 0
-        elif LT < 350: isSR = dPhi > 1.0
-        elif LT < 600: isSR = dPhi > 0.75
-        elif LT > 600: isSR = dPhi > 0.5
+        # 0-B SRs -- simplified dPhi
+        if ret['nBJet'] == 0:
+            if LT < 250:   isSR = 0
+            elif LT > 250: isSR = dPhi > 0.75
+            # BLIND data
+            if event.isData and nJetC >= 5:
+                isSR = - isSR
+        # Multi-B SRs
+        else:
+            if LT < 250:   isSR = 0
+            elif LT < 350: isSR = dPhi > 1.0
+            elif LT < 600: isSR = dPhi > 0.75
+            elif LT > 600: isSR = dPhi > 0.5
 
-        # BLIND data
-        if event.isData and nJetC >= 6:
-            isSR = - isSR
+            # BLIND data
+            if event.isData and nJetC >= 6:
+                isSR = - isSR
 
         ret['isSR'] = isSR
+
+        #############
+        ## Playground
+        #############
 
         # di-lepton mass: opposite-sign, same flavour
         Mll = 0

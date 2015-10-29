@@ -7,24 +7,27 @@ import PhysicsTools.HeppyCore.framework.config as cfg
 #Load all analyzers
 from CMGTools.TTHAnalysis.analyzers.susyCore_modules_cff import *
 
+#JSON
+jsonAna.useLumiBlocks = True
+
 ####### Leptons  #####
 # lep collection
 lepAna.packedCandidates = 'packedPFCandidates'
 
 ## ELECTRONS
-lepAna.loose_electron_pt  = 5
-eleID = "MVAID"
+lepAna.loose_electron_pt  = 10
+eleID = "CBID"
 
 if eleID == "CBID":
 	lepAna.loose_electron_id  = "POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto_full5x5"
-	lepAna.loose_electron_lostHits = 999. # no cut
-	lepAna.loose_electron_dxy    = 999.
-	lepAna.loose_electron_dz     = 999.
+	lepAna.loose_electron_lostHits = 999. # no cut since embedded in ID
+	lepAna.loose_electron_dxy    = 999. # no cut since embedded in ID
+	lepAna.loose_electron_dz     = 999. # no cut since embedded in ID
 
-	lepAna.inclusive_electron_id  = ""#"POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto_full5x5"
-	lepAna.inclusive_electron_lostHits = 999. # no cut since embedded in ID
-	lepAna.inclusive_electron_dxy    = 999. # no cut since embedded in ID
-	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_id  = "" # Keep no ID
+	lepAna.inclusive_electron_lostHits = 5. #
+	lepAna.inclusive_electron_dxy    = 0.5 # very loose (like in core)
+	lepAna.inclusive_electron_dz     = 1.0 # very loose (like in core)
 
 elif eleID == "MVAID":
 	inclusive_electron_id  = "" # same as in susyCore
@@ -44,7 +47,7 @@ elif eleID == "Incl": # as inclusive as possible
 	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
 
 ## MUONS
-lepAna.loose_muon_pt  = 5
+lepAna.loose_muon_pt  = 10
 
 # Isolation
 isolation = "miniIso"
@@ -71,7 +74,7 @@ ttHLepSkim.maxLeptons = 999
 #LepSkim.ptCuts = []
 
 ####### JETS #########
-jetAna.jetPt = 25
+jetAna.jetPt = 30
 jetAna.jetEta = 2.4
 
 # --- JET-LEPTON CLEANING ---
@@ -178,7 +181,7 @@ isData = True # default, but will be overwritten below
 
 sample = 'MC'
 #sample = 'data'
-test = 0
+test = 1
 
 if sample == "MC":
 
@@ -204,7 +207,8 @@ if sample == "MC":
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = TTJets_LO_25ns
+		#comp = TTJets_LO_25ns
+		comp = T1tttt_mGo_1500to1525_mLSP_50to1125
 		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
@@ -223,10 +227,12 @@ if sample == "MC":
 		# PRODUCTION
 		# run on everything
 
-		#selectedComponents = mcSamples_Asymptotic50ns
-		#selectedComponents =[ TTJets_LO_25ns]#QCD_HT
-		#selectedComponents = [  TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
-		selectedComponents = [TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar]#, TTJets_DiLepton]
+		#selectedComponents =[ TTJets_LO_25ns ]
+		#selectedComponents = [ TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
+		#selectedComponents += [TTJets_SingleLeptonFromT_ext1 , TTJets_SingleLeptonFromTbar_ext1 , TTJets_DiLepton_ext1]
+		#selectedComponents = [TTJets_DiLepton]
+		#selectedComponents = [TTJets_DiLepton_ext1]
+		selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 2

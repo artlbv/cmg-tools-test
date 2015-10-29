@@ -11,8 +11,11 @@ kreator = ComponentCreator()
 TTJets_LO_25ns = kreator.makeMCComponentFromDESY("TTJets_LO_25ns", "/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM", "CMS", ".*root", 831.76)
 # single/di-lepton
 TTJets_SingleLeptonFromT = kreator.makeMCComponentFromDESY("TTJets_SingleLeptonFromT", "/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root", 831.76*(3*0.108)*(1-3*0.108))
+TTJets_SingleLeptonFromT_ext1 = kreator.makeMCComponentFromDESY("TTJets_SingleLeptonFromT_ext1", "/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM", "CMS", ".*root", 831.76*(3*0.108)*(1-3*0.108))
 TTJets_SingleLeptonFromTbar = kreator.makeMCComponentFromDESY("TTJets_SingleLeptonFromTbar", "/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM", "CMS", ".*root", 831.76*(3*0.108)*(1-3*0.108))
+TTJets_SingleLeptonFromTbar_ext1 = kreator.makeMCComponentFromDESY("TTJets_SingleLeptonFromTbar_ext1", "/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM", "CMS", ".*root", 831.76*(3*0.108)*(1-3*0.108))
 TTJets_DiLepton = kreator.makeMCComponentFromDESY("TTJets_DiLepton", "/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM", "CMS", ".*root", 831.76*((3*0.108)**2))
+TTJets_DiLepton_ext1 = kreator.makeMCComponentFromDESY("TTJets_DiLepton_ext1", "/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM", "CMS", ".*root", 831.76*((3*0.108)**2))
 
 ##HT binned samples
 TTJets_HT600to800 = kreator.makeMCComponentFromDESY("TTJets_HT600to800", "/TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root", 1.61*1.655)
@@ -20,7 +23,7 @@ TTJets_HT800to1200 = kreator.makeMCComponentFromDESY("TTJets_HT800to1200", "/TTJ
 TTJets_HT1200to2500 = kreator.makeMCComponentFromDESY("TTJets_HT1200to2500", "/TTJets_HT-1200to2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root", 0.12*1.655)
 TTJets_HT2500toInf = kreator.makeMCComponentFromDESY("TTJets_HT2500toInf", "/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root", 0.00143*1.655)
 
-TTs = [ TTJets_LO_25ns , TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar, TTJets_DiLepton, TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf]
+TTs = [ TTJets_LO_25ns , TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromT_ext1, TTJets_SingleLeptonFromTbar, TTJets_SingleLeptonFromTbar_ext1, TTJets_DiLepton, TTJets_DiLepton_ext1, TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf]
 
 ### V+jets inclusive (from https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV)
 WJetsToLNu = kreator.makeMCComponentFromDESY("WJetsToLNu","/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root", 3* 20508.9)
@@ -118,6 +121,10 @@ SingleTop_50ns = [
     TToLeptons_tch_50ns, TBar_tWch_50ns, T_tWch_50ns
 ]
 
+### OFFICIAL SMS SIGNALS
+T1tttt_mGo_1500to1525_mLSP_50to1125 = kreator.makeMCComponent("T1tttt_mGo_1500to1525_mLSP_50to1125", "/SMS-T1tttt_mGluino-1500to1525_mLSP-50to1125_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15FSPremix-MCRUN2_74_V9-v1/MINIAODSIM", "CMS", ".*root")
+
+
 ### ----------  Reprocessed PHYS14 SIGNAL samples ------------
 # location: /nfs/dust/cms/group/susy-desy/Run2/MC/MiniAOD/RunIISpring15DR74/FromGiovanni
 T1tttt_mGo1500_mChi100 = kreator.makePrivateMCComponentFromDir('T1tttt_mGo1500_mChi100', '/T1tttt_mGo1500_mChi100/', '/nfs/dust/cms/group/susy-desy/Run2/MC/MiniAOD/RunIISpring15DR74/FromGiovanni/', '*.root', 0.0141903)
@@ -132,9 +139,11 @@ mcSamples_Asymptotic50ns = [ TTJets_LO_50ns, WJetsToLNu_50ns, DYJetsToLL_M50_50n
 
 mcSamples = mcSamples_Asymptotic25ns + mcSamples_Asymptotic50ns
 
+mcSamplesSignal = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
+
 mcSamplesPriv = T1tttt_priv
 
-samples = mcSamples + mcSamplesPriv
+samples = mcSamplesSignal + mcSamples + mcSamplesPriv
 
 dataSamples = []
 
