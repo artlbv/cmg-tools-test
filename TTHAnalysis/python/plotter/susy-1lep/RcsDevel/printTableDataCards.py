@@ -344,7 +344,7 @@ if __name__ == "__main__":
         tableList = ['EWK','TT','TTincl','TTdiLep','TTsemiLep','WJets','TTV','data']
         #tableList = ['TT','TTincl']
         for name in tableList:
-            printBinnedRcsKappaTable((dictRcs_MB, dictRcs_SB, dictKappa),  [name],'Rcs_table_'+name)
+            printBinnedRcsKappaTable((dictRcs_MB,dictRcs_SB, dictKappa),  [name],'Rcs_table_'+name)
         
 
         sigYields9 = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
