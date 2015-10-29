@@ -129,16 +129,22 @@ def getLumiText(lumi = None):
 
     return lumitext
 
-def doCMSlumi(canv):
+def doCMSlumi(canv, isMC = False):
 
     CMS_lumi.writeExtraText = 1
-    CMS_lumi.extraText = "Preliminary"
+
+    if isMC:
+        CMS_lumi.extraText = "Simulation"
+    else:
+        CMS_lumi.extraText = "Preliminary"
+
     iPos = 0
     if( iPos==0 ): CMS_lumi.relPosX = 0.12
 
     iPeriod = 4 #13TeV
 
     CMS_lumi.lumi_13TeV = getLumiText()
+    #CMS_lumi.lumi_13TeV = "MC"
     CMS_lumi.CMS_lumi(canv, iPeriod, iPos)
 
 
@@ -639,6 +645,7 @@ class PlotMaker:
                     dir.WriteTObject(v)
                 #
                 for p in itertools.chain(reversed(mca.listBackgrounds(allProcs=True)), reversed(mca.listSignals(allProcs=True))):
+
                     if p in pmap: 
                         plot = pmap[p]
                         if plot.Integral() <= 0: continue
@@ -668,6 +675,16 @@ class PlotMaker:
                             plot.SetMarkerSize(1.5)
                         else:
                             plot.SetMarkerStyle(0)
+
+
+                # to get fraction
+                if self._options.fraction:
+                    for plot in stack.GetHists():
+                        plot.Divide(total)
+                        plot.SetLineColor(plot.GetFillColor())
+                    total.Divide(total)
+                    total.SetMaximum(1)
+
                 stack.Draw("GOFF")
                 stack.GetYaxis().SetTitle(pspec.getOption('YTitle',"Events"))
                 stack.GetXaxis().SetTitle(pspec.getOption('XTitle',pspec.name))
@@ -708,7 +725,7 @@ class PlotMaker:
                 #if islog: total.SetMaximum(2*total.GetMaximum())
                 #if not islog: total.SetMinimum(0)
                 if not options.extraLabel=="": #free some space on the canvas for extra label lines
-                    tmpMin = 0.01 #default log miminum
+                    tmpMin = 0.1 #default log miminum
                     if pspec.hasOption('YMin'):
                         tmpMin = pspec.getOption('YMin',1.0)
                     total.SetMinimum(tmpMin)
@@ -725,7 +742,10 @@ class PlotMaker:
 
                 total.Draw("HIST")
                 if self._options.plotmode == "stack":
-                    stack.Draw("SAME HIST")
+                    if self._options.fraction:
+                        stack.Draw("SAME HIST E")
+                    else:
+                        stack.Draw("SAME HIST ")
                     total.Draw("AXIS SAME")
                 else: 
                     if self._options.errors:
@@ -764,7 +784,11 @@ class PlotMaker:
                 if not options.cmslumi:
                     doTinyCmsPrelim(hasExpo = total.GetMaximum() > 9e4 and not c1.GetLogy(),textSize=(0.045 if doRatio else 0.033))
                 else:
-                    doCMSlumi(c1)
+                    if 'data' in pmap:
+                        doCMSlumi(c1)
+                    else:
+                        doCMSlumi(c1,True)
+
                 if not options.extraLabel=="": printExtraLabel(options.extraLabel,pspec.getOption('Legend','TR'))
                 signorm = None; datnorm = None; sfitnorm = None
                 if options.showSigShape or options.showIndivSigShapes or options.showIndivSigs: 
@@ -844,10 +868,8 @@ class PlotMaker:
 def addPlotMakerOptions(parser):
     addMCAnalysisOptions(parser)
     parser.add_option("--ss",  "--scale-signal", dest="signalPlotScale", default=1.0, type="float", help="scale the signal in the plots by this amount");
-    #parser.add_option("--cmslumi", dest="cmslumi", type="string", default=("Preliminary","13TeV","%(lumi).1f pb^{-1}"), help="CMS lumi text");
     parser.add_option("--cmslumi", dest="cmslumi", action="store_true", default=True, help="Do official CMS lumi text")
     parser.add_option("--lspam", dest="lspam",   type="string", default="CMS Preliminary", help="Spam text on the right hand side");
-    #parser.add_option("--rspam", dest="rspam",   type="string", default="#sqrt{s} = 13 TeV, L = %(lumi)", help="Spam text on the right hand side");
     parser.add_option("--rspam", dest="rspam",   type="string", default="%(lumi) (13 TeV)", help="Spam text on the right hand side");
     parser.add_option("--print", dest="printPlots", type="string", default="png,pdf,txt", help="print out plots in this format or formats (e.g. 'png,pdf,txt')");
     parser.add_option("--pdir", "--print-dir", dest="printDir", type="string", default="plots", help="print out plots in this directory");
@@ -874,8 +896,9 @@ def addPlotMakerOptions(parser):
     parser.add_option("--legendWidth", dest="legendWidth", type="float", default=0.25, help="Width of the legend")
     parser.add_option("--flagDifferences", dest="flagDifferences", action="store_true", default=False, help="Flag plots that are different (when using only two processes, and plotmode nostack")
     parser.add_option("--pseudoData", dest="pseudoData", type="string", default=None, help="If set to 'background' or 'all', it will plot also a pseudo-dataset made from background (or signal+background) with Poisson fluctuations in each bin.")
+    # acdv
     parser.add_option("--extraLabel", dest="extraLabel", default = "", help="print extra text next to the legend (several lines in case string contains \\n )")
-
+    parser.add_option("--fraction", dest="fraction", action="store_true", default=False, help="Do Fraction plots instead")
 
 if __name__ == "__main__":
     from optparse import OptionParser

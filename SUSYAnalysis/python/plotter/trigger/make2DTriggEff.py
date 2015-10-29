@@ -509,7 +509,11 @@ if __name__ == "__main__":
 
     if 'JetHT' in fileName:
 
-        lumi = 42.0
+        #lumi = 42.0
+        if '147pb' in fileName:
+            lumi = 147.0
+        elif '1260pb' in fileName:
+            lumi = 1260
 
         ## LepPt vs MET
         var = ('MET','Lep_pt')
@@ -517,24 +521,25 @@ if __name__ == "__main__":
         refTrig = ''#HT800'
 
         ## Muons
-        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 5 && HT > 400'
-        testTrig = ['Mu50||MuHT350MET70']#,'Mu50','MuHT350MET70']
-        #make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
+        cuts = 'Selected == 1 && nMu >= 1 && Lep_pt > 25 && HT > 500'
+        testTrig = ['Mu50||MuHT350MET50','MuHT350']#,'Mu50','MuHT350MET70']
+        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
 
         ## Electrons
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5 && HT > 400'
-        testTrig = ['Ele105||EleHT350MET70']#,'Ele105','EleHT350MET70']
-        #make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
+        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 25 && HT > 500'
+        testTrig = ['Ele105||EleHT350MET50','EleHT350']#,'Ele105','EleHT350MET70']
+        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
 
         ## LepPt vs LepEta
-        var = ('Lep_eta','Lep_pt')
-        varList = [var]
-        refTrig = ''#HT800'
+        #var = ('Lep_eta','Lep_pt')
+        #varList = [var]
+        refTrig = 'HT350MET100'#HT800'
 
         ## Electrons
-        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 5'# && HT > 400'
-        testTrig = ['Ele105']
-        make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
+        cuts = 'Selected == 1 && nEl >= 1 && Lep_pt > 25'# && HT > 400'
+        #testTrig = ['Ele105']
+        testTrig = ['EleHT350']
+        #make2DEffPlots(tree, lumi, maxEntries, varList, refTrig, testTrig, cuts)
 
     elif 'HTMHT' in fileName:
 
