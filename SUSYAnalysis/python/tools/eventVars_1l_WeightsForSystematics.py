@@ -39,7 +39,7 @@ class EventVars1LWeightsForSystematics:
             if TopPtWeight<0.5: TopPtWeight=0.5
             
             if GenAntiTopIdx!=-999 and GenTopIdx!=-999:
-                GenTTBarp4 = genPart[GenTopIdx].p4()+ genPart[GenAntiTopIdx].p4()
+                GenTTBarp4 = genParts[GenTopIdx].p4()+ genParts[GenAntiTopIdx].p4()
                 GenTTBarPt = GenTTBarp4.Pt()
                 if GenTTBarPt>120: GenTTBarWeight= 0.95
                 if GenTTBarPt>150: GenTTBarWeight= 0.90
