@@ -9,11 +9,48 @@ from math import hypot
 from ROOT import *
 #sys.argv = tmpArg
 
+## STYLE
+gStyle.SetOptTitle(0)
+gStyle.SetOptStat(0)
+gStyle.SetPadTopMargin(0.05)
+gStyle.SetPadRightMargin(0.075)
+
+#gStyle.SetLabelFont(62)
+#gStyle.SetTitleFont(62)
+
+## CMS Lumi
+#from CMGTools.TTHAnalysis.plotter.CMS_lumi import CMS_lumi
+#import CMGTools.TTHAnalysis.plotter.CMS_lumi
+#sys.path.append("$CMSSW_BASE/src/CMGTools/TTHAnalysis/python/plotter/")
+import CMS_lumi
+
+CMS_lumi.writeExtraText = 1
+CMS_lumi.extraText = "Preliminary"
+iPos = 11
+if( iPos==0 ): CMS_lumi.relPosX = 0.1
+
+## DICTS for storage
 _dhStore = {}
 _pdfStore = {}
 _varStore = {}
 _hStore = {}
 _canvStore = {}
+
+def decryptBinName(binname):
+
+    #print 'Binname before', binname
+    binname = binname.replace("_"," ")
+    binname = binname.replace('NJ34','')
+    #binname = binname.replace('NJ34','N_{jet} #in [3,4] ')
+
+    if "LT" not in binname: binname += "L_{T} #geq 250"
+    elif "LT1" in binname: binname = binname.replace("LT1","L_{T} #in [250,350]")
+    elif "LT2" in binname: binname = binname.replace("LT2","L_{T} #in [350,450]")
+    elif "LT3" in binname: binname = binname.replace("LT3","L_{T} #in [450,650]")
+    elif "LT4" in binname: binname = binname.replace("LT4","L_{T} #geq 600")
+
+    #print 'Binname after', binname
+    return binname
 
 def doLegend():
 
@@ -165,7 +202,7 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
     _dhStore['data_'+binname].plotOn(frame,RooFit.Name('data'),RooFit.DataError(RooAbsData.SumW2) )#,RooLinkedList())
 
     # plot full template fit
-    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.LineColor(4),RooFit.Name('FullFit'))
+    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.LineColor(2),RooFit.Name('FullFit'))
     # plot only QCD component
     if not inclTemplate:
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+binname]) # hack to keep arguments alive
@@ -173,22 +210,26 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
         import re
         incName = re.sub('LT[0-9]_','',binname)
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+incName]) # hack to keep arguments alive
-    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(2),RooFit.LineStyle(2),RooFit.Name('QCDfit'))
+    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(3),RooFit.LineStyle(2),RooFit.Name('QCDfit'))
     # plot only EWK
     argset2 = RooArgSet(_pdfStore['pdfEWKsel_'+binname]) # hack to keep arguments alive
-    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset2),RooFit.LineColor(3),RooFit.LineStyle(2),RooFit.Name('EWKfit'))
+    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset2),RooFit.LineColor(4),RooFit.LineStyle(2),RooFit.Name('EWKfit'))
 
     # PLOT
     canv = TCanvas("cQCDfit_"+binname,"canvas for bin "+binname,800,600)
     frame.Draw()
 
     if addHists:
-        _hStore['EWKsel_'+binname].SetFillStyle(3001)
-        _hStore['QCDsel_'+binname].SetFillStyle(3002)
 
-        alpha = 0.35
-        _hStore['EWKsel_'+binname].SetFillColorAlpha(_hStore['EWKsel_'+binname].GetFillColor(),alpha)
-        _hStore['QCDsel_'+binname].SetFillColorAlpha(_hStore['QCDsel_'+binname].GetFillColor(),alpha)
+        doTransp = True
+
+        if doTransp:
+            alpha = 0.35
+            _hStore['EWKsel_'+binname].SetFillColorAlpha(_hStore['EWKsel_'+binname].GetFillColor(),alpha)
+            _hStore['QCDsel_'+binname].SetFillColorAlpha(_hStore['QCDsel_'+binname].GetFillColor(),alpha)
+        else:
+            _hStore['EWKsel_'+binname].SetFillStyle(3001)
+            _hStore['QCDsel_'+binname].SetFillStyle(3002)
 
         stack = THStack('hs','hstack')
         stack.Add(_hStore['QCDsel_'+binname])
@@ -206,24 +247,34 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
     # LEGEND
     leg = doLegend()
 
+    # set legend header = bin name
+    #leg.SetHeader("Bin: " + binname.replace("_",", "))
+    leg.SetHeader("Bin: " + decryptBinName(binname))
+
     if mcData:
         leg.AddEntry(frame.findObject('data'),'Pseudo Data','lp')
     else:
         leg.AddEntry(frame.findObject('data'),'Data','lp')
 
+    leg.AddEntry(frame.findObject('FullFit'),'Full fit','l')
+    leg.AddEntry(frame.findObject('QCDfit'),'QCD fit (Data)','l')
+    leg.AddEntry(frame.findObject('EWKfit'),'EWK fit (MC)','l')
+
+
     if addHists:
+        leg.AddEntry(0,"From MC:","")
         leg.AddEntry(_hStore['EWKsel_'+binname],'EWK selected','f')
         leg.AddEntry(_hStore['QCDsel_'+binname],'QCD selected','f')
 
-    leg.AddEntry(frame.findObject('FullFit'),'Full fit','l')
-    leg.AddEntry(frame.findObject('QCDfit'),'QCD fit','l')
-    leg.AddEntry(frame.findObject('EWKfit'),'EWK fit','l')
 
     leg.Draw()
 
     SetOwnership( leg, 0 )
 
     #for prim in  canv.GetListOfPrimitives(): print prim
+
+    # Draw CMS Lumi
+    CMS_lumi.CMS_lumi(canv, 4, iPos)
 
     gPad.Update()
 
@@ -342,7 +393,7 @@ def plotFratios(resList, isClosure = False):
         #print bin, val
         #binName = bin[:bin.find("_NJ")]
         binName = bin
-        hist.GetXaxis().SetBinLabel(i+1,binName)
+        hist.GetXaxis().SetBinLabel(i+1,decryptBinName(binName))
         hist.SetBinContent(i+1,val)
         hist.SetBinError(i+1,err)
 
@@ -354,9 +405,11 @@ def plotFratios(resList, isClosure = False):
     # style
     hist.SetMarkerStyle(20)
     hist.Draw('E1p')
+    hist.GetYaxis().SetTitleOffset(1.4)
 
     if not isClosure:
         hist.GetYaxis().SetTitle("F_{sel-to-anti} QCD")
+
         #hist.GetYaxis().SetRangeUser(0.,0.8)
     else:
         hist.GetYaxis().SetTitle("F_{fit-to-mc} QCD_{selected}")
@@ -367,6 +420,9 @@ def plotFratios(resList, isClosure = False):
         line.SetLineStyle(2)
         line.Draw('same')
         SetOwnership(line,0)
+
+    # Draw CMS Lumi
+    CMS_lumi.CMS_lumi(canv, 4, iPos)
 
     gPad.Update()
 
@@ -389,13 +445,15 @@ if __name__ == "__main__":
     Make QCD fits with Lp
     """
 
+    # bools
     parser.add_option("-b","--batch", dest="batch",default=False, action="store_true", help="Batch mode")
     parser.add_option("-c","--closure", dest="doClosure",default=False, action="store_true", help="Do closure of MC/Fit")
     parser.add_option("-p","--plot", dest="doPlot",default=True, action="store_true", help="Make Lp plots")
     parser.add_option("-i","--inclTempl", dest="inclTemplate",default=True, action="store_true", help="Use Lp template from inclusive LT bin")
     parser.add_option("--mc","--mcData", dest="mcData",default=False, action="store_true", help="Use pseudo-data from MC")
-
+    # int/floats
     parser.add_option("-v","--verbose",  dest="verbose",  default=1,  type="int",    help="Verbosity level (0 = quiet, 1 = verbose, 2+ = more)")
+    parser.add_option("-l","--lumi",  dest="lumi",  default=1.26,  type="float",    help="Luminosity in /fb")
 
     # Read options and args
     (options,args) = parser.parse_args()
@@ -407,7 +465,7 @@ if __name__ == "__main__":
     mcData = False #True # take data from file or generate toys
     '''
 
-    # Check options
+    ## Check options
     if options.doClosure and not options.mcData:
         #print "Do you really want to make a closure test with Data? [y/n]"
 
@@ -423,6 +481,14 @@ if __name__ == "__main__":
                 break
             else:
                 answ.append(raw_input("Enter 'y' or 'n'"))
+
+    ## Lumi setup
+    if options.mcData:
+        CMS_lumi.lumi_13TeV = "MC"
+        CMS_lumi.extraText = "Simulation"
+    else:
+        CMS_lumi.lumi_13TeV = str(options.lumi) + " fb^{-1}"
+        CMS_lumi.extraText = "Preliminary"
 
     infileName = "../lp_only_plots.root"
 
@@ -441,6 +507,7 @@ if __name__ == "__main__":
     #binNames = ['incl','NB1','NB2','NB3']
     #binNames = ['NJ45']
     #binNames = ['NJ34']
+    #binNames = ['NJ34','LT1_NJ34']
     binNames = ['NJ34','LT1_NJ34','LT2_NJ34','LT3_NJ34','LT4_NJ34']
 
     #binNames += ['NJ45','LT0_NJ45','LT1_NJ45','LT2_NJ45','LT3_NJ45','LT4_NJ45']
@@ -462,25 +529,52 @@ if __name__ == "__main__":
 
     print 'Finished fitting. Saving Canvases...'
 
+    # Suffix for Data/MC
+    if options.mcData: suff = "_MC"
+    else: suff = "_Data"
+
     # save plots to root file
-    outfile = TFile('plots/'+os.path.basename(infileName).replace('.root','_plots.root'),'RECREATE')
+    pureFname = os.path.basename(infileName)
+
+    outfile = TFile('plots/'+pureFname.replace('.root','_plots'+suff+'.root'),'RECREATE')
     print 'Saving plots to file', outfile.GetName()
+
+    extList = ['.png','.pdf']
 
     for canvKey in _canvStore:
         canv = _canvStore[canvKey]
-        canv.SaveAs('plots/'+canv.GetName()+'.png')
         canv.Write()
+        # write in different extensions
+        for ext in extList:
+            canv.SaveAs('plots/'+canv.GetName()+suff+ext)
 
     # save ratio hist
     hRatio.Write()
 
-    print 40*'/\\'
-    print 'Compact results'
-    for (bin,fRat,err) in resList:
-        #(fRat, err) = ratioDict[bin]
-        print 'Bin\t %s has F ratio\t %.3f +/- %.3f (%.2f %% error)' %(bin, fRat, err, 100*err/fRat)
-        #print '%s\t%.3f\t%.3f' % (bin, fRat, err)
-    print 40*'\\/'
+    if options.verbose > 0:
+        print 40*'/\\'
+        print 'Compact results'
+        for (bin,fRat,err) in resList:
+            #fRat, err) = ratioDict[bin]
+            print 'Bin\t %s has F ratio\t %.3f +/- %.3f (%.2f %% error)' %(bin, fRat, err, 100*err/fRat)
+            #print '%s\t%.3f\t%.3f' % (bin, fRat, err)
+        print 40*'\\/'
+
+    # Write results to txt file
+    if not options.doClosure:        txtFname = pureFname.replace('.root','_f-ratios')
+    else:        txtFname = pureFname.replace('.root','_closure')
+
+    txtFname+=suff+".txt"
+
+    with open(txtFname,"w") as ftxt:
+
+        headline = "#Bin\tF-Ratio\tError\n"
+        ftxt.write(headline)
+
+        print "Writing ratios to txt file", txtFname
+        for (bin,fRat,err) in resList:
+            line =  '%s\t\t%.3f\t%.3f\n' %(bin, fRat, err)
+            ftxt.write(line)
 
     if '-b' not in sys.argv:
         # wait for input

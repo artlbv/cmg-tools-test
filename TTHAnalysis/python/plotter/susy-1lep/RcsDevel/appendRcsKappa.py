@@ -35,14 +35,71 @@ def getRcsHist(tfile, hname, band = "SB"):
 
     return hRcs
 
+def readQCDratios(fname = "lp_LTbins_NJ34_f-ratios_MC.txt"):
 
-def getQCDpred(tfile, band = "MB", lep = "ele"):
+    fDict = {}
 
-    fRatio = 0.3 # FIXME
-    fRatioErr = 0.01 # FIXME
+    with open(fname) as ftxt:
+        lines = ftxt.readlines()
+
+        for line in lines:
+            if line[0] != '#':
+                (bin,rat,err) = line.split()
+                bin = bin.replace("_NJ34","")
+                if 'LT' in bin:
+                    fDict[bin] = (float(rat),float(err))
+
+    #print 'Loaded f-ratios from file', fname
+    #print fDict
+
+    return fDict
+
+def getQCDsubtrHisto(tfile, pname = "background", band = "CR_MB/", isMC = True, lep = "ele"):
+
+    fRatio = 0.3 # default
+    fRatioErr = 0.01 # default
+
+    fRatios = {}
+
+    if isMC: fRatios = readQCDratios("lp_LTbins_NJ34_f-ratios_MC.txt")
+    else: fRatios = readQCDratios("lp_LTbins_NJ34_f-ratios_Data.txt")
+
+    # get bin from filename
+    for key in fRatios:
+        if key in tfile.GetName():
+            (fRatio,fRatioErr) = fRatios[key]
+            #print "Found matching ratios for key" , key
+            break
+        #else: print "No corresp fRatio found! Using default."
 
     if lep == "ele" :
 
+        hOrig = tfile.Get(band+pname) # original histogram
+        if not hOrig: return 0
+
+        hCorr = hOrig.Clone(pname+"_QCDsubtr") # histo to subtract QCD
+
+        # take anti/selected ele yields
+        ySele = hOrig.GetBinContent(3,2); ySeleLep = hOrig.GetBinContent(2,2)
+        yAnti = hOrig.GetBinContent(3,1)
+
+        #ySeleFromAnti = fRatio*yAnti
+        ySeleMinusAnti = ySele - fRatio*yAnti if ySele > fRatio*yAnti else 0
+        ySeleLepMinusAnti = ySeleLep - fRatio*yAnti if ySeleLep > fRatio*yAnti else 0
+
+        hCorr.SetBinContent(3,2,ySeleMinusAnti)
+        hCorr.SetBinContent(2,2,ySeleLepMinusAnti)
+
+        # error -- FIXME
+        if yAnti == 0: pass
+        ySeleMinusAntiErr = ySeleMinusAnti*hypot(ySele,fRatio*yAnti)
+        #hCorr.SetBinError(3,2,ySeleMinusAntiErr)
+
+        ## return corrected histogram
+        #hCorr.Write()
+        return hCorr
+    '''
+    if True:
         hname = "x_QCD"
         yQCDanti = getYield(tfile,hname,"CR_"+band+"/", (lep,"anti"))
 
@@ -57,9 +114,11 @@ def getQCDpred(tfile, band = "MB", lep = "ele"):
         yQCDsel = getYield(tfile,hname,"CR_"+band+"/", (lep,"sele"))
         print 'Expected nQCDsele = %f +- %f, predicted: %f +- %f' %(yQCDsel[0],yQCDsel[1],pQCDsel,pQCDselErr)
 
+        return 1
     else:
+        print "QCD estimate not yet implemented for muons"
         return 0
-
+    '''
 
 
 def getRcsWqcd(tfile, pname, band = "MB", lep = "lep"):
@@ -86,6 +145,35 @@ def getRcsWqcd(tfile, pname, band = "MB", lep = "lep"):
 
 
     return 1
+
+
+def makeQCDsubtraction(fileList):
+
+    # define hists to make QCD estimation
+    pnames = ["background","data","QCD"] # process name
+    #pnames = ["background","QCD"] # process name
+
+    #pnames = getPnames(fileList[0],'SR_MB') # get process names from file
+    #print 'Found these hists:', pnames
+
+    bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
+
+    for fname in fileList:
+        tfile = TFile(fname,"UPDATE")
+
+        for pname in pnames:
+            for bindir in bindirs:
+
+                if 'data' in pname: isMC = False
+                else: isMC = True
+
+                hNew = getQCDsubtrHisto(tfile,pname,bindir+"/",isMC)
+
+                tfile.cd(bindir)
+                hNew.Write()
+                tfile.cd()
+
+        tfile.Close()
 
 def makeKappaHists(fileList):
 
@@ -168,6 +256,10 @@ if __name__ == "__main__":
     # find files matching pattern
     fileList = glob.glob(pattern+"*.root")
 
+    makeQCDsubtraction(fileList)
     makeKappaHists(fileList)
+
+    #tfile = TFile(fileList[0],"UPDATE")
+    #getQCDsubtrHisto(tfile,"background","")
 
     print 'Finished'
