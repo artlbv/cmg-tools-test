@@ -1,12 +1,22 @@
 ####
 # Background for 25ns
 
-TT                 : TTJets_LO_25ns      : xsec*1.0 : lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+# TT inclusive only for full-hadronic case
+TT      : TTJets_LO_25ns      : xsec*1.0 : ngenTau+ngenLep == 0 && lheHTIncoming <= 600 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+
+## Combined small and ext1 samples
+## Di/SemiLep
+TT      : TTJets_DiLepton_full	 : xsec*1.0 : lheHTIncoming <= 600 ; FillColor=ROOT.kRed+1, Label="t\#bar{t} dilept"
+
+# wrote real xsec because mixed xsec in samples
+TT	: TTJets_SingleLeptonFromT_full        : 182.1754*1.0 : lheHTIncoming <= 600 ; FillColor=ROOT.kRed+2, Label="t\#bar{t}"
+TT      : TTJets_SingleLeptonFromTbar_full     : 182.1754*1.0 : lheHTIncoming <= 600; FillColor=ROOT.kRed+2, Label="t\#bar{t}"
+
 # HT-binned TTJets samples
-TT         : TTJets_HT600to800   : xsec*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT         : TTJets_HT800to1200  : xsec*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT         : TTJets_HT1200to2500 : xsec*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
-TT         : TTJets_HT2500toInf  : xsec*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT      : TTJets_HT600to800   : xsec*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT      : TTJets_HT800to1200  : xsec*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT      : TTJets_HT1200to2500 : xsec*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
+TT      : TTJets_HT2500toInf  : xsec*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
 
 # Single Top
 SingleT  :TToLeptons_tch   : xsec*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
@@ -46,6 +56,11 @@ DY       : DYJetsToLL_M50_HT400to600 :  xsec*1.0; Label="DY+jets", FillColor=ROO
 DY       : DYJetsToLL_M50_HT600toInf :  xsec*1.0; Label="DY+jets", FillColor=ROOT.kRed-6, NormSystematic=0.5
 
 # DATA
-data: SingleElectron_Run2015D
-data: SingleMuon_Run2015D
+#data: SingleElectron_Run2015D
+#data: SingleMuon_Run2015D
 
+data: SingleElectron_Run2015D_05Oct
+data: SingleElectron_Run2015D_v4
+
+data: SingleMuon_Run2015D_05Oct
+data: SingleMuon_Run2015D_v4
