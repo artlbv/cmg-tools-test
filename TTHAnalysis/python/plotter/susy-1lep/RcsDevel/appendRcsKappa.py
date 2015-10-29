@@ -2,7 +2,7 @@
 #import re, sys, os, os.path
 
 import glob, os, sys
-from math import hypot
+from math import hypot, sqrt
 from ROOT import *
 
 from readYields import getYield
@@ -79,21 +79,30 @@ def getQCDsubtrHisto(tfile, pname = "background", band = "CR_MB/", isMC = True, 
 
         hCorr = hOrig.Clone(pname+"_QCDsubtr") # histo to subtract QCD
 
-        # take anti/selected ele yields
-        ySele = hOrig.GetBinContent(3,2); ySeleLep = hOrig.GetBinContent(2,2)
-        yAnti = hOrig.GetBinContent(3,1)
+        # take anti/selected yields for Electrons
+        ySeleEle = hOrig.GetBinContent(3,2); ySeleEleErr = hOrig.GetBinError(3,2);
+        yAnti = hOrig.GetBinContent(3,1); yAntiErr = hOrig.GetBinError(3,1);
 
-        #ySeleFromAnti = fRatio*yAnti
-        ySeleMinusAnti = ySele - fRatio*yAnti if ySele > fRatio*yAnti else 0
-        ySeleLepMinusAnti = ySeleLep - fRatio*yAnti if ySeleLep > fRatio*yAnti else 0
+        yQCDFromAnti = fRatio*yAnti
+        ySeleEleMinusAnti = ySeleEle - fRatio*yAnti# if ySeleEle > fRatio*yAnti else 0
 
-        hCorr.SetBinContent(3,2,ySeleMinusAnti)
+        # error
+        ySeleEleMinusAntiErr = sqrt(ySeleEleErr**2 + (yAntiErr*fRatio)**2 + (yAnti*fRatioErr)**2)
+
+        # Set bin for electrons
+        hCorr.SetBinContent(3,2,ySeleEleMinusAnti)
+        hCorr.SetBinError(3,2,ySeleEleMinusAntiErr)
+
+        ## Apply correction on combined electrons
+        ySeleLep = hOrig.GetBinContent(2,2)
+        ySeleMu = hOrig.GetBinContent(1,2); ySeleMuErr = hOrig.GetBinError(1,2)
+
+        ySeleLepMinusAnti = ySeleMu + ySeleEleMinusAnti
+        ySeleLepMinusAntiErr = hypot(ySeleMuErr,ySeleEleMinusAntiErr)
+
+        # Set bin for combined leptons
         hCorr.SetBinContent(2,2,ySeleLepMinusAnti)
-
-        # error -- FIXME
-        if yAnti == 0: pass
-        ySeleMinusAntiErr = ySeleMinusAnti*hypot(ySele,fRatio*yAnti)
-        #hCorr.SetBinError(3,2,ySeleMinusAntiErr)
+        hCorr.SetBinError(2,2,ySeleLepMinusAntiErr)
 
         ## return corrected histogram
         #hCorr.Write()
