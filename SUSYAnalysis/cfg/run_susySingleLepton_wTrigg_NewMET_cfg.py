@@ -181,7 +181,7 @@ isData = True # default, but will be overwritten below
 
 sample = 'MC'
 #sample = 'data'
-test = 0
+test = 1
 
 if sample == "MC":
 
@@ -207,7 +207,8 @@ if sample == "MC":
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = TTJets_LO_25ns
+		#comp = TTJets_LO_25ns
+		comp = T1tttt_mGo_1500to1525_mLSP_50to1125
 		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
@@ -228,10 +229,10 @@ if sample == "MC":
 
 		#selectedComponents =[ TTJets_LO_25ns ]
 		#selectedComponents = [ TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
-		#selectedComponents += [TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar, TTJets_DiLepton]
+		#selectedComponents += [TTJets_SingleLeptonFromT_ext1 , TTJets_SingleLeptonFromTbar_ext1 , TTJets_DiLepton_ext1]
 		#selectedComponents = [TTJets_DiLepton]
 		#selectedComponents = [TTJets_DiLepton_ext1]
-		selectedComponents = SingleTop
+		selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 2

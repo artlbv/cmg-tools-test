@@ -1,4 +1,3 @@
-
 #inclusive low stats sample
 #TTincl 	 : TTJets_LO_25ns : xsec*1.0  ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
 ############################

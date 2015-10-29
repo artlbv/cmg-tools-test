@@ -46,6 +46,7 @@ with open(cntFile,"r") as cfile:
             cntsSusy[(int(mGo),int(mLSP))] = int(cnt)
 
     print 'Filled %i items to dict' % (len(cntsSusy))
+    print "Finished signal parameter load"
 
 # REMOVE LATER
 import random

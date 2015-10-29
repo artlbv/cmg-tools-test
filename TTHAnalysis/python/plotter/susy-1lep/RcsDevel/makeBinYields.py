@@ -8,11 +8,10 @@ from math import hypot
 # trees
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/"
 #FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/Friends/"
-#Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns"
-Tdir = "/nfs/dust/cms/user/clseitz/1LepSUS/CMG74/DESY-SUSY/CMSSW_7_4_12/src/CMGTools/SUSYAnalysis/macros/Signal"
-FTdir = "/nfs/dust/cms/user/clseitz/1LepSUS/CMG74/DESY-SUSY/CMSSW_7_4_12/src/CMGTools/TTHAnalysis/python/plotter/susy-1lep/RcsDevel/Flinks"
-
+Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns"
 #FTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID"
+mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID_PUave70mb"
+dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
 #FTdir = "FriendTrees_MC/"
 
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/"
@@ -20,12 +19,17 @@ FTdir = "/nfs/dust/cms/user/clseitz/1LepSUS/CMG74/DESY-SUSY/CMSSW_7_4_12/src/CMG
 
 def addOptions(options):
 
-    # LUMI
-    options.lumi = 3
+    # LUMI (overwrite default 19/fb)
+    if options.lumi > 19:
+        options.lumi = 3
+    else:
+        options.lumi = 1.26
 
     # set tree options
     options.path = Tdir
-    options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
+    #options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
+    options.friendTreesMC = [("sf/t",mcFTdir+"/evVarFriend_{cname}.root")]
+    options.friendTreesData = [("sf/t",dataFTdir+"/evVarFriend_{cname}.root")]
     options.tree = "treeProducerSusySingleLepton"
 
     # extra options
@@ -57,8 +61,8 @@ def addOptions(options):
         if options.var == "LT":
             options.bins = "[250,350,450,600,1200]"
         elif options.var == "HT":
-            #options.bins = "[500,750,1000,1250,1600]"
-            options.bins = "50,500,1500"
+            options.bins = "[500,750,1000,1250,1600]"
+            #options.bins = "25,500,1500"
 
 def makeLepYieldGrid(hist):
 
@@ -135,6 +139,7 @@ def writeYields(options):
         totalMC = []; ewkMC = []
         for p in mca.listBackgrounds():
             if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p and 'TTincl' not in p:
+            #if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p:
                 print 'adding for background',p
                 totalMC.append(report[p])
                 if 'QCD' not in p:
@@ -262,13 +267,13 @@ if __name__ == "__main__":
 
     # make cut list
     cDict = {}
-    
+
     cDict = cutDictCR
     cDict.update(cutDictSR)
+    '''
     cDict.update(cutDictSRf9)
     cDict.update(cutDictCRf9)
-    
-
+    '''
     #cDict = cutQCD #QCD
     #cDict = cutIncl #Inclusive
 
