@@ -15,8 +15,8 @@ from searchBins import *
 from array import array
 
 import CMS_lumi
-CMS_lumi.lumi_13TeV = "MC"                                                                                                                
-CMS_lumi.extraText = "Simulation"                                                                                                         
+CMS_lumi.lumi_13TeV = "MC"                                                                                         
+CMS_lumi.extraText = "Simulation"                                                                                
 CMS_lumi.writeExtraText = 1
 
 
@@ -98,6 +98,9 @@ def makeRCSPlot(yieldsList, dimension, source = 'EWK'):
         if i < 2:
             c.cd(1)
             dummy.GetYaxis().SetRangeUser(0,0.2)
+            dummy.GetYaxis().SetTitle('R_{CS}')
+            dummy.GetYaxis().SetTitleSize(0.055)
+            dummy.GetYaxis().SetTitleOffset(0.7)
 
             if 'TTdi' in source:
                 dummy.GetYaxis().SetRangeUser(0.2,1.2)
@@ -113,6 +116,9 @@ def makeRCSPlot(yieldsList, dimension, source = 'EWK'):
             c.cd(2)
             h.Draw('same')
             dummy2.GetYaxis().SetRangeUser(0,2)
+            dummy2.GetYaxis().SetTitle('#kappa factor')
+            dummy2.GetYaxis().SetTitleSize(0.055)
+            dummy2.GetYaxis().SetTitleOffset(0.7)
 #            c.GetPad(2).BuildLegend()
             leg2.AddEntry(h)
             line.Draw("same")
@@ -179,7 +185,10 @@ def makeFracPlots(yieldsList, dimension, whichsource = 'EWK'):
                 (LTbin, HTbin, Bbin ) = bin.split("_")[0:3]
                 if dim in HTbin or dim in LTbin or dim in Bbin:
                     i = i + 1
-                    total = yields[0][bin]['TT'][0]
+                    if whichsource == 'EWK':  
+                        total = yields[0][bin]['EWK'][0]
+                    elif whichsource == 'TT': 
+                        total = yields[0][bin]['TT'][0]
                     
                     print source, yields[0][bin][source][0], yields[0][bin][source][0]/total
                     h.SetBinContent(i, yields[0][bin][source][0]/total)
@@ -276,20 +285,26 @@ if __name__ == "__main__":
         if i==1: jets = '9-i'
         sourceList = ['EWK','TT','TTdiLep','TTsemiLep','WJets','TTV','SingleT']#,'data']
         for source in sourceList:
-            makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'NB0_'+jets+'RCS', source)
+#            makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'NB0_'+jets+'RCS', source)
             makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'NB1_'+jets+'RCS', source)
             makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'NB2_'+jets+'RCS', source)
             makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'NB3i_'+jets+'RCS', source)
-            makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'LT1_'+jets+'RCS', source)
-            makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'LT2_'+jets+'RCS', source)
-            makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'LT3_'+jets+'RCS', source)
-            makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'LT4i_'+jets+'RCS', source)
+          #  makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'LT1_'+jets+'RCS', source)
+          #  makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'LT2_'+jets+'RCS', source)
+          #  makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'LT3_'+jets+'RCS', source)
+          #  makeRCSPlot(((dictRcs_MB, jets.replace('-',',')+' jets'), (dictRcs_SB , ' 4,5 jets'), (dictKappa, '#kappa')),'LT4i_'+jets+'RCS', source)
 
         if 1==2:
             makeFracPlot(((dictSR_MB, jets.replace('-',',')+'jets'), (dictSR_SB , ' 4,5 jets'),),'NB0_'+jets+'Frac')
         if 1==1:
             print  ' '
             whichsource = 'TT'
+            makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB1_'+jets+'Frac',whichsource)
+            makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB2_'+jets+'Frac',whichsource)
+            makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',' )+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB3i_'+jets+'Frac',whichsource) 
+
+
+            whichsource = 'EWK'
             makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB1_'+jets+'Frac',whichsource)
             makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB2_'+jets+'Frac',whichsource)
             makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',' )+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB3i_'+jets+'Frac',whichsource) 
