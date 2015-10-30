@@ -15,25 +15,25 @@ from searchBins import *
 from array import array
 
 import CMS_lumi
-CMS_lumi.lumi_13TeV = "MC"                                                                                         
-CMS_lumi.extraText = "Simulation"                                                                                
+CMS_lumi.lumi_13TeV = "MC"
+CMS_lumi.extraText = "Simulation"
 CMS_lumi.writeExtraText = 1
 
 
 
-gROOT.SetBatch(kTRUE) 
+gROOT.SetBatch(kTRUE)
 gStyle.SetOptStat(kFALSE)
 gStyle.SetPaintTextFormat('4.3f')
 f = TFile('RCS_kappa_plost.root',"recreate")
 f2 = TFile('bkgFrac_plots.root',"recreate")
 
 def getLegend():
-    leg = TLegend(0.1500359,0.6448413,0.5294842,0.8556548);                                                         
-    leg.SetBorderSize(1);                                                                                                                          
-    leg.SetLineColor(1);                                                                                                                           
-    leg.SetLineStyle(1);                                                                                                                           
-    leg.SetLineWidth(1);                                                                                                                           
-    leg.SetFillColor(0);                                                                                                                       
+    leg = TLegend(0.1500359,0.6448413,0.5294842,0.8556548);
+    leg.SetBorderSize(1);
+    leg.SetLineColor(1);
+    leg.SetLineStyle(1);
+    leg.SetLineWidth(1);
+    leg.SetFillColor(0);
     leg.SetFillStyle(1001);
     return leg
 ######################GLOBAL VARIABLES PUT IN OPTIONS############
@@ -41,7 +41,7 @@ ignoreEmptySignal = True
 def makeRCSPlot(yieldsList, dimension, source = 'EWK'):
     binNames = sorted(yieldsList[0][0].keys())
     graphs = []
-    
+
     hists = []
     (dim, outname) = dimension.split('_')[0:2]
     for yields in yieldsList:
@@ -56,7 +56,7 @@ def makeRCSPlot(yieldsList, dimension, source = 'EWK'):
             if dim in HTbin or dim in LTbin or dim in Bbin:
                 i = i+1
                 print LTbin, Bbin, HTbin, yields[0][bin][source][0]
-                
+
                 h.SetBinContent(i,yields[0][bin][source][0])
                 h.SetBinError(i,yields[0][bin][source][1])
 
@@ -78,14 +78,14 @@ def makeRCSPlot(yieldsList, dimension, source = 'EWK'):
     c.SetTicky()
     dummy = hists[0].Clone()
     dummy2= hists[2].Clone()
-    dummy.SetTitle('')    
+    dummy.SetTitle('')
     dummy2.SetTitle('')
     c.Divide(0,2)
     c.cd(1)
     dummy.Draw()
     c.cd(2)
     dummy2.Draw()
-   
+
     leg = getLegend()
     leg2 = getLegend()
     for i,h in enumerate(hists):
@@ -106,7 +106,7 @@ def makeRCSPlot(yieldsList, dimension, source = 'EWK'):
                 dummy.GetYaxis().SetRangeUser(0.2,1.2)
             if 'TTV' in source:
                 dummy.GetYaxis().SetRangeUser(0,0.5)
-                
+
             h.Draw('same')
             leg.AddEntry(h)
             leg.Draw()
@@ -124,10 +124,10 @@ def makeRCSPlot(yieldsList, dimension, source = 'EWK'):
             line.Draw("same")
             leg2.Draw()
  #   c.GetPad(1).BuildLegend()
-  
+
     c.SetName(dim + "_"+outname+'_'+source)
-    CMS_lumi.cmsTextSize = 0.65 
-    CMS_lumi.relPosX = 0.08  
+    CMS_lumi.cmsTextSize = 0.65
+    CMS_lumi.relPosX = 0.08
     CMS_lumi.CMS_lumi(c.GetPad(1), 4, 0)
     f.cd()
 
@@ -135,7 +135,7 @@ def makeRCSPlot(yieldsList, dimension, source = 'EWK'):
     c.SaveAs('RCSplots/'+dim + "_"+outname+'_'+source+'.pdf')
 
 
-    return 
+    return
 
 def makeSBMBtable(yieldsList, dimension, source = 'EWK'):
 
@@ -154,9 +154,9 @@ def makeSBMBtable(yieldsList, dimension, source = 'EWK'):
                 total = yields[0][bin]['EWK'][0]
                 for source in singleSourceNames:
                     print source, yields[0][bin][source][0], yields[0][bin][source][0]/total
-            print 
-   
-    return 
+            print
+
+    return
 
 colorDict = {'TT': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-2,
 'QCD':kCyan-6,'SingleT':kViolet+5,'DY':kRed-6,'TTV':kOrange-3}
@@ -164,7 +164,7 @@ def makeFracPlots(yieldsList, dimension, whichsource = 'EWK'):
 
     binNames = sorted(yieldsList[0][0].keys())
     graphs = []
-    
+
     hists = []
     xbins = 20
     (dim, outname) = dimension.split('_')[0:2]
@@ -179,17 +179,17 @@ def makeFracPlots(yieldsList, dimension, whichsource = 'EWK'):
 
         hstack = THStack("hs","")
         for j,source in enumerate(singleSourceNames):
-            h = TH1F("test", "test", 25, 0, 25) 
+            h = TH1F("test", "test", 25, 0, 25)
             i=0
             for k,bin in enumerate(binNames):
                 (LTbin, HTbin, Bbin ) = bin.split("_")[0:3]
                 if dim in HTbin or dim in LTbin or dim in Bbin:
                     i = i + 1
-                    if whichsource == 'EWK':  
+                    if whichsource == 'EWK':
                         total = yields[0][bin]['EWK'][0]
-                    elif whichsource == 'TT': 
+                    elif whichsource == 'TT':
                         total = yields[0][bin]['TT'][0]
-                    
+
                     print source, yields[0][bin][source][0], yields[0][bin][source][0]/total
                     h.SetBinContent(i, yields[0][bin][source][0]/total)
                     h.SetTitle(source)
@@ -211,7 +211,7 @@ def makeFracPlots(yieldsList, dimension, whichsource = 'EWK'):
             h.SetMarkerSize(2)
             h.SetMarkerColor(kWhite)
             hstack.Add(h)
-        
+
         hists.append(hstack)
 
     c = TCanvas("canvas", "canvas", 850 , 700)
@@ -240,9 +240,9 @@ def makeFracPlots(yieldsList, dimension, whichsource = 'EWK'):
         elif whichsource == 'TT':
             c.BuildLegend(0.8537736,0.4637037,0.9964623,0.7007407, '#splitline{'+yieldsList[i][1] + '}{' + mid.replace(', ','') +'}')
         c.SetName(dim + "_"+outname+'_'+yieldsList[i][1].replace(' ','').replace(',',''))
-        
+
         CMS_lumi.relPosX = 0.13
-        CMS_lumi.cmsTextSize = 0.5 
+        CMS_lumi.cmsTextSize = 0.5
         CMS_lumi.CMS_lumi(c, 4, 0)
         f2.cd()
         c.Write()
@@ -250,7 +250,7 @@ def makeFracPlots(yieldsList, dimension, whichsource = 'EWK'):
             c.SaveAs('FracPlots/'+dim + "_"+outname+'_'+yieldsList[i][1].replace(' ','').replace(',','')+'.pdf')
         elif whichsource == 'TT':
             c.SaveAs('FracPlots_TT/'+dim + "_"+outname+'_'+yieldsList[i][1].replace(' ','').replace(',','')+'_ttbar.pdf')
-    return 
+    return
 
 
 
@@ -269,7 +269,7 @@ if __name__ == "__main__":
     inDir = cardDirectory
     cardFnames = glob.glob(inDir+'/*/*68*.root')
     cardFnames9 = glob.glob(inDir+'/*/*9i*.root')
-    
+
     for i,cards in enumerate((cardFnames, cardFnames9)):
         dictRcs_MB = getYieldDict(cards,"Rcs_MB","","lep")
         dictRcs_SB = getYieldDict(cards,"Rcs_SB","","lep")
@@ -280,7 +280,7 @@ if __name__ == "__main__":
         dictCR_MB = getYieldDict(cards,"CR_MB","","lep")
         dictCR_SB = getYieldDict(cards,"CR_SB","","lep")
 
-        
+
         if i==0: jets = '6-8'
         if i==1: jets = '9-i'
         sourceList = ['EWK','TT','TTdiLep','TTsemiLep','WJets','TTV','SingleT']#,'data']
@@ -301,24 +301,18 @@ if __name__ == "__main__":
             whichsource = 'TT'
             makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB1_'+jets+'Frac',whichsource)
             makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB2_'+jets+'Frac',whichsource)
-            makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',' )+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB3i_'+jets+'Frac',whichsource) 
+            makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',' )+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB3i_'+jets+'Frac',whichsource)
 
 
             whichsource = 'EWK'
             makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB1_'+jets+'Frac',whichsource)
             makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB2_'+jets+'Frac',whichsource)
-            makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',' )+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB3i_'+jets+'Frac',whichsource) 
+            makeFracPlots(((dictCR_MB, 'CR '+ jets.replace('-',',' )+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB3i_'+jets+'Frac',whichsource)
 
         if 1==2 and i==0:
             makeSBMBtable(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB1_'+jets+'Frac')
             makeSBMBtable(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB2_'+jets+'Frac')
             makeSBMBtable(((dictCR_MB, 'CR '+ jets.replace('-',',')+' jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',',')+' jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB3i_'+jets+'Frac')
-        
+
 #        makeSBMBtable(((dictCR_MB, 'CR '+ jets.replace('-',', ')+'jets'), (dictCR_SB , ' CR 4,5 jets'), (dictSR_MB, 'SR '+ jets.replace('-',', ')+'jets'), (dictSR_SB , ' SR 4,5 jets'), ),'NB1_'+jets+'Frac')
         makeSBMBtable(((dictCR_MB, 'CR '+ jets.replace('-',',')+'jets'), (dictCR_SB , ' CR 4,5 jets')),'NB1_'+jets+'Frac')
-            
-            
-
-
-
-        
