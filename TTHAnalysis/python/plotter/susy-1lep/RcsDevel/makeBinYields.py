@@ -9,7 +9,7 @@ from math import hypot
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/"
 #FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/Friends/"
 Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns"
-#FTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID"
+
 mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID_PUave70mb"
 dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
 #FTdir = "FriendTrees_MC/"
@@ -45,7 +45,7 @@ def addOptions(options):
         #options.bins = "60,-1500,1500,30,0,1500"
         options.bins = "34,-1700,1700,10,0,1500"
 
-        options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
+        options.friendTrees = [("sf/t",mcFTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
 
     elif options.grid:
@@ -270,10 +270,10 @@ if __name__ == "__main__":
 
     cDict = cutDictCR
     cDict.update(cutDictSR)
-    '''
+    
     cDict.update(cutDictSRf9)
     cDict.update(cutDictCRf9)
-    '''
+    
     #cDict = cutQCD #QCD
     #cDict = cutIncl #Inclusive
 
