@@ -114,8 +114,6 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
     benchmark2 = (1500,0)
     factor = {benchmark2 : 145296.0/45886.0*0.0141903,benchmark:145296.0/99410.0*0.0856418}
     precision = 2
-    if 'Rcs' in name:
-        precision = 4
     f = open(name + '.tex','w')
     f.write('\\begin{table}[ht] \n ')
     binNames = sorted(yieldsList[0].keys())
@@ -123,19 +121,13 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
     regions = []
     region = ['MB', 'SB', '$\kappa$']
     for i,yields in enumerate(yieldsList):
-        if 'Rcs' in name:
-#            singleSourceNames.append(( x for x in yields[binNames[0]].keys() if (('TT' in x)) ))
-            singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if (x in printSource)))
-            
-        else:
-            singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if not('EWK' in x) and (x != 'TT' and x != 'TTincl')))
+        singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if not('EWK' in x) and (x != 'TT' and x != 'TTincl')))
             #singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if ('TT' in x and not 'TTV' in x and not 'TTd' in x and not 'TTs' in x)  ))
 
     singleSourceNames = sum(singleSourceNames, [])
     
-    if not 'Rcs' in name:
-        singleSourceNames.append(benchmark)    
-        singleSourceNames.append(benchmark2)    
+    singleSourceNames.append(benchmark)    
+    singleSourceNames.append(benchmark2)    
     SourceNames = singleSourceNames
     
     print type(benchmark)
@@ -174,6 +166,112 @@ def printBinnedTable(yieldsList, yieldsSig, printSource, name):
                     print yieldsSig[bin][source], factor[source]
                     f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yieldsSig[bin][source][0] *  factor[source], yieldsSig[bin][source][1] *  factor[source]))
         #print '--'
+        f.write(' \\\ \n')
+
+    f.write('\\hline \n')
+    f.write('\\end{tabular} \n')
+    f.write('\\end{table} \n')   
+    return
+
+def printBinnedRcsKappaTable(yieldsList, printSource, name):
+    precision = 4
+    f = open(name + '.tex','w')
+    f.write('\\begin{table}[ht] \n ')
+    binNames = sorted(yieldsList[0].keys())
+    singleSourceNames = []
+    regions = []
+    region = ['MB', 'SB', '$\kappa$']
+    #for i,yields in enumerate(yieldsList):
+    #    singleSourceNames.append(sorted( x for x in yields[binNames[0]].keys() if (x in printSource)))
+    singleSourceNames.append(sorted( x for x in yieldsList[0][binNames[0]].keys() if (x in printSource)))
+    singleSourceNames = sum(singleSourceNames, [])
+    SourceNames = singleSourceNames
+
+    nSource = len(singleSourceNames)*len(yieldsList)
+    print nSource, SourceNames
+    nCol = nSource + 4
+    f.write('\\tiny \n')
+    f.write('\\caption{'+name.replace('_',' ')+'} \n')
+    f.write('\\begin{tabular}{|' + (nCol *'%(align)s | ') % dict(align = 'c') + '} \n')
+
+    f.write('\\hline \n')
+    f.write('$L_T$ & $H_T$ & nB & binName &' +  ' %s ' % ' & '.join(map(str, singleSourceNames)) + ' \\\ \n')
+    f.write(' $[$ GeV $]$  &   $[$GeV$]$ & &  '  + (nSource *'%(tab)s  ') % dict(tab = '&') + ' \\\ \\hline \n')
+    #write out all the counts
+    for i,bin in enumerate(binNames):
+        (LTbin, HTbin, Bbin ) = bin.split("_")[0:3]        
+        (LT, HT, B) = (binsLT[LTbin][1],binsHT[HTbin][1],binsNB[Bbin][1])           
+        (LT0, HT0, B0 ) = ("","","") 
+        if i > 0 :
+            (LT0bin, HT0bin, B0bin ) = binNames[i-1].split("_")[0:3]
+            (LT0, HT0, B0) = (binsLT[LT0bin][1],binsHT[HT0bin][1],binsNB[B0bin][1])           
+        if LT != LT0:
+            f.write(('\\cline{1-%s} ' + LT + ' & ' + HT + ' & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin) % (nCol))
+        if LT == LT0 and HT != HT0:
+            f.write(('\\cline{2-%s}  & ' + HT + ' & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin) % (nCol))
+        elif LT == LT0 and HT == HT0:
+            f.write('  &  & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin)
+#        for source, yields in zip(SourceNames, yieldsList):
+        for yields in yieldsList:
+            for source in SourceNames:
+                f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % yields[bin][source])                
+
+        f.write(' \\\ \n')
+
+    f.write('\\hline \n')
+    f.write('\\end{tabular} \n')
+    f.write('\\end{table} \n')   
+    return
+
+
+
+def printAnyBinnedTable(yieldsList, name):
+    precision = 4
+    f = open(name + '.tex','w')
+    f.write('\\begin{table}[ht] \n ')
+    binNames = sorted(yieldsList[0][0].keys())
+    singleSourceNames = []
+    regions = []
+    region = ['MB', 'SB', '$\kappa$']
+
+    for dicts in yieldsList:
+        printSource = dicts[1]
+        for source in printSource:
+            singleSourceNames.append(source[1])
+
+
+#    singleSourceNames = sum(singleSourceNames, [])
+    SourceNames = singleSourceNames
+
+    nSource = len(singleSourceNames)#*len(yieldsList)
+    print nSource, SourceNames
+    nCol = nSource + 4
+    f.write('\\tiny \n')
+    f.write('\\caption{'+name.replace('_',' ')+'} \n')
+    f.write('\\begin{tabular}{|' + (nCol *'%(align)s | ') % dict(align = 'c') + '} \n')
+
+    f.write('\\hline \n')
+    f.write('$L_T$ & $H_T$ & nB & binName &' +  ' %s ' % ' & '.join(map(str, singleSourceNames)) + ' \\\ \n')
+    f.write(' $[$ GeV $]$  &   $[$GeV$]$ & &  '  + (nSource *'%(tab)s  ') % dict(tab = '&') + ' \\\ \\hline \n')
+    #write out all the counts
+    for i,bin in enumerate(binNames):
+        (LTbin, HTbin, Bbin ) = bin.split("_")[0:3]        
+        (LT, HT, B) = (binsLT[LTbin][1],binsHT[HTbin][1],binsNB[Bbin][1])           
+        (LT0, HT0, B0 ) = ("","","") 
+        if i > 0 :
+            (LT0bin, HT0bin, B0bin ) = binNames[i-1].split("_")[0:3]
+            (LT0, HT0, B0) = (binsLT[LT0bin][1],binsHT[HT0bin][1],binsNB[B0bin][1])           
+        if LT != LT0:
+            f.write(('\\cline{1-%s} ' + LT + ' & ' + HT + ' & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin) % (nCol))
+        if LT == LT0 and HT != HT0:
+            f.write(('\\cline{2-%s}  & ' + HT + ' & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin) % (nCol))
+        elif LT == LT0 and HT == HT0:
+            f.write('  &  & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin)
+        for dicts in yieldsList:
+            for source in dicts[1]:
+                f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % dicts[0][bin][source[0]])                
+
+
         f.write(' \\\ \n')
 
     f.write('\\hline \n')
@@ -285,14 +383,14 @@ if __name__ == "__main__":
     inDirSig = cardDirectorySig
     cardFnamesSig = glob.glob(inDirSig+'/*/*.root')
 
-    if 1==1:
+    if 1==2:
         sigYields = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
         sigYieldsCR = getYieldDict(cardFnamesSig,"CR_MB", "T1tttt_Scan", "lep")
         sigYieldsSB = getYieldDict(cardFnamesSig,"SR_SB", "T1tttt_Scan", "lep")
         sigYieldsCR_SB = getYieldDict(cardFnamesSig,"CR_SB", "T1tttt_Scan", "lep")
         mcYields = getYieldDict(cardFnames,"SR_MB","","lep")
         
-        print sigYields
+
         printBinnedTable((mcYields,),  sigYields, [],'SR_table')
         printBinnedTable((getYieldDict(cardFnames,"CR_MB","","lep") ,),  sigYieldsCR, [],'CR_table')
         printBinnedTable((getYieldDict(cardFnames,"CR_SB","","lep") ,),  sigYieldsCR_SB, [],'CR_SBtable')
@@ -304,7 +402,7 @@ if __name__ == "__main__":
         tableList = ['EWK','TT','TTincl','TTdiLep','TTsemiLep','WJets','TTV','data']
         #tableList = ['TT','TTincl']
         for name in tableList:
-            printBinnedTable((dictRcs_MB, dictRcs_SB, dictKappa), sigYields, [name],'Rcs_table_'+name)
+            printBinnedRcsKappaTable((dictRcs_MB,dictRcs_SB, dictKappa),  [name],'Rcs_table_'+name)
         
 
         sigYields9 = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", "lep")
@@ -322,9 +420,31 @@ if __name__ == "__main__":
         dictKappa9 = getYieldDict(cardFnames9,"Kappa","","lep")
 
         for name in tableList:
-            printBinnedTable((dictRcs_MB9, dictRcs_SB9, dictKappa9), sigYields, [name],'Rcs_table_9_'+name)
+            printBinnedRcsKappaTable((dictRcs_MB9, dictRcs_SB9, dictKappa9), [name],'Rcs_table_9_'+name)
+    if 1==2:
+        for i,cards in enumerate((cardFnames, cardFnames9)):
+            dictYieldCR_SB = getYieldDict(cards,"CR_SB","","lep")
+            dictYieldCR_MB = getYieldDict(cards,"CR_MB","","lep")
+            dictYieldSR_SB = getYieldDict(cards,"SR_SB","","lep")
+            dictRcs_SB = getYieldDict(cards,"Rcs_SB","","lep")
+            dictKappa = getYieldDict(cards,"Kappa","","lep")
+            dictPredSR_MB = getYieldDict(cards,"SR_MB_predict","","lep")
+            
+            printBinnedRcsKappaTable((dictYieldCR_SB,  dictYieldSR_SB, dictYieldCR_MB), ['QCD','EWK','data'],'yields_data_45jets'+str(i))
+            printBinnedRcsKappaTable((dictRcs_SB,  ), ['data_QCDsubtr','EWK'],'RCS_dataQCDsubtr_ewk_45jets'+str(i))
+            printBinnedRcsKappaTable((dictKappa,  ), ['EWK'],'Kappa_EWK'+str(i))
+            printBinnedRcsKappaTable((dictPredSR_MB,  ), ['data_pred','EWK_pred'],'RCS_datapred_SR68jets'+str(i))
+    if 1==1:
         
-    '''for lep in ('ele','mu'):
+
+        YieldCR_MB = [ getYieldDict(cardFnames,"CR_MB","","lep"), [('QCD','QCD'),('EWK','EWK'),('data','data')] ]
+
+        YieldCR_SB = [ getYieldDict(cardFnames,"CR_SB","","lep"), [('data_QCDsubtr','data - QCD$^{pred}$')] ]
+        YieldSR_SB = [ getYieldDict(cardFnames,"SR_SB","","lep"), [('data_QCDsubtr','data - QCD$^{pred}$')] ]
+        Rcs_SB = [ getYieldDict(cardFnames,"Rcs_SB","","lep") , [('data_QCDsubtr','$R_{CS}(data - QCD$^{pred}$)'), ('EWK','$R_{CS}^{EWK}$')]]
+        printAnyBinnedTable((YieldCR_SB,  YieldSR_SB, Rcs_SB),'test')
+            
+        '''for lep in ('ele','mu'):
         sig = getYieldDict(cardFnamesSig,"SR_MB", "T1tttt_Scan", lep)
         mc = getYieldDict(cardFnames,"SR_MB","", lep)
         mcSys = {"Flat_uBin_Lep": getSystDict(cardFnames,"SR_MB","dummy", lep, 0.3),
