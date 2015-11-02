@@ -46,7 +46,7 @@ def decryptBinName(binname):
     if "LT" not in binname: binname += "L_{T} #geq 250"
     elif "LT1" in binname: binname = binname.replace("LT1","L_{T} #in [250,350]")
     elif "LT2" in binname: binname = binname.replace("LT2","L_{T} #in [350,450]")
-    elif "LT3" in binname: binname = binname.replace("LT3","L_{T} #in [450,650]")
+    elif "LT3" in binname: binname = binname.replace("LT3","L_{T} #in [450,600]")
     elif "LT4" in binname: binname = binname.replace("LT4","L_{T} #geq 600")
 
     #print 'Binname after', binname
@@ -210,7 +210,7 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
         import re
         incName = re.sub('LT[0-9]_','',binname)
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+incName]) # hack to keep arguments alive
-    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(3),RooFit.LineStyle(2),RooFit.Name('QCDfit'))
+    _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(kCyan),RooFit.LineStyle(5),RooFit.Name('QCDfit'))
     # plot only EWK
     argset2 = RooArgSet(_pdfStore['pdfEWKsel_'+binname]) # hack to keep arguments alive
     _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset2),RooFit.LineColor(4),RooFit.LineStyle(2),RooFit.Name('EWKfit'))
@@ -505,7 +505,7 @@ if __name__ == "__main__":
     binNames = ['incl']
     #binNames += ['HT500toInf','HT500to1000','HT750to1000','HT500to750']
     #binNames = ['incl','NB1','NB2','NB3']
-    #binNames = ['NJ45']
+    #binNames = ['incl','NJ34']
     #binNames = ['NJ34']
     #binNames = ['NJ34','LT1_NJ34']
     binNames = ['NJ34','LT1_NJ34','LT2_NJ34','LT3_NJ34','LT4_NJ34']
