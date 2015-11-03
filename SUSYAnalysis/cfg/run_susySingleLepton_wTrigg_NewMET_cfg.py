@@ -16,6 +16,8 @@ lepAna.packedCandidates = 'packedPFCandidates'
 
 ## ELECTRONS
 lepAna.loose_electron_pt  = 10
+lepAna.inclusive_electron_pt  = 10
+
 eleID = "CBID"
 
 if eleID == "CBID":
@@ -26,8 +28,8 @@ if eleID == "CBID":
 
 	lepAna.inclusive_electron_id  = "" # Keep no ID
 	lepAna.inclusive_electron_lostHits = 5. #
-	lepAna.inclusive_electron_dxy    = 0.5 # very loose (like in core)
-	lepAna.inclusive_electron_dz     = 1.0 # very loose (like in core)
+	lepAna.inclusive_electron_dxy    = 1.0 # very loose (like in core)
+	lepAna.inclusive_electron_dz     = 2.0 # very loose (like in core)
 
 elif eleID == "MVAID":
 	inclusive_electron_id  = "" # same as in susyCore
@@ -176,6 +178,9 @@ triggerFlagsAna.triggerBits = {
 
 #-------- SAMPLES AND TRIGGERS -----------
 
+# select components
+selectedComponents = []
+
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
@@ -196,19 +201,17 @@ if sample == "MC":
 	ttHLepSkim.minLeptons = 1
 
 	# -- new 74X samples
-#	from CMGTools.RootTools.samples.samples_13TeV_74X import *
+	#from CMGTools.RootTools.samples.samples_13TeV_74X import *
 	# -- samples at DESY
-	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
-
-	# select components
-	selectedComponents = [
-		TTJets_LO_25ns,
-	]
+	# MiniAODv1
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	# MiniAODv2
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
 
 	if test==1:
 		# test a single component, using a single thread.
-		#comp = TTJets_LO_25ns
-		comp = T1tttt_mGo_1500to1525_mLSP_50to1125
+		comp = TTJets_LO
+		#comp = T1tttt_mGo_1500to1525_mLSP_50to1125
 		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
@@ -232,7 +235,7 @@ if sample == "MC":
 		#selectedComponents += [TTJets_SingleLeptonFromT_ext1 , TTJets_SingleLeptonFromTbar_ext1 , TTJets_DiLepton_ext1]
 		#selectedComponents = [TTJets_DiLepton]
 		#selectedComponents = [TTJets_DiLepton_ext1]
-		selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
+		#selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 2
@@ -374,8 +377,12 @@ sequence = cfg.Sequence(susyCoreSequence+[
 		treeProducer,
 		])
 
-# remove skimming for Data
-if isData:
+isSignal = False:
+for comp in selectedComponents:
+	if "SMS" in comp: isSignal = True
+
+# remove skimming for Data or Signal
+if isData or isSignal :
 	sequence.remove(ttHHTSkimmer)
 #	sequence.remove(ttHSTSkimmer)
 

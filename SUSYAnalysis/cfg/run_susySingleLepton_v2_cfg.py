@@ -16,6 +16,8 @@ lepAna.packedCandidates = 'packedPFCandidates'
 
 ## ELECTRONS
 lepAna.loose_electron_pt  = 10
+lepAna.inclusive_electron_pt  = 10
+
 eleID = "CBID"
 
 if eleID == "CBID":
@@ -26,8 +28,8 @@ if eleID == "CBID":
 
 	lepAna.inclusive_electron_id  = "" # Keep no ID
 	lepAna.inclusive_electron_lostHits = 5. #
-	lepAna.inclusive_electron_dxy    = 0.5 # very loose (like in core)
-	lepAna.inclusive_electron_dz     = 1.0 # very loose (like in core)
+	lepAna.inclusive_electron_dxy    = 1.0 # very loose (like in core)
+	lepAna.inclusive_electron_dz     = 2.0 # very loose (like in core)
 
 elif eleID == "MVAID":
 	inclusive_electron_id  = "" # same as in susyCore
@@ -176,12 +178,15 @@ triggerFlagsAna.triggerBits = {
 
 #-------- SAMPLES AND TRIGGERS -----------
 
+# select components
+selectedComponents = []
+
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-#sample = 'MC'
-sample = 'data'
-test = 0
+sample = 'MC'
+#sample = 'data'
+test = 1
 
 if sample == "MC":
 
@@ -193,21 +198,19 @@ if sample == "MC":
 	isData = False
 
 	# modify skim
-	ttHLepSkim.minLeptons = 1
+	ttHLepSkim.minLeptons = 0
 
 	# -- new 74X samples
-#	from CMGTools.RootTools.samples.samples_13TeV_74X import *
+	#from CMGTools.RootTools.samples.samples_13TeV_74X import *
 	# -- samples at DESY
-	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
-
-	# select components
-	selectedComponents = [
-		TTJets_LO_25ns,
-	]
+	# MiniAODv1
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	# MiniAODv2
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = TTJets_LO_25ns
+		comp = TTJets_LO
 		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
@@ -215,24 +218,23 @@ if sample == "MC":
 		# test all components (1 thread per component).
 		for comp in selectedComponents:
 			comp.splitFactor = 1
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.files = comp.files[:1]
 	elif test==3:
 		# run all components (1 thread per component).
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 	elif test==0:
 		# PRODUCTION
 		# run on everything
 
 		#selectedComponents = mcSamples_Asymptotic50ns
-		#selectedComponents =[ TTJets_LO_25ns]#QCD_HT
 		#selectedComponents = [  TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
-		selectedComponents = [TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar]#, TTJets_DiLepton]
+		#selectedComponents = [TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar]#, TTJets_DiLepton]
 
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 
 elif sample == "data":
@@ -244,7 +246,7 @@ elif sample == "data":
 
 	isData = True
 
-	# modify skim -- don't skim data!
+	# modify skim -- don't skim data on leptons!
 	ttHLepSkim.minLeptons = 0
 
 	# central samples
@@ -353,6 +355,8 @@ treeProducer = cfg.Analyzer(
 	collections = susySingleLepton_collections,
 	)
 
+
+
 ## TEMPORARY
 # HBHE filter analyzer
 from CMGTools.TTHAnalysis.analyzers.hbheAnalyzer import hbheAnalyzer
@@ -371,8 +375,13 @@ sequence = cfg.Sequence(susyCoreSequence+[
 		treeProducer,
 		])
 
-# remove skimming for Data
-if isData:
+
+isSignal = False
+#for comp in selectedComponents:
+#	if "SMS" in comp: isSignal = True
+
+# remove skimming for Data or Signal
+if isData or isSignal :
 	sequence.remove(ttHHTSkimmer)
 #	sequence.remove(ttHSTSkimmer)
 
