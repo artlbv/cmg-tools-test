@@ -34,7 +34,7 @@ class BinYield:
         self.err = err
 
     def __repr__(self):
-        return "%.3f +- %.3f" % (self.val, self.err)
+        return "%5.2f +- %5.2f" % (self.val, self.err)
 
 class YieldStore:
 
@@ -82,6 +82,7 @@ class YieldStore:
         tfile = TFile(fname,"READ")
         bfname = os.path.basename(fname)
         binName = bfname.replace("_SR.merge.root","")
+        binName = bfname.replace(".merge.root","")
         #print binName
 
         # get list of dirs
@@ -105,35 +106,111 @@ class YieldStore:
                 self.addYield(sample,category,binName,yd)
         return 1
 
-    def getBinDict(self,samp,cat):
+    def getBinYield(self,samp,cat,bin):
+
+        if samp in self.yields:
+            if cat in self.yields[samp]:
+                if bin in self.yields[samp][cat]:
+                    return self.yields[samp][cat][bin]
+        return 0
+
+    def getSampDict(self,samp,cat):
 
         if samp in self.samples and cat in self.categories:
             return self.yields[samp][cat]
+        else: return 0
 
-    def printSamp(self, sname, ytype = "CR_MB"):
+    def getSampsDict(self,samp,cats = []):
 
-        print 40*"/\\"
-        print "Values for %s in %s" %(sname,ytype)
+        yds = {}
+        for bin in self.bins: yds[bin] = []
+
+        for cat in cats:
+            for bin in self.bins:
+                yds[bin].append(self.getBinYield(samp,cat,bin))
+
+        if not yds:
+            print "Couldn't find dict"
+            return 0
+
+        return yds
+
+    def getMixDict(self, samps = []):
+        # provide dict: sample - category
+        # return dict: bin - yields (corresp to sample,cat)
+
+        yds = {}
+        for bin in self.bins:
+            yds[bin] = []
+
+            for samp,cat in samps:
+                yds[bin].append(self.getBinYield(samp,cat,bin))
+
+        return yds
+
+    def printBins(self, samp,cat):
+        if type(cat) == str:
+            yds = self.getSampDict(samp,cat)
+        elif type(cat) == list:
+            yds = self.getSampsDict(samp,cat)
+        else:
+            print "You have to give either a string or a list of strings"
+            return 0
+
         print 80*"-"
-        print 40*"\\/"
+        print "Contents for sample %s and category %s" %(samp,cat)
+        print "Bin\tYield+-Error"
+
+        for bin in sorted(yds.keys()):
+            print bin,"\t", yds[bin]
+
+        return 1
+
+    def printMixBins(self, samps):
+
+        yds = self.getMixDict(samps)
+
+        print 80*"-"
+        print "Contents for", samps
+        print "Bin\tYield+-Error"
+
+        for bin in sorted(yds.keys()):
+            print bin,"\t", yds[bin]
+
+        return 1
+
 
 if __name__ == "__main__":
 
-    pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT1_HT0_NB*NJ68"
+    #pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT1_HT0_NB0*NJ68"
+    #pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT1_HT0_NB*NJ68"
+    pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT*NJ68"
+
     fileList = glob.glob(pattern+"*.root")
 
-    by = YieldStore("bla")
+    yds = YieldStore("bla")
 
+    print "Starting to add yields..."
     for fname in fileList:
-        by.addBinYields(fname)
+        yds.addBinYields(fname)
+    print ".. finished"
 
-    #print by.yDict
-    #by.printSamp("QCD")
+    #print yds.bins
+    print yds.categories
+    print yds.samples
+    #yds.printBins("QCD","CR_SB")
+    #yds.getSampsDict("QCD",["CR_SB","CR_MB"])
+    #yds.printBins("QCD",["CR_SB","CR_MB"])
+    #yds.printBins("data",yds.categories)
 
-    #by.printSamp2("EWK")
+    #samps = {"EWK":"CR_MB","QCD":"CR_SB"}
+    #samps = {"EWK":"CR_SB","background_QCDsubtr":"CR_SB","background_QCDsubtr":"Closure"}
+    samps = [
+        ("QCD","CR_SB"),
+        ("QCD_QCDpred","CR_SB"),
+        ("QCD_QCDsubtr","CR_SB"),
+        ]
+    #print yds.getMixDict(samps)
+    yds.printMixBins(samps)
 
-    print by.bins
-    print by.categories
-    print by.samples
-
-    print by.getBinDict("QCD","CR_SB")
+    #print yds.yields
