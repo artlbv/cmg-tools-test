@@ -39,6 +39,10 @@ float mt_2(float pt1, float phi1, float pt2, float phi2) {
     return std::sqrt(2*pt1*pt2*(1-std::cos(phi1-phi2)));
 }
 
+float mt(float metPt, float lepPt, float dPhi) {
+    return std::sqrt(2*metPt*lepPt*(1-std::cos(dPhi)));
+}
+
 float P(float pt1, float eta1, float phi1, float m1)
 {
  TLorentzVector p41;
