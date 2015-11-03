@@ -350,7 +350,7 @@ def makeClosureHists(fileList):
             hPred = tfile.Get("SR_MB_predict/"+pname)#+"_pred")
             hExp = tfile.Get("SR_MB/"+pname)
 
-            hDiff = hExp.Clone(hExp.GetName()+"_diff")
+            hDiff = hExp.Clone(hExp.GetName())#+"_diff")
             hDiff.Add(hPred,-1)
 
             hDiff.GetYaxis().SetTitle("Expected - Predicted")
