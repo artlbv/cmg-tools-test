@@ -76,9 +76,9 @@ elif isolation == "relIso03":
 #########################
 
 ## OTHER LEPTON SKIMMER
-from CMGTools.TTHAnalysis.analyzers.looseLepSkimmer import looseLepSkimmer
-looseLepSkim = cfg.Analyzer(
-    looseLepSkimmer, name='looseLepSkimmer',
+from CMGTools.TTHAnalysis.analyzers.anyLepSkimmer import anyLepSkimmer
+anyLepSkim = cfg.Analyzer(
+    anyLepSkimmer, name='anyLepSkimmer',
     minLeptons = 1,
     maxLeptons = 999,
     )
@@ -198,7 +198,7 @@ isData = True # default, but will be overwritten below
 
 sample = 'MC'
 #sample = 'data'
-test = 1
+test = 0
 
 if sample == "MC":
 
@@ -379,7 +379,7 @@ hbheFilterAna = cfg.Analyzer(
 sequence = cfg.Sequence(susyCoreSequence+[
 		LHEAna,
 		ttHEventAna,
-		looseLepSkim,
+		anyLepSkim,
 		#ttHSTSkimmer,
 		ttHHTSkimmer,
 		hbheFilterAna,
