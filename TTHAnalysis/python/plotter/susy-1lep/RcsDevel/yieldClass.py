@@ -109,7 +109,7 @@ class YieldStore:
 
         print "Starting to add yields..."
         for fname in fileList:
-            self.addBinYields(fname)
+            self.addBinYields(fname,leptype)
         print ".. finished"
 
         return 1
