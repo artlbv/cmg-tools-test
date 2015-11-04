@@ -146,16 +146,17 @@ class EventVars1L_base:
             ## selected == tight leps
             'nTightLeps', 'nTightEl','nTightMu',
             #("tightLeps_DescFlag","I",10,"nTightLeps"),
-            'Lep_pdgId','Lep_pt','Lep_eta','Lep_phi','Lep_Idx','Lep_relIso','Lep_miniIso',
+            'Lep_pdgId','Lep_pt','Lep_eta','Lep_phi','Lep_Idx','Lep_relIso','Lep_miniIso','Lep_hOverE',
             'Selected', # selected (tight) or anti-selected lepton
             ## MET
             'MET','LT','ST',
+            'MT',
             "DeltaPhiLepW", 'dPhi','Lp',
             # no HF stuff
             'METNoHF', 'LTNoHF', 'dPhiNoHF',
             ## jets
-            'HT','nJets','nJets30','nBJet',
-            "htJet30j", "htJet30ja",
+            'HT','nJets','nJets30','nJets40','nBJet','nBJets30','nBJets40',
+            "htJet30j", "htJet30ja","htJet40j",
             'Jet1_pt','Jet2_pt',
             ## top tags
             "nHighPtTopTag", "nHighPtTopTagPlusTau23",
@@ -188,9 +189,9 @@ class EventVars1L_base:
         # -- needs to be adjusted manually
         ##############################
         if event.isData:
-            ret['PD_JetHT'] = 1
+            ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
-            ret['PD_SingleMu'] = 0
+            ret['PD_SingleMu'] = 1
         else:
             ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
@@ -424,6 +425,7 @@ class EventVars1L_base:
 
             ret['Lep_relIso'] = tightLeps[0].relIso03
             ret['Lep_miniIso'] = tightLeps[0].miniRelIso
+            if hasattr(event,"hOverE"): ret['Lep_hOverE'] = tightLeps[0].hOverE
 
         elif len(leps) > 0: # fill it with leading lepton
             ret['Lep_Idx'] = 0
@@ -435,17 +437,24 @@ class EventVars1L_base:
 
             ret['Lep_relIso'] = leps[0].relIso03
             ret['Lep_miniIso'] = leps[0].miniRelIso
+            if hasattr(event,"hOverE"): ret['Lep_hOverE'] = ret['Lep_hOverE'] = leps[0].hOverE
 
         ### JETS
         centralJet30 = []
+        centralJet40 = []
 
         for i,j in enumerate(jets):
             if j.pt>30 and abs(j.eta)<centralEta:
                 centralJet30.append(j)
+            if j.pt>40 and abs(j.eta)<centralEta:
+                centralJet40.append(j)
 
         nJetC = len(centralJet30)
         ret['nJets']   = nJetC
         ret['nJets30']   = nJetC
+
+        nJet40C = len(centralJet40)
+        ret['nJets40']   = nJet40C
 
         if nJetC > 0:
             ret['Jet1_pt'] = centralJet30[0].pt
@@ -457,6 +466,8 @@ class EventVars1L_base:
         ret['htJet30j']  = sum([j.pt for j in centralJet30])
         ret['htJet30ja'] = sum([j.pt for j in jets if j.pt>30])
 
+        ret['htJet40j']  = sum([j.pt for j in centralJet40])
+
         ret['HT'] = ret['htJet30j']
 
         ## B tagging WPs for CSVv2 (CSV-IVF)
@@ -466,12 +477,19 @@ class EventVars1L_base:
         btagWP = btag_MediumWP
 
         BJetMedium30 = []
+        BJetMedium40 = []
 
         for i,j in enumerate(centralJet30):
             if j.btagCSV > btagWP:
                 BJetMedium30.append(j)
 
+        for i,j in enumerate(centralJet40):
+            if j.btagCSV > btagWP:
+                BJetMedium40.append(j)
+
         ret['nBJet']   = len(BJetMedium30)
+        ret['nBJets30']   = len(BJetMedium30)
+        ret['nBJets40']   = len(BJetMedium40)
 
         # deltaPhi between the (single) lepton and the reconstructed W (lep + MET)
         dPhiLepW = -999 # set default value to -999 to spot "empty" entries
@@ -480,6 +498,7 @@ class EventVars1L_base:
         LT = -999
         LTNoHF = -999
         Lp = -99
+        MT = -99
 
         if len(tightLeps) >=1:
             recoWp4 =  tightLeps[0].p4() + metp4
@@ -487,6 +506,8 @@ class EventVars1L_base:
             dPhiLepW = tightLeps[0].p4().DeltaPhi(recoWp4)
             LT = tightLeps[0].pt + event.met_pt
             Lp = tightLeps[0].pt / recoWp4.Pt() * cos(dPhiLepW)
+
+            MT = recoWp4.Mt()
 
             ## no HF
             recoWNoHFp4 =  tightLeps[0].p4() + metNoHFp4
@@ -499,6 +520,7 @@ class EventVars1L_base:
         ret['ST'] = LT
         ret['LT'] = LT
         ret['Lp'] = Lp
+        ret['MT'] = MT
 
         # no HF
         dPhiNoHF = abs(dPhiLepWNoHF) # nickname for absolute dPhiLepW
