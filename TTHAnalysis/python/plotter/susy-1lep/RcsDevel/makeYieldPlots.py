@@ -230,15 +230,15 @@ if __name__ == "__main__":
 
     yds.showStats()
 
-    '''
+
     samps = [
         ("QCD","CR_SB"),
         ("QCD_QCDpred","CR_SB"),
         ("QCD_QCDsubtr","CR_SB"),
         ]
 
-    #yds.printMixBins(samps)
-
+    yds.printMixBins(samps)
+    '''
     #ydQCD = yds.getSampDict("QCD","CR_SB")
     #hist = makeSampHisto(ydQCD,"QCD_CRSB")
 
@@ -305,3 +305,4 @@ if __name__ == "__main__":
     #hist.Draw("p")
 
     if not _batchMode: raw_input("Enter any key to exit")
+
