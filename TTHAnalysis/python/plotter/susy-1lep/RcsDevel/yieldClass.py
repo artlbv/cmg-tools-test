@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import glob, os, sys
+import glob, os
 #from math import hypot
 from ROOT import *
 
@@ -34,7 +34,7 @@ class BinYield:
         self.err = err
 
     def __repr__(self):
-        return "%5.2f +- %5.2f" % (self.val, self.err)
+        return "%4.2f +- %4.2f" % (self.val, self.err)
 
 class YieldStore:
 
@@ -46,7 +46,6 @@ class YieldStore:
 
     def __init__(self,name):
         self.name = name
-        self.yDict = {} # yields in dictionary
 
         self.yields = {} # yields in dictionary of type d[sample][category][bin] = (yield,err)
         self.bins = [] # list of all bins stored
@@ -54,12 +53,6 @@ class YieldStore:
         self.samples = [] # list of all samples available
 
     def addYield(self, sample, category, bin, yd):
-        '''
-        yields = {} # dict of type d[sample] = catDict
-        samples = {} # dict of type d[sample] = categoryDict
-        categories = {} # d[category] = binDict
-        bins = {} # d[bin] = (yield,err)
-        '''
 
         # create dict structure if empty and add to list storages
         if sample not in self.yields: self.yields[sample] = {}
@@ -106,6 +99,33 @@ class YieldStore:
                 self.addYield(sample,category,binName,yd)
         return 1
 
+    def addFromFiles(self, pattern, leptype = ("lep","sele") ):
+
+        # append / if pattern is a dir
+        if os.path.isdir(pattern): pattern += "/"
+
+        # find files matching pattern
+        fileList = glob.glob(pattern+"*.root")
+
+        print "Starting to add yields..."
+        for fname in fileList:
+            self.addBinYields(fname)
+        print ".. finished"
+
+        return 1
+
+    def showStats(self):
+        print 80*"#"
+        print "Storage contains:"
+        print len(self.bins), "Bins:", self.bins
+        print len(self.categories), "Categories:", self.categories
+        print len(self.samples), "Samples:", self.samples
+        print 80*"#"
+
+    ###########################
+    ## Reading functions follow
+    ###########################
+
     def getBinYield(self,samp,cat,bin):
 
         if samp in self.yields:
@@ -123,16 +143,11 @@ class YieldStore:
     def getSampsDict(self,samp,cats = []):
 
         yds = {}
-        for bin in self.bins: yds[bin] = []
 
-        for cat in cats:
-            for bin in self.bins:
+        for bin in self.bins:
+            yds[bin] = []
+            for cat in cats:
                 yds[bin].append(self.getBinYield(samp,cat,bin))
-
-        if not yds:
-            print "Couldn't find dict"
-            return 0
-
         return yds
 
     def getMixDict(self, samps = []):
@@ -159,10 +174,11 @@ class YieldStore:
 
         print 80*"-"
         print "Contents for sample %s and category %s" %(samp,cat)
-        print "Bin\tYield+-Error"
+        #print "Bin\tYield+-Error"
 
         for bin in sorted(yds.keys()):
             print bin,"\t", yds[bin]
+        print 80*"-"
 
         return 1
 
@@ -175,7 +191,9 @@ class YieldStore:
         print "Bin\tYield+-Error"
 
         for bin in sorted(yds.keys()):
-            print bin,"\t", yds[bin]
+            print bin,"\t\t",
+            for yd in yds[bin]: print yd,"\t",
+            print
 
         return 1
 
@@ -189,11 +207,7 @@ if __name__ == "__main__":
     fileList = glob.glob(pattern+"*.root")
 
     yds = YieldStore("bla")
-
-    print "Starting to add yields..."
-    for fname in fileList:
-        yds.addBinYields(fname)
-    print ".. finished"
+    yds.addFromFiles(pattern)
 
     #print yds.bins
     print yds.categories
