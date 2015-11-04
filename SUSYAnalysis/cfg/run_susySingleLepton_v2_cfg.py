@@ -26,10 +26,10 @@ if eleID == "CBID":
 	lepAna.loose_electron_dxy    = 999. # no cut since embedded in ID
 	lepAna.loose_electron_dz     = 999. # no cut since embedded in ID
 
-	lepAna.inclusive_electron_id  = "" # Keep no ID
-	lepAna.inclusive_electron_lostHits = 5. #
-	lepAna.inclusive_electron_dxy    = 1.0 # very loose (like in core)
-	lepAna.inclusive_electron_dz     = 2.0 # very loose (like in core)
+	lepAna.inclusive_electron_id  = "POG_Cuts_ID_SPRING15_25ns_v1_Veto_full5x5"
+	lepAna.inclusive_electron_lostHits = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_dxy    = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
 
 elif eleID == "MVAID":
 	inclusive_electron_id  = "" # same as in susyCore
@@ -61,19 +61,31 @@ if isolation == "miniIso":
 	lepAna.miniIsolationVetoLeptons = None
 	lepAna.loose_muon_isoCut     = lambda muon : muon.miniRelIso < 0.4
 	lepAna.loose_electron_isoCut = lambda elec : elec.miniRelIso < 0.4
+	lepAna.inclusive_electron_isoCut = lambda elec : elec.miniRelIso < 0.4
 elif isolation == "relIso03":
 	# normal relIso03
 	lepAna.ele_isoCorr = "rhoArea"
 	lepAna.mu_isoCorr = "rhoArea"
 
 	lepAna.loose_electron_relIso = 0.5
+	lepAna.inclusive_electron_relIso = 0.5
 	lepAna.loose_muon_relIso = 0.5
 
+#########################
 # --- LEPTON SKIMMING ---
+#########################
+
+## OTHER LEPTON SKIMMER
+from CMGTools.TTHAnalysis.analyzers.looseLepSkimmer import looseLepSkimmer
+looseLepSkim = cfg.Analyzer(
+    looseLepSkimmer, name='looseLepSkimmer',
+    minLeptons = 1,
+    maxLeptons = 999,
+    )
+
+# GOOD LEPTON SKIMMER -- FROM TTH (in Core already)
 ttHLepSkim.minLeptons = 0
 ttHLepSkim.maxLeptons = 999
-#LepSkim.idCut  = ""
-#LepSkim.ptCuts = []
 
 ####### JETS #########
 jetAna.jetPt = 30
@@ -229,9 +241,7 @@ if sample == "MC":
 		# PRODUCTION
 		# run on everything
 
-		#selectedComponents = mcSamples_Asymptotic50ns
-		#selectedComponents = [  TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
-		#selectedComponents = [TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar]#, TTJets_DiLepton]
+		selectedComponents =  [ TTJets_LO ]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 1
@@ -369,6 +379,7 @@ hbheFilterAna = cfg.Analyzer(
 sequence = cfg.Sequence(susyCoreSequence+[
 		LHEAna,
 		ttHEventAna,
+		looseLepSkim,
 		#ttHSTSkimmer,
 		ttHHTSkimmer,
 		hbheFilterAna,
