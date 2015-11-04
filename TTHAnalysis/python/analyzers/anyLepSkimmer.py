@@ -1,8 +1,8 @@
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 
-class looseLepSkimmer( Analyzer ):
+class anyLepSkimmer( Analyzer ):
     def __init__(self, cfg_ana, cfg_comp, looperName ):
-        super(looseLepSkimmer,self).__init__(cfg_ana,cfg_comp,looperName)
+        super(anyLepSkimmer,self).__init__(cfg_ana,cfg_comp,looperName)
         self.ptCuts = cfg_ana.ptCuts if hasattr(cfg_ana, 'ptCuts') else []
         self.ptCuts += 10*[-1.]
 
@@ -10,10 +10,10 @@ class looseLepSkimmer( Analyzer ):
         self.idFunc = eval("lambda lepton : "+self.idCut);
 
     def declareHandles(self):
-        super(looseLepSkimmer, self).declareHandles()
+        super(anyLepSkimmer, self).declareHandles()
 
     def beginLoop(self, setup):
-        super(looseLepSkimmer,self).beginLoop(setup)
+        super(anyLepSkimmer,self).beginLoop(setup)
         self.counters.addCounter('events')
         count = self.counters.counter('events')
         count.register('all events')
@@ -26,7 +26,7 @@ class looseLepSkimmer( Analyzer ):
         self.counters.counter('events').inc('all events')
 
         leptons = []
-        for lep, ptCut in zip(event.otherLeptons, self.ptCuts):
+        for lep, ptCut in zip(event.selectedLeptons+event.otherLeptons, self.ptCuts):
             if not self.idFunc(lep):
                 continue
             if lep.pt() > ptCut:
