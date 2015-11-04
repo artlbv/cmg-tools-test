@@ -98,7 +98,7 @@ class EventVars1L_signal:
             if mGo in xsecGlu:
                 ret['susyXsec'] = xsecGlu[mGo][0]
                 #ret['susyXsecErr'] = xsecGlu[mGo][1]
-            else:
+            elif mGo > 0:
                 print 'Xsec not found for mGo', mGo
 
             # Number of generated events
