@@ -314,7 +314,10 @@ class EventVars1L_base:
                     # ELE CutBased ID
                     # check MVA WPs
                     passTightID = (lep.SPRING15_25ns_v1 == 4)
-                    passLooseID = (lep.SPRING15_25ns_v1 >= 1)
+                    passMediumID = (lep.SPRING15_25ns_v1 >= 3)
+                    passLooseID = (lep.SPRING15_25ns_v1 >= 2)
+                    passVetoID = (lep.SPRING15_25ns_v1 >= 1)
+                    passAnyID = (lep.SPRING15_25ns_v1 >= 0)
 
                 elif eleID == 'MVA':
                     # ELE MVA ID
@@ -344,14 +347,14 @@ class EventVars1L_base:
                         selectedVetoLeps.append(lep)
 
                 # anti-selected
-                elif passLooseID:
+                elif not passMediumID:#passLooseID:
 
                     # all anti leptons are veto for selected
                     selectedVetoLeps.append(lep)
 
-                    # Iso check:
-                    if lep.miniRelIso < Lep_miniIsoCut: passIso = True
-                    # conversion check
+                    # Iso check -- no iso check
+                    passIso = True
+                    # no conversion check
                     passConv = True
 
                     # fill
