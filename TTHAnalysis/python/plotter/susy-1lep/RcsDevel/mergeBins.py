@@ -71,7 +71,7 @@ def findMatchBins(binname):
     if '.' in binname:
         binname = binname[:binname.find('.')]
     purebname = binname[:binname.find('_NJ')]
-    
+
     SR_MBname = binname
     CR_MBname = binname.replace('_SR','_CR')
 
@@ -170,6 +170,9 @@ def mergeBins(fileList, pattern = 'NJ68', outdir = None):
         if options.verbose > 0:
             print 'File bin name is', binname
             print 'Matching bins are:', matchbins
+
+        # strip off "SR" ending
+        binname = binname[:binname.find("_SR")]
 
         ofname = outdir+'/'+binname+'.merge.root'
 
