@@ -28,22 +28,29 @@ colorList = [1,2,4,7,9,8,3,6] + range(10,50)
 _histStore = {}
 _canvStore = {}
 
+# do transparent fill?
+doTransp = True
+
 def doLegend():
 
-    leg = TLegend(0.65,0.7,0.85,0.9)
+    #leg = TLegend(0.65,0.7,0.85,0.9)
+    leg = TLegend(0.45,0.7,0.65,0.9)
     leg.SetBorderSize(1)
     leg.SetTextFont(62)
     leg.SetTextSize(0.04)
     leg.SetLineColor(1)
     leg.SetLineStyle(1)
     leg.SetLineWidth(1)
-    leg.SetFillColor(0)
     leg.SetFillStyle(1001)
+
+    if doTransp: leg.SetFillColorAlpha(0,0.8)
+    else:leg.SetFillColor(0)
 
     return leg
 
 def getBinLabel(binname):
 
+    # NB
     binname = binname.replace("NB3i","N_{b} #geq 3")
     binname = binname.replace("NB2i","N_{b} #geq 2")
     binname = binname.replace("NB1i","N_{b} #geq 1")
@@ -51,6 +58,11 @@ def getBinLabel(binname):
     binname = binname.replace("NB2","N_{b} = 2")
     binname = binname.replace("NB1","N_{b} = 1")
     binname = binname.replace("NB0","N_{b} = 0")
+
+    # NJ
+    binname = binname.replace("NJ34","N_{j} #in [3,4]")
+    binname = binname.replace("NJ45","N_{j} #in [4,5]")
+    binname = binname.replace("NJ6i","N_{j} #geq 6")
 
     return binname
 
@@ -118,7 +130,9 @@ if __name__ == "__main__":
 
     pname = os.path.basename(tfile.GetName()).replace(".root","")
     canv=TCanvas(pname,"F-ratios for " + pname.replace("_"," "),800,800)
-    plotOpt = "pe"
+
+    if doTransp: plotOpt = "e5"
+    else:        plotOpt = "pe1"
 
     leg = doLegend()
 
@@ -130,17 +144,28 @@ if __name__ == "__main__":
 
     for i,(bin,hist) in enumerate(hList):
 
+        print hist
+        for ibin in range(1,hist.GetNbinsX()+1):
+            print ibin, hist.GetBinContent(ibin), hist.GetBinError(ibin)
+            if hist.GetBinContent(ibin) == 0:
+                hist.SetBinError(ibin,0)
+
         if i == 0:
             hist.GetYaxis().SetNdivisions(505)
-            hist.GetYaxis().SetRangeUser(0,0.5)
+            #hist.GetYaxis().SetRangeUser(0,0.045)
+            hist.GetYaxis().SetRangeUser(0,0.55)
             hist.GetYaxis().SetTitleOffset(1.2)
             hist.GetYaxis().SetTitleSize(0.05)
             hist.GetYaxis().SetTitle("F_{sel-to-anti}")
+            #hist.GetYaxis().SetTitle("R_{CS}")
 
         # make up hist
         hist.SetStats(0)
         hist.SetMarkerColor(colorList[i])
         hist.SetLineColor(colorList[i])
+        if doTransp: hist.SetFillColorAlpha(colorList[i],0.35)
+        else:  hist.SetFillColor(colorList[i])
+        #hist.SetFillStyle(3002)
 
         hist.Draw(plotOpt)
         if "same" not in plotOpt: plotOpt += "same"
