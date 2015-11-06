@@ -75,7 +75,7 @@ class YieldStore:
         tfile = TFile(fname,"READ")
         bfname = os.path.basename(fname)
         binName = bfname.replace("_SR.merge.root","")
-        binName = bfname.replace(".merge.root","")
+        binName = binName.replace(".merge.root","")
         #print binName
 
         # get list of dirs
