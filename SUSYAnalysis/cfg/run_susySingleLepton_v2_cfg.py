@@ -194,7 +194,9 @@ isData = True # default, but will be overwritten below
 
 sample = 'MC'
 #sample = 'data'
+
 test = 1
+
 
 if sample == "MC":
 
@@ -215,7 +217,7 @@ if sample == "MC":
 	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
 	# MiniAODv2
 	from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
-
+	selectedComponents = WJetsToLNuHT
 	if test==1:
 		# test a single component, using a single thread.
 		comp = TTJets_LO
