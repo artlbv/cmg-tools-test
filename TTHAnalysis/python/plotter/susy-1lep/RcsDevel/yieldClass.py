@@ -3,7 +3,7 @@
 import glob, os
 #from math import hypot
 from ROOT import *
-
+from searchBins import *
 def getLepYield(hist,leptype = ('lep','sele')):
 
     if hist.GetNbinsX() == 1:
@@ -195,6 +195,37 @@ class YieldStore:
             for yd in yds[bin]: print yd,"\t",
             print
 
+        return 1
+
+    def printLatexTable(self, samps, printSamps, label, f):
+        yds = self.getMixDict(samps)
+        nSource = len(samps)
+        nCol = nSource + 4
+        precision = 5
+        f.write('\multicolumn{' + str(nCol) + '}{|c|}{' +label +'} \\\ \\hline \n')
+        f.write('$L_T$ & $H_T$ & nB & binName &' +  ' %s ' % ' & '.join(map(str, printSamps)) + ' \\\ \n')
+        f.write(' $[$ GeV $]$  &   $[$GeV$]$ & &  '  + (nSource *'%(tab)s  ') % dict(tab = '&') + ' \\\ \\hline \n')
+
+        bins = sorted(yds.keys())
+        for i,bin in enumerate(bins):
+            (LTbin, HTbin, Bbin ) = bin.split("_")[0:3]        
+            (LT, HT, B) = (binsLT[LTbin][1],binsHT[HTbin][1],binsNB[Bbin][1])           
+            (LT0, HT0, B0 ) = ("","","") 
+            if i > 0 :
+                (LT0bin, HT0bin, B0bin ) = bins[i-1].split("_")[0:3]
+                (LT0, HT0, B0) = (binsLT[LT0bin][1],binsHT[HT0bin][1],binsNB[B0bin][1])           
+            if LT != LT0:
+                f.write(('\\cline{1-%s} ' + LT + ' & ' + HT + ' & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin) % (nCol))
+            if LT == LT0 and HT != HT0:
+                f.write(('\\cline{2-%s}  & ' + HT + ' & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin) % (nCol))
+            elif LT == LT0 and HT == HT0:
+                f.write('  &  & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin)
+
+            for yd in yds[bin]:
+                f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
+            
+            f.write(' \\\ \n')
+        f.write(' \\hline \n')
         return 1
 
 
