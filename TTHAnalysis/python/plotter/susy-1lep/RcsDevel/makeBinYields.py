@@ -8,12 +8,17 @@ from math import hypot
 # trees
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/"
 #FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/Friends/"
-Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns"
 
-mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID_PUave70mb"
+#Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns"
+#mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID_PUave70mb"
+#dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
+
+Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2"
+mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_anyLepSkim"
+# old data
 dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
-#FTdir = "FriendTrees_MC/"
 
+#FTdir = "FriendTrees_MC/"
 #Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/"
 #FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/Friends/"
 
@@ -64,11 +69,17 @@ def addOptions(options):
             options.bins = "[500,750,1000,1250,1600]"
             #options.bins = "25,500,1500"
 
-def makeLepYieldGrid(hist):
+def makeLepYieldGrid(hist, options):
 
     for ybin in range(1,hist.GetNbinsY()+1):
         ymu = hist.GetBinContent(1,ybin)
         yele = hist.GetBinContent(3,ybin)
+
+        # set MC errors to be sqrt(N)
+        if options.mcPoissonErrors:
+            #print "Setting Poisson errors for MC"
+            hist.SetBinError(1,ybin,sqrt(ymu))
+            hist.SetBinError(3,ybin,sqrt(yele))
 
         ymuErr = hist.GetBinError(1,ybin)
         yeleErr = hist.GetBinError(3,ybin)
@@ -102,7 +113,7 @@ def makeUpHist(hist, options):
         hist.GetYaxis().SetBinLabel(1,"anti")
         hist.GetYaxis().SetBinLabel(2,"selected")
 
-        makeLepYieldGrid(hist)
+        makeLepYieldGrid(hist, options)
 
     if options.signal:
         hist.SetStats(0)
@@ -250,6 +261,7 @@ if __name__ == "__main__":
 
     # more options
     parser.add_option("--asimov", dest="asimov", action="store_true", default=False, help="Make Asimov pseudo-data")
+    parser.add_option("--mcPoisson", dest="mcPoissonErrors", action="store_true", default=False, help="Make MC errors poisson")
     parser.add_option("--signal", dest="signal", action="store_true", default=False, help="Is signal scan")
     parser.add_option("--grid", dest="grid", action="store_true", default=False, help="Plot 2d grid: ele/mu vs selected/anti")
 
@@ -270,10 +282,12 @@ if __name__ == "__main__":
 
     cDict = cutDictCR
     cDict.update(cutDictSR)
-    
-    cDict.update(cutDictSRf9)
-    cDict.update(cutDictCRf9)
-    
+
+    doNjet9 = False
+    if doNjet9:
+        cDict.update(cutDictSRf9)
+        cDict.update(cutDictCRf9)
+
     #cDict = cutQCD #QCD
     #cDict = cutIncl #Inclusive
 
