@@ -129,8 +129,8 @@ def makeSampHisto(ydict, samp, cat, ind = 0):
     hist.SetMarkerStyle(20)
 
     if "Kappa" in cat:
-        hist.GetYaxis().SetRangeUser(-0.05,0.3)
-        hist.GetYaxis().SetTitle("Events")
+        hist.GetYaxis().SetRangeUser(0.05,1.95)
+        hist.GetYaxis().SetTitle("Kappa")
     elif "Rcs" in cat:
         hist.GetYaxis().SetRangeUser(0.005,0.35)
         hist.GetYaxis().SetTitle("R_{CS}")
@@ -146,7 +146,8 @@ def makeSampHists(yds,samps):
     for ind,(samp,cat) in enumerate(samps):
 
         yd = yds.getSampDict(samp,cat)
-        hist = makeSampHisto(yd,samp,cat, ind)
+        if yd:
+            hist = makeSampHisto(yd,samp,cat, ind)
 
         histList.append(hist)
 
@@ -212,10 +213,22 @@ def getTotal(histList):
 
     return total
 
-def plotHists(histList, ratio = None):
+def getCatLabel(name):
 
-    canv = TCanvas("canv","canv",1000,600)
+    cname = name
+    cname = cname.replace("_"," ")
+    cname = cname.replace("SB","N_{j} #in [4,5]")
+    cname = cname.replace("MB","N_{j} #in [6,8]")
+
+    return cname
+
+def plotHists(cname, histList, ratio = None):
+
+    canv = TCanvas(cname,cname,1000,600)
     leg = doLegend()
+
+    head = getCatLabel(cname)
+    leg.SetHeader(head)
 
     if ratio != None:
         #canv.SetWindowSize(600 + (600 - canv.GetWw()), (750 + (750 - canv.GetWh())));
@@ -236,6 +249,10 @@ def plotHists(histList, ratio = None):
         if  hist.ClassName() == 'THStack':
             hist.Draw("HIST")
             hist.GetXaxis().LabelsOption("h")
+            hist.GetYaxis().SetTitle("Events")
+            hist.GetYaxis().SetTitleSize(0.06)
+            hist.GetYaxis().SetTitleOffset(0.6)
+            hist.GetYaxis().SetLabelSize(0.05)
 
             for h in hist.GetHists():
                 leg.AddEntry(h,h.GetTitle(),"f")
@@ -283,18 +300,14 @@ if __name__ == "__main__":
         print "No pattern given!"
         exit(0)
 
-    '''
-    # append / if pattern is a dir
-    if os.path.isdir(pattern): pattern += "/"
-
-    # find files matching pattern
-    fileList = glob.glob(pattern+"*.root")
-    '''
+    #BinMask LTX_HTX_NBX_NJX for canvas names
+    basename = os.path.basename(pattern)
+    mask = basename.replace("*","X_")
 
     ## Create Yield Storage
     yds = YieldStore("lepYields")
 
-    yds.addFromFiles(pattern,("lep","sele"))
+    yds.addFromFiles(pattern,("ele","anti"))
 
     yds.showStats()
 
@@ -328,7 +341,7 @@ if __name__ == "__main__":
         #("data_QCDsubtr","CR_SB"),
         ]
     '''
-
+    '''
     sampsRcs = [
         ("EWK","Rcs_SB"),
         ("EWK","Rcs_MB"),
@@ -339,13 +352,14 @@ if __name__ == "__main__":
 
     prepKappaHist(hKappa)
 
-    canv = plotHists(rcsHists,hKappa)
+    canv = plotHists("bla",rcsHists,hKappa)
 
     '''
     cat = "CR_SB"
 
     #mcSamps = [samp for samp in yds.samples if ("backgr" not in samp or "data" not in samp or "EWK" not in samp)]
-    mcSamps = ['DY','TTV','SingleT','WJets','TT','QCD']
+    #mcSamps = ['DY','TTV','SingleT','WJets','TT','QCD']
+    mcSamps = ['WJets','TT','QCD']
     print mcSamps
 
     samps = [(samp,cat) for samp in mcSamps]
@@ -359,22 +373,24 @@ if __name__ == "__main__":
     total = getTotal(hists)
 
     # Totals
-    tots = [("background",cat),("data",cat)]
+    #tots = [("background",cat),("data",cat)]
+    tots = [("background",cat),("background",cat)]
 
     hTot = makeSampHists(yds,tots)
 
     #stack.Draw("HIST")
-    #canv = plotHists([stack,total]+hTot)
-    #canv = plotHists([stack]+hTot)
+    #canv = plotHists(cat,[stack,total]+hTot)
+    #canv = plotHists(cat,[stack]+hTot)
 
     ratio = getRatio(hTot[1],total)
 
-    canv = plotHists([stack,total,hTot[1]],ratio)
+    #canv = plotHists("New_AntiEle_"+cat,[stack,total,hTot[1]],ratio)
+    canv = plotHists("New_AntiEle_"+cat,[stack,total],ratio)
 
-    #canv = plotHists([ratio])
+    #canv = plotHists(cat,[ratio])
 
     #hist.Draw("p")
-    '''
 
-    canv.SaveAs(canv.GetName()+".pdf")
     if not _batchMode: raw_input("Enter any key to exit")
+
+    canv.SaveAs("BinPlots/"+mask+canv.GetName()+".pdf")
