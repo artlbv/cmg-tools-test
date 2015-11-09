@@ -76,7 +76,7 @@ elif isolation == "relIso03":
 #########################
 
 ## OTHER LEPTON SKIMMER
-anyLepSkim.minLeptons = 1
+anyLepSkim.minLeptons = 0
 anyLepSkim.maxLeptons = 999
 
 # GOOD LEPTON SKIMMER -- FROM TTH (in Core already)
@@ -98,10 +98,10 @@ jetAna.dataGT = "Summer15_25nsV6_DATA"
 
 jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
-jetAna.recalibrateJets = False # false for miniAOD v2!
+jetAna.recalibrateJets = True # false for miniAOD v2!
 
 ## MET -- check preprocessor
-metAna.recalibrate = False #should be false in susycore, already
+metAna.recalibrate = True #should be false in susycore, already
 
 ## Iso Track
 isoTrackAna.setOff=False
@@ -194,7 +194,7 @@ isData = True # default, but will be overwritten below
 
 #sample = 'MC'
 sample = 'data'
-test = 1
+test = 0
 
 if sample == "MC":
 
@@ -206,6 +206,7 @@ if sample == "MC":
 	isData = False
 
 	# modify skim
+	anyLepSkim.minLeptons = 1
 	ttHLepSkim.minLeptons = 0
 
 	# -- new 74X samples
@@ -215,6 +216,7 @@ if sample == "MC":
 	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
 	# MiniAODv2
 	from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
+
 	selectedComponents = WJetsToLNuHT
 	if test==1:
 		# test a single component, using a single thread.
@@ -237,7 +239,8 @@ if sample == "MC":
 		# PRODUCTION
 		# run on everything
 
-		selectedComponents =  QCDHT#[ TTJets_LO ]
+		#selectedComponents =  QCDHT#[ TTJets_LO ]
+		selectedComponents =  SingleTop + DYJetsM50HT + TTV
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 1
@@ -247,12 +250,13 @@ elif sample == "data":
 
 	print 'Going to process DATA'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV5_DATA.db'
-	jecEra    = 'Summer15_25nsV5_DATA'
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV6_DATA.db'
+	jecEra    = 'Summer15_25nsV6_DATA'
 
 	isData = True
 
 	# modify skim -- don't skim data on leptons!
+	anyLepSkim.minLeptons = 0
 	ttHLepSkim.minLeptons = 0
 
 	# central samples
@@ -272,7 +276,7 @@ elif sample == "data":
 	if test==1:
 		# test a single component, using a single thread.
 		#comp = SingleMuon_Run2015D
-		comp = JetHT_Run2015D_Promptv4
+		comp = SingleElectron_Run2015D_Promptv4
 		#comp = SingleElectron_Run2015D
 		#comp.files = ['dcap://dcache-cms-dcap.desy.de/pnfs/desy.de/cms/tier2//store/data/Run2015D/JetHT/MINIAOD/PromptReco-v3/000/256/587/00000/F664AC07-935D-E511-A019-02163E01424B.root']
 
