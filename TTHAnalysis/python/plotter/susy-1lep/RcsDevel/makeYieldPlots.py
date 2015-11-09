@@ -230,14 +230,6 @@ if __name__ == "__main__":
 
     yds.showStats()
 
-
-    samps = [
-        ("QCD","CR_SB"),
-        ("QCD_QCDpred","CR_SB"),
-        ("QCD_QCDsubtr","CR_SB"),
-        ]
-
-    yds.printMixBins(samps)
     '''
     #ydQCD = yds.getSampDict("QCD","CR_SB")
     #hist = makeSampHisto(ydQCD,"QCD_CRSB")
@@ -269,7 +261,7 @@ if __name__ == "__main__":
     hists = makeSampHists(samps)
 
     '''
-
+    '''
     cat = "CR_SB"
 
     #mcSamps = [samp for samp in yds.samples if ("backgr" not in samp or "data" not in samp or "EWK" not in samp)]
@@ -303,6 +295,6 @@ if __name__ == "__main__":
 
     canv.SaveAs(canv.GetName()+".pdf")
     #hist.Draw("p")
-
+    
     if not _batchMode: raw_input("Enter any key to exit")
-
+    '''
