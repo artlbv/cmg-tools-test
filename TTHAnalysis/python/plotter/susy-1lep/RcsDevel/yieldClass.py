@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import glob, os
+import os, glob, sys
 
 from ROOT import *
 from searchBins import *
@@ -13,6 +13,7 @@ class BinYield:
         self.val = val
         self.err = err
 
+    # func that is called with print BinYield object
     def __repr__(self):
         return "%4.2f +- %4.2f" % (self.val, self.err)
 
@@ -83,9 +84,12 @@ class YieldStore:
                     yds = getScanYields(hist,leptype)
                     # loop over mass points
                     for mGo,mLSP in yds:
+                        # selected key type: mass point string or tuple
                         point = sample + "_mGo%i_mLSP%i" %(mGo,mLSP)
                         #point = (mGo,mLSP)
+
                         yd = BinYield(yds[(mGo,mLSP)])
+                        # store if yield is not empty -- temporary
                         if yd.val > 0:
                             self.addYield(point,category,binName,yd)
         return 1
@@ -97,11 +101,23 @@ class YieldStore:
 
         # find files matching pattern
         fileList = glob.glob(pattern+"*.root")
+        nFiles = len(fileList)
 
-        print "Starting to add yields..."
+        print "## Starting to add yields from %i files like " %(nFiles) + pattern + ": ", ; sys.stdout.flush()
+        # progress bar
+        progbar_width = nFiles
+        # setup progbar
+        sys.stdout.write("[%s]" % (" " * progbar_width))
+        sys.stdout.flush()
+        sys.stdout.write("\b" * (progbar_width+1)) # return to start of line, after '['
+
         for fname in fileList:
+            #print "\b#",
+            sys.stdout.write("-")
+            sys.stdout.flush()
             self.addBinYields(fname,leptype)
-        print ".. finished"
+
+        print "> done."
 
         return 1
 
@@ -222,12 +238,18 @@ class YieldStore:
 
 if __name__ == "__main__":
 
-    #pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT1_HT0_NB0*NJ68"
-    #pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT1_HT0_NB*NJ68"
-    #pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT*NJ68"
-    pattern = "Yields/wData/lumi1p2_puWeight_data/scan/merged_old/LT1_HT0_NB1*NJ68"
+    import sys
 
-    fileList = glob.glob(pattern+"*.root")
+    ## remove '-b' option
+    if '-b' in sys.argv:
+        sys.argv.remove('-b')
+
+    if len(sys.argv) > 1:
+        pattern = sys.argv[1]
+        print '## pattern is', pattern
+    else:
+        print "No pattern given!"
+        exit(0)
 
     yds = YieldStore("bla")
     yds.addFromFiles(pattern)
