@@ -205,6 +205,14 @@ ttHLepSkim = cfg.Analyzer(
     #ptCuts = [20,10],                # can give a set of pt cuts on the leptons
     )
 
+## OTHER LEPTON SKIMMER
+from CMGTools.TTHAnalysis.analyzers.anyLepSkimmer import anyLepSkimmer
+anyLepSkim = cfg.Analyzer(
+    anyLepSkimmer, name='anyLepSkimmer',
+    minLeptons = 0,
+    maxLeptons = 999,
+    )
+
 ## Photon Analyzer (generic)
 photonAna = cfg.Analyzer(
     PhotonAnalyzer, name='photonAnalyzer',
@@ -470,6 +478,7 @@ susyCoreSequence = [
     susyScanAna,
     vertexAna,
     lepAna,
+    anyLepSkim,
     ttHLepSkim,
     #ttHLepMCAna,
     photonAna,

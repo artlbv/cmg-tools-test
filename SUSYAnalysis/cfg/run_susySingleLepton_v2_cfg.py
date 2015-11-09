@@ -26,10 +26,10 @@ if eleID == "CBID":
 	lepAna.loose_electron_dxy    = 999. # no cut since embedded in ID
 	lepAna.loose_electron_dz     = 999. # no cut since embedded in ID
 
-	lepAna.inclusive_electron_id  = "" # Keep no ID
-	lepAna.inclusive_electron_lostHits = 5. #
-	lepAna.inclusive_electron_dxy    = 1.0 # very loose (like in core)
-	lepAna.inclusive_electron_dz     = 2.0 # very loose (like in core)
+	lepAna.inclusive_electron_id  = "POG_Cuts_ID_SPRING15_25ns_v1_Veto_full5x5"
+	lepAna.inclusive_electron_lostHits = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_dxy    = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
 
 elif eleID == "MVAID":
 	inclusive_electron_id  = "" # same as in susyCore
@@ -61,19 +61,27 @@ if isolation == "miniIso":
 	lepAna.miniIsolationVetoLeptons = None
 	lepAna.loose_muon_isoCut     = lambda muon : muon.miniRelIso < 0.4
 	lepAna.loose_electron_isoCut = lambda elec : elec.miniRelIso < 0.4
+	lepAna.inclusive_electron_isoCut = lambda elec : elec.miniRelIso < 0.4
 elif isolation == "relIso03":
 	# normal relIso03
 	lepAna.ele_isoCorr = "rhoArea"
 	lepAna.mu_isoCorr = "rhoArea"
 
 	lepAna.loose_electron_relIso = 0.5
+	lepAna.inclusive_electron_relIso = 0.5
 	lepAna.loose_muon_relIso = 0.5
 
+#########################
 # --- LEPTON SKIMMING ---
+#########################
+
+## OTHER LEPTON SKIMMER
+anyLepSkim.minLeptons = 1
+anyLepSkim.maxLeptons = 999
+
+# GOOD LEPTON SKIMMER -- FROM TTH (in Core already)
 ttHLepSkim.minLeptons = 0
 ttHLepSkim.maxLeptons = 999
-#LepSkim.idCut  = ""
-#LepSkim.ptCuts = []
 
 ####### JETS #########
 jetAna.jetPt = 30
@@ -85,8 +93,8 @@ if jetAna.cleanSelectedLeptons:	jetAna.minLepPt = 10
 
 ## JEC -- see preprocessor for MET
 #use default for 25 ns from susycore Summer15_25nsV2_MC
-#jetAna.mcGT = "Summer15_50nsV4_MC"
-#jetAna.dataGT = "Summer15_50nsV4_DATA"
+#jetAna.mcGT = "Summer15_25nsV5_MC"
+jetAna.dataGT = "Summer15_25nsV6_DATA"
 
 jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
@@ -184,8 +192,8 @@ selectedComponents = []
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-sample = 'MC'
-#sample = 'data'
+#sample = 'MC'
+sample = 'data'
 test = 1
 
 if sample == "MC":
@@ -207,7 +215,7 @@ if sample == "MC":
 	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
 	# MiniAODv2
 	from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
-
+	selectedComponents = WJetsToLNuHT
 	if test==1:
 		# test a single component, using a single thread.
 		comp = TTJets_LO
@@ -229,9 +237,7 @@ if sample == "MC":
 		# PRODUCTION
 		# run on everything
 
-		#selectedComponents = mcSamples_Asymptotic50ns
-		#selectedComponents = [  TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
-		#selectedComponents = [TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar]#, TTJets_DiLepton]
+		selectedComponents =  QCDHT#[ TTJets_LO ]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 1
@@ -258,7 +264,7 @@ elif sample == "data":
 	#selectedComponents = [ SingleElectron_Run2015D, SingleMuon_Run2015D ]
 
 	# MiniAOD V2
-	selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
+	selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4]#, JetHT_Run2015D_05Oct,JetHT_Run2015D_Promptv4]
 	#selectedComponents = [ SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
 
 	if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
