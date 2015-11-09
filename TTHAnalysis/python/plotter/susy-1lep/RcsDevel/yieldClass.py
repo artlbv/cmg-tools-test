@@ -29,12 +29,13 @@ def getLepYield(hist,leptype = ('lep','sele')):
 class BinYield:
     ## Simple class for yield,error storing (instead of tuple)
 
-    def __init__(self, (val, err)):
+    def __init__(self, sample, (val, err)):
+        self.name = sample
         self.val = val
         self.err = err
 
     def __repr__(self):
-        return "%4.2f +- %4.2f" % (self.val, self.err)
+        return "%s : %4.2f +- %4.2f" % (self.name, self.val, self.err)
 
 class YieldStore:
 
@@ -94,7 +95,7 @@ class YieldStore:
 
                 sample = hist.GetName()
 
-                yd = BinYield(getLepYield(hist, leptype))
+                yd = ( BinYield(sample, getLepYield(hist, leptype)) )
 
                 self.addYield(sample,category,binName,yd)
         return 1
@@ -223,10 +224,12 @@ class YieldStore:
 
             for yd in yds[bin]:
                 f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
+                print yd.name
             
             f.write(' \\\ \n')
         f.write(' \\hline \n')
         return 1
+
 
 
 if __name__ == "__main__":
