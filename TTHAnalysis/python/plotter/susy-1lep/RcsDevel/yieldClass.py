@@ -1,30 +1,10 @@
 #!/usr/bin/env python
 
-import glob, os
-#from math import hypot
+import os, glob, sys
+
 from ROOT import *
 from searchBins import *
-def getLepYield(hist,leptype = ('lep','sele')):
-
-    if hist.GetNbinsX() == 1:
-        return (hist.GetBinContent(1),hist.GetBinError(1))
-
-    elif hist.GetNbinsX() == 3 and hist.GetNbinsY() == 2:
-
-        if leptype == ('mu','anti'):
-            return (hist.GetBinContent(1,1),hist.GetBinError(1,1))
-        elif leptype == ('mu','sele'):
-            return (hist.GetBinContent(1,2),hist.GetBinError(1,2))
-        elif leptype == ('ele','anti'):
-            return (hist.GetBinContent(3,1),hist.GetBinError(3,1))
-        elif leptype == ('ele','sele'):
-            return (hist.GetBinContent(3,2),hist.GetBinError(3,2))
-        elif leptype == ('lep','anti'):
-            return (hist.GetBinContent(2,1),hist.GetBinError(2,1))
-        elif leptype == ('lep','sele'):
-            return (hist.GetBinContent(2,2),hist.GetBinError(2,2))
-    else:
-        return (hist.Integral(),TMath.sqrt(hist.Integral()))
+from readYields import getLepYield, getScanYields
 
 class BinYield:
     ## Simple class for yield,error storing (instead of tuple)
@@ -33,6 +13,7 @@ class BinYield:
         self.val = val
         self.err = err
 
+    # func that is called with print BinYield object
     def __repr__(self):
         return "%4.2f +- %4.2f" % (self.val, self.err)
 
@@ -75,7 +56,7 @@ class YieldStore:
         tfile = TFile(fname,"READ")
         bfname = os.path.basename(fname)
         binName = bfname.replace("_SR.merge.root","")
-        binName = bfname.replace(".merge.root","")
+        binName = binName.replace(".merge.root","")
         #print binName
 
         # get list of dirs
@@ -94,9 +75,23 @@ class YieldStore:
 
                 sample = hist.GetName()
 
-                yd = BinYield(getLepYield(hist, leptype))
+                if ('Scan' not in sample) and ('scan' not in sample):
+                    # get normal sample yield
+                    yd = BinYield(getLepYield(hist, leptype))
+                    self.addYield(sample,category,binName,yd)
+                else:
+                    # get yields from scan
+                    yds = getScanYields(hist,leptype)
+                    # loop over mass points
+                    for mGo,mLSP in yds:
+                        # selected key type: mass point string or tuple
+                        point = sample + "_mGo%i_mLSP%i" %(mGo,mLSP)
+                        #point = (mGo,mLSP)
 
-                self.addYield(sample,category,binName,yd)
+                        yd = BinYield(yds[(mGo,mLSP)])
+                        # store if yield is not empty -- temporary
+                        #if yd.val > 0:
+                        self.addYield(point,category,binName,yd)
         return 1
 
     def addFromFiles(self, pattern, leptype = ("lep","sele") ):
@@ -106,11 +101,23 @@ class YieldStore:
 
         # find files matching pattern
         fileList = glob.glob(pattern+"*.root")
+        nFiles = len(fileList)
 
-        print "Starting to add yields..."
+        print "## Starting to add yields from %i files like " %(nFiles) + pattern + ": ", ; sys.stdout.flush()
+        # progress bar
+        progbar_width = nFiles
+        # setup progbar
+        sys.stdout.write("[%s]" % (" " * progbar_width))
+        sys.stdout.flush()
+        sys.stdout.write("\b" * (progbar_width+1)) # return to start of line, after '['
+
         for fname in fileList:
+            #print "\b#",
+            sys.stdout.write("-")
+            sys.stdout.flush()
             self.addBinYields(fname,leptype)
-        print ".. finished"
+
+        print "> done."
 
         return 1
 
@@ -208,12 +215,12 @@ class YieldStore:
 
         bins = sorted(yds.keys())
         for i,bin in enumerate(bins):
-            (LTbin, HTbin, Bbin ) = bin.split("_")[0:3]        
-            (LT, HT, B) = (binsLT[LTbin][1],binsHT[HTbin][1],binsNB[Bbin][1])           
-            (LT0, HT0, B0 ) = ("","","") 
+            (LTbin, HTbin, Bbin ) = bin.split("_")[0:3]
+            (LT, HT, B) = (binsLT[LTbin][1],binsHT[HTbin][1],binsNB[Bbin][1])
+            (LT0, HT0, B0 ) = ("","","")
             if i > 0 :
                 (LT0bin, HT0bin, B0bin ) = bins[i-1].split("_")[0:3]
-                (LT0, HT0, B0) = (binsLT[LT0bin][1],binsHT[HT0bin][1],binsNB[B0bin][1])           
+                (LT0, HT0, B0) = (binsLT[LT0bin][1],binsHT[HT0bin][1],binsNB[B0bin][1])
             if LT != LT0:
                 f.write(('\\cline{1-%s} ' + LT + ' & ' + HT + ' & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin) % (nCol))
             if LT == LT0 and HT != HT0:
@@ -223,7 +230,7 @@ class YieldStore:
 
             for yd in yds[bin]:
                 f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
-            
+
             f.write(' \\\ \n')
         f.write(' \\hline \n')
         return 1
@@ -231,23 +238,30 @@ class YieldStore:
 
 if __name__ == "__main__":
 
-    #pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT1_HT0_NB0*NJ68"
-    #pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT1_HT0_NB*NJ68"
-    pattern = "Yields/wData/lumi1p2_puWeight_data/grid/merged/LT*NJ68"
+    import sys
 
-    fileList = glob.glob(pattern+"*.root")
+    ## remove '-b' option
+    if '-b' in sys.argv:
+        sys.argv.remove('-b')
+
+    if len(sys.argv) > 1:
+        pattern = sys.argv[1]
+        print '## pattern is', pattern
+    else:
+        print "No pattern given!"
+        exit(0)
 
     yds = YieldStore("bla")
     yds.addFromFiles(pattern)
 
-    #print yds.bins
-    print yds.categories
-    print yds.samples
+    #yds.showStats()
+
     #yds.printBins("QCD","CR_SB")
     #yds.getSampsDict("QCD",["CR_SB","CR_MB"])
     #yds.printBins("QCD",["CR_SB","CR_MB"])
     #yds.printBins("data",yds.categories)
 
+    '''
     #samps = {"EWK":"CR_MB","QCD":"CR_SB"}
     #samps = {"EWK":"CR_SB","background_QCDsubtr":"CR_SB","background_QCDsubtr":"Closure"}
     samps = [
@@ -257,5 +271,15 @@ if __name__ == "__main__":
         ]
     #print yds.getMixDict(samps)
     yds.printMixBins(samps)
-
+    '''
     #print yds.yields
+
+    cat = "SR_MB"
+
+    samps = [
+        ("EWK",cat),
+        ("T1tttt_Scan_mGo1500_mLSP0",cat),
+        ("T1tttt_Scan_mGo1200_mLSP750",cat),
+        ]
+    #print yds.getMixDict(samps)
+    yds.printMixBins(samps)
