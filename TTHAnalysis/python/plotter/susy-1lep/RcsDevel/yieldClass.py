@@ -90,8 +90,8 @@ class YieldStore:
 
                         yd = BinYield(yds[(mGo,mLSP)])
                         # store if yield is not empty -- temporary
-                        if yd.val > 0:
-                            self.addYield(point,category,binName,yd)
+                        #if yd.val > 0:
+                        self.addYield(point,category,binName,yd)
         return 1
 
     def addFromFiles(self, pattern, leptype = ("lep","sele") ):
@@ -254,9 +254,8 @@ if __name__ == "__main__":
     yds = YieldStore("bla")
     yds.addFromFiles(pattern)
 
-    #print yds.bins
-    print yds.categories
-    print yds.samples
+    #yds.showStats()
+
     #yds.printBins("QCD","CR_SB")
     #yds.getSampsDict("QCD",["CR_SB","CR_MB"])
     #yds.printBins("QCD",["CR_SB","CR_MB"])
@@ -274,3 +273,13 @@ if __name__ == "__main__":
     yds.printMixBins(samps)
     '''
     #print yds.yields
+
+    cat = "SR_MB"
+
+    samps = [
+        ("EWK",cat),
+        ("T1tttt_Scan_mGo1500_mLSP0",cat),
+        ("T1tttt_Scan_mGo1200_mLSP750",cat),
+        ]
+    #print yds.getMixDict(samps)
+    yds.printMixBins(samps)
