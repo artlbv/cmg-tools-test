@@ -3,6 +3,8 @@
 #include "Math/GenVector/PtEtaPhiM4D.h"
 #include "Math/GenVector/PxPyPzM4D.h"
 
+#include <TMath.h>
+#include <TLorentzVector.h>
 //// UTILITY FUNCTIONS NOT IN TFORMULA ALREADY
 
 float myratio(float num, float denom) {
@@ -232,6 +234,5 @@ float DR_for_ST_PT(float ST, float PT)
   float DR = myFuncDROfPandPT(x,par);
   return DR;
 }
-
 
 void functions() {}
