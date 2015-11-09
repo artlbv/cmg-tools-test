@@ -364,7 +364,7 @@ if __name__ == "__main__":
 
     yds.showStats()
 
-
+    '''
     samps = [
         ("QCD","CR_SB"),
         ("QCD_QCDpred","CR_SB"),
@@ -372,7 +372,7 @@ if __name__ == "__main__":
         ]
 
     yds.printMixBins(samps)
-    '''
+
     #ydQCD = yds.getSampDict("QCD","CR_SB")
     #hist = makeSampHisto(ydQCD,"QCD_CRSB")
 
@@ -393,8 +393,7 @@ if __name__ == "__main__":
         ("EWK","CR_SB"),
         #("data_QCDsubtr","CR_SB"),
         ]
-    '''
-    '''
+
     sampsRcs = [
         ("EWK","Rcs_SB"),
         ("EWK","Rcs_MB"),
