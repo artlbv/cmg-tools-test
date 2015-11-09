@@ -12,13 +12,31 @@ gStyle.SetPadRightMargin(0.075)
 gStyle.SetPadBottomMargin(0.225)
 
 ## Global vars
-colorList = [1,2,4,7,9,8,3,6] + range(10,50)
+_alpha = 0.75
+colorList = [2,4,7,9,8,3,6] + range(10,50)
 _histStore = {}
 
-_batchMode = False
+_batchMode = True
 
 colorDict = {'TT': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-2,
 'QCD':kCyan-6,'SingleT':kViolet+5,'DY':kRed-6,'TTV':kOrange-3,'data':1,'background':2,'EWK':3}
+
+def doLegend(nEntr = None):
+
+    if nEntr:
+        leg = TLegend(0.65,0.875-(nEntr*0.2),0.85,0.875)
+    else:
+        leg = TLegend(0.65,0.5,0.85,0.85)
+    leg.SetBorderSize(1)
+    leg.SetTextFont(62)
+    leg.SetTextSize(0.03321678)
+    leg.SetLineColor(0)
+    #leg.SetLineStyle(1)
+    #leg.SetLineWidth(1)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(1001)
+
+    return leg
 
 def getSampColor(name):
 
@@ -32,17 +50,35 @@ def getSampColor(name):
 
     else: return 1
 
-def makeSampHisto(ydict, samp, cat):
+def prepKappaHist(hist):
+    # prepare hist to be kappa
+
+    hist.GetYaxis().SetNdivisions(505)
+    hist.GetYaxis().SetTitle("#kappa")
+    hist.GetYaxis().CenterTitle()
+    hist.GetYaxis().SetTitleSize(0.1)
+    hist.GetYaxis().SetTitleOffset(0.2)
+
+    hist.GetYaxis().SetLabelSize(0.1)
+    hist.GetYaxis().SetRangeUser(0.05,1.95)
+
+    hist.GetXaxis().SetLabelSize(0.1)
+
+def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
+
+    # yield dict
+    ydict = yds.getSampDict(samp,cat)
 
     # create histo
     binList = sorted(ydict.keys())
     nbins = len(binList)
 
-    hname = samp + "_" + cat
+    if hname == "": hname = samp + "_" + cat
     if "Rcs" in cat:
         htitle = cat.replace("Rcs_","R_{CS}^{") + "} (%s)" %samp
     else:
-        htitle = cat + " (%s)" %samp
+        #htitle = cat + " (%s)" %samp
+        htitle = "%s" %samp
 
     #hist = TH1F(hname,hname,nbins,-0.5,nbins+0.5)
     hist = TH1F(hname,htitle,nbins,0,nbins)
@@ -51,45 +87,60 @@ def makeSampHisto(ydict, samp, cat):
     for ibin,bin in enumerate(binList):
 
         binLabel = bin
-        #binLabel = binLabel.replace("_NJ68","")
-        binLabel = binLabel.replace("_",",")
+        binLabel = binLabel.replace("_NJ68","")
+        binLabel = binLabel.replace("_NJ9i","")
+        #binLabel = binLabel.replace("_",",")
 
+        newLabel = "#splitline"
 
-        hist.GetXaxis().SetBinLabel(ibin+1,binLabel)
+        splitbins = binLabel.split("_")#[:2]
+        nbins = len(splitbins)
 
-        if "Kappa" not in cat:
-            hist.SetBinContent(ibin+1,ydict[bin].val)
-            hist.SetBinError(ibin+1,ydict[bin].err)
+        if nbins == 2:
+            newLabel = "#splitline{%s}{%s}" %(splitbins[0],splitbins[1])
+        elif nbins == 3:
+            newLabel = "#splitline{%s}{#splitline{%s}{%s}}" %(splitbins[0],splitbins[1],splitbins[2])
         else:
-            val = (ydict[bin].val-1)/10
-            err = (ydict[bin].err)/10
+            newLabel = binLabel
+        '''
+        for ch in binLabel.split("_")[:2]:
+            newLabel += "{%s}" % ch
+        print newLabel
+        '''
 
-            hist.SetBinContent(ibin+1,val)
-            hist.SetBinError(ibin+1,err)
+        hist.GetXaxis().SetBinLabel(ibin+1,newLabel)
+
+        hist.SetBinContent(ibin+1,ydict[bin].val)
+        hist.SetBinError(ibin+1,ydict[bin].err)
 
     # options
-    hist.GetXaxis().LabelsOption("v")
+    hist.GetXaxis().LabelsOption("h")
 
     # Style
-    col = getSampColor(hist.GetName())
-    # col = colorList[i]
+    if ("Kappa" not in cat) and ("Rcs" not in cat):
+        col = getSampColor(hist.GetName())
+    else:
+        col = colorList[ind]
     #print "color for %s  %i" %(hist.GetName(),col)
 
     if "data" not in hist.GetName():
         if _batchMode == True:
-            hist.SetFillColorAlpha(col,0.35)
+            hist.SetFillColorAlpha(col,_alpha)
         else:
             hist.SetFillColor(col)
-            hist.SetFillStyle(3001)
+            hist.SetFillStyle(1001)
 
     hist.SetLineColor(col)
     hist.SetMarkerColor(col)
     hist.SetMarkerStyle(20)
 
     if "Kappa" in cat:
-        hist.GetYaxis().SetRangeUser(-0.05,0.3)
-
-    if "Kappa" not in cat or "Rcs" not in cat:
+        hist.GetYaxis().SetRangeUser(0.05,1.95)
+        hist.GetYaxis().SetTitle("Kappa")
+    elif "Rcs" in cat:
+        hist.GetYaxis().SetRangeUser(0.005,0.35)
+        hist.GetYaxis().SetTitle("R_{CS}")
+    else:
         hist.GetYaxis().SetTitle("Events")
 
     return hist
@@ -98,10 +149,11 @@ def makeSampHists(yds,samps):
 
     histList = []
 
-    for samp,cat in samps:
+    for ind,(samp,cat) in enumerate(samps):
 
-        yd = yds.getSampDict(samp,cat)
-        hist = makeSampHisto(yd,samp,cat)
+        #yd = yds.getSampDict(samp,cat)
+        #if yd:
+        hist = makeSampHisto(yds,samp,cat,"",ind)
 
         histList.append(hist)
 
@@ -115,12 +167,56 @@ def getRatio(histA,histB):
     #ratio.GetYaxis().SetTitle("Ratio")
     ratio.GetYaxis().SetTitle(histA.GetTitle()+"/"+histB.GetTitle())
     ratio.GetYaxis().CenterTitle()
+    ratio.GetYaxis().SetNdivisions(505)
+    ratio.GetYaxis().SetTitleSize(0.1)
+    ratio.GetYaxis().SetTitleOffset(0.3)
+
+    ratio.GetYaxis().SetLabelSize(0.1)
+    ratio.GetYaxis().SetRangeUser(0.05,1.95)
+
+    ratio.GetXaxis().SetLabelSize(0.1)
 
     ratio.SetLineColor(1)
     ratio.SetFillColor(0)
     ratio.SetFillStyle(0)
 
     return ratio
+
+def getPull(histA,histB):
+
+    pull = histA.Clone("pull_"+histA.GetName()+"_"+histB.GetName())
+    pull.Add(histB,-1)
+    #pull.Divide(histB)
+
+    for ibin in range(1,pull.GetNbinsX()+1):
+        err = histA.GetBinError(ibin)
+        if err > 0:
+            pull.SetBinContent(ibin,pull.GetBinContent(ibin)/err)
+            pull.SetBinError(ibin,pull.GetBinError(ibin)/err)
+        else:
+            pull.SetBinContent(ibin,0)
+            pull.SetBinError(ibin,0)
+
+    #pull.GetYaxis().SetTitle("Pull")
+    #title = "#frac{%s - %s}{%s}" %(histA.GetTitle(),histB.GetTitle(),histB.GetTitle())
+        title = "#frac{%s - %s}{#sigma(%s)}" %(histA.GetTitle(),histB.GetTitle(),histA.GetTitle())
+    pull.GetYaxis().SetTitle(title)
+    pull.GetYaxis().CenterTitle()
+    pull.GetYaxis().SetNdivisions(505)
+    pull.GetYaxis().SetTitleSize(0.1)
+    pull.GetYaxis().SetTitleOffset(0.3)
+
+    pull.GetYaxis().SetLabelSize(0.1)
+    pull.GetYaxis().SetRangeUser(-5,5)
+
+    pull.GetXaxis().SetLabelSize(0.1)
+
+    pull.SetLineColor(1)
+    pull.SetFillColor(0)
+    pull.SetFillStyle(0)
+
+    return pull
+
 
 def getStack(histList):
 
@@ -131,9 +227,9 @@ def getStack(histList):
 
         #style
         if _batchMode == True:
-            hist.SetFillColorAlpha(hist.GetFillColor(),0.35)
+            hist.SetFillColorAlpha(hist.GetFillColor(),_alpha)
         else:
-            hist.SetFillStyle(3000)
+            hist.SetFillStyle(1001)
 
     # Options
     #stack.Draw("GOFF") # GOFF doesn't actually draw anything
@@ -142,33 +238,67 @@ def getStack(histList):
     return stack
 
 def getTotal(histList):
+    # to be used only for ratio and error band
 
     total = histList[0].Clone("total")
     total.Reset()
+    total.SetTitle("total")
+    total.SetName("total")
 
     for hist in histList:  total.Add(hist)
 
-    total.SetTitle("Total")
-    total.SetLineColor(1)
-    total.SetFillColor(0)
+    total.SetLineColor(0)
+    total.SetFillColor(kGray)
+    total.SetFillStyle(3144)
+    total.SetMarkerStyle(0)
+    total.SetMarkerColor(0)
 
     return total
 
-def plotHists(histList, ratio = None):
+def getCatLabel(name):
 
-    canv = TCanvas("canv","canv",800,600)
+    cname = name
+    cname = cname.replace("_"," ")
+    cname = cname.replace("SB","N_{j} #in [4,5]")
+    cname = cname.replace("MB","N_{j} #in [6,8]")
+
+    return cname
+
+def plotHists(cname, histList, ratio = None):
+
+    canv = TCanvas(cname,cname,1000,600)
+    #leg = doLegend(len(histList)+1)
+    leg = doLegend()
+
+    head = getCatLabel(cname)
+    leg.SetHeader(head)
 
     if ratio != None:
-        canv.SetWindowSize(600 + (600 - canv.GetWw()), (750 + (750 - canv.GetWh())));
-        p1 = TPad("pad1","pad1",0,0.31,1,1);
-        p1.SetBottomMargin(0);
-        p1.Draw();
+        #canv.SetWindowSize(600 + (600 - canv.GetWw()), (750 + (750 - canv.GetWh())));
         p2 = TPad("pad2","pad2",0,0,1,0.31);
         p2.SetTopMargin(0);
-        p2.SetBottomMargin(0.3);
+        p2.SetBottomMargin(0.31);
         p2.SetFillStyle(0);
         p2.Draw();
+
+        p1 = TPad("pad1","pad1",0,0.31,1,1);
+        p1.SetBottomMargin(0.02);
+        p1.Draw();
+
+        p2.cd()
+        ratio.Draw("pe1")
+
+        # 1 - line
+        #xmin = ratio.GetXaxis().
+        #line = TLine(0,1,ratio.GetNbinsX(),1)
+        line = TLine(0,0,ratio.GetNbinsX(),0)
+        line.SetLineWidth(1)
+        line.Draw()
+        SetOwnership(line,0)
+
         p1.cd();
+    else:
+        canv.SetBottomMargin(0.1)
 
     plotOpt = ""
 
@@ -176,28 +306,36 @@ def plotHists(histList, ratio = None):
 
         if  hist.ClassName() == 'THStack':
             hist.Draw("HIST")
-            hist.GetXaxis().LabelsOption("v")
-        elif "data" in hist.GetName():
+            hist.GetXaxis().LabelsOption("h")
+            hist.GetYaxis().SetTitle("Events")
+            hist.GetYaxis().SetTitleSize(0.06)
+            hist.GetYaxis().SetTitleOffset(0.6)
+            if ratio == None: hist.GetYaxis().SetLabelSize(0.04)
+            else: hist.GetYaxis().SetLabelSize(0.05)
+
+            for h in reversed(hist.GetHists()):
+                leg.AddEntry(h,h.GetTitle(),"f")
+        elif ("data" in hist.GetName()) or ("Data" in hist.GetName()):
             hist.Draw(plotOpt+"pE1")
+            leg.AddEntry(hist,hist.GetTitle(),"p")
+        elif "total" in hist.GetName():
+            hist.Draw(plotOpt+"E2")
+            leg.AddEntry(hist,"MC Uncertainty","f")
         else:
             hist.Draw(plotOpt+"pE2")
+            leg.AddEntry(hist,hist.GetTitle(),"pf")
+
+        # remove axis label with ratio
+        if i == 0 and ratio != None:
+            hist.GetXaxis().SetLabelOffset(1)
 
         if "same" not in plotOpt: plotOpt += "same"
 
-    canv.BuildLegend()
+    #canv.BuildLegend()
+    leg.Draw()
+    SetOwnership(leg,0)
 
-    if ratio != None:
-        p2.cd()
-
-        ratio.Draw()
-        ratio.GetYaxis().SetRangeUser(0.,1.5)
-
-        # 1 - line
-        #xmin = ratio.GetXaxis().
-        line = TLine(0,1,ratio.GetNbinsX(),1)
-        line.SetLineWidth(1)
-        line.Draw()
-        SetOwnership(line,0)
+    #if ratio != None:
 
     return canv
 
@@ -215,22 +353,19 @@ if __name__ == "__main__":
         print "No pattern given!"
         exit(0)
 
-    '''
-    # append / if pattern is a dir
-    if os.path.isdir(pattern): pattern += "/"
-
-    # find files matching pattern
-    fileList = glob.glob(pattern+"*.root")
-    '''
+    #BinMask LTX_HTX_NBX_NJX for canvas names
+    basename = os.path.basename(pattern)
+    mask = basename.replace("*","X_")
 
     ## Create Yield Storage
     yds = YieldStore("lepYields")
 
-    yds.addFromFiles(pattern,("lep","sele"))
+    yds.addFromFiles(pattern,("ele","anti"))
 
     yds.showStats()
 
     '''
+
     #ydQCD = yds.getSampDict("QCD","CR_SB")
     #hist = makeSampHisto(ydQCD,"QCD_CRSB")
 
@@ -252,20 +387,26 @@ if __name__ == "__main__":
         #("data_QCDsubtr","CR_SB"),
         ]
 
-    samps = [
-        ("EWK","Kappa"),
+    sampsRcs = [
         ("EWK","Rcs_SB"),
         ("EWK","Rcs_MB"),
         ]
 
-    hists = makeSampHists(samps)
+    rcsHists = makeSampHists(yds,sampsRcs)
+    hKappa = makeSampHists(yds,[("EWK","Kappa")])[0]
+
+
+    prepKappaHist(hKappa)
+
+    canv = plotHists("bla",rcsHists,hKappa)
 
     '''
-    '''
-    cat = "CR_SB"
+    cat = "SR_MB"
+
 
     #mcSamps = [samp for samp in yds.samples if ("backgr" not in samp or "data" not in samp or "EWK" not in samp)]
-    mcSamps = ['TT', 'SingleT', 'WJets', 'DY', 'QCD','TTV']
+    mcSamps = ['DY','TTV','SingleT','WJets','TT','QCD']
+    #mcSamps = ['WJets','TT','QCD']
     print mcSamps
 
     samps = [(samp,cat) for samp in mcSamps]
@@ -280,21 +421,24 @@ if __name__ == "__main__":
 
     # Totals
     tots = [("background",cat),("data",cat)]
+    #tots = [("background",cat),("background",cat)]
 
     hTot = makeSampHists(yds,tots)
 
     #stack.Draw("HIST")
-    #canv = plotHists([stack,total]+hTot)
-    #canv = plotHists([stack]+hTot)
+    #canv = plotHists(cat,[stack,total]+hTot)
+    #canv = plotHists(cat,[stack]+hTot)
 
     ratio = getRatio(hTot[1],total)
 
-    canv = plotHists([stack]+hTot,ratio)
+    canv = plotHists("AntiEle_"+cat,[stack,total,hTot[1]],ratio)
+    #canv = plotHists("AntiEle_"+cat,[stack,total],ratio)
 
-    #canv = plotHists([ratio])
+    #canv = plotHists(cat,[ratio])
 
-    canv.SaveAs(canv.GetName()+".pdf")
     #hist.Draw("p")
     
     if not _batchMode: raw_input("Enter any key to exit")
-    '''
+    canv.SaveAs("BinPlots/"+mask+canv.GetName()+".pdf")
+
+    

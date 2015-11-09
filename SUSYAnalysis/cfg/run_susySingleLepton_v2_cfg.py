@@ -93,8 +93,8 @@ if jetAna.cleanSelectedLeptons:	jetAna.minLepPt = 10
 
 ## JEC -- see preprocessor for MET
 #use default for 25 ns from susycore Summer15_25nsV2_MC
-#jetAna.mcGT = "Summer15_50nsV4_MC"
-#jetAna.dataGT = "Summer15_50nsV4_DATA"
+#jetAna.mcGT = "Summer15_25nsV5_MC"
+jetAna.dataGT = "Summer15_25nsV6_DATA"
 
 jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
@@ -192,11 +192,9 @@ selectedComponents = []
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-sample = 'MC'
-#sample = 'data'
-
+#sample = 'MC'
+sample = 'data'
 test = 1
-
 
 if sample == "MC":
 
@@ -239,7 +237,7 @@ if sample == "MC":
 		# PRODUCTION
 		# run on everything
 
-		selectedComponents =  [ TTJets_LO ]
+		selectedComponents =  QCDHT#[ TTJets_LO ]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 1
@@ -266,7 +264,7 @@ elif sample == "data":
 	#selectedComponents = [ SingleElectron_Run2015D, SingleMuon_Run2015D ]
 
 	# MiniAOD V2
-	selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
+	selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4]#, JetHT_Run2015D_05Oct,JetHT_Run2015D_Promptv4]
 	#selectedComponents = [ SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
 
 	if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
