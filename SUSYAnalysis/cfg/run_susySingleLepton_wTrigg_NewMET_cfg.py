@@ -26,10 +26,10 @@ if eleID == "CBID":
 	lepAna.loose_electron_dxy    = 999. # no cut since embedded in ID
 	lepAna.loose_electron_dz     = 999. # no cut since embedded in ID
 
-	lepAna.inclusive_electron_id  = "" # Keep no ID
-	lepAna.inclusive_electron_lostHits = 5. #
-	lepAna.inclusive_electron_dxy    = 1.0 # very loose (like in core)
-	lepAna.inclusive_electron_dz     = 2.0 # very loose (like in core)
+	lepAna.inclusive_electron_id  = "POG_Cuts_ID_SPRING15_25ns_v1_Veto_full5x5"
+	lepAna.inclusive_electron_lostHits = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_dxy    = 999. # no cut since embedded in ID
+	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
 
 elif eleID == "MVAID":
 	inclusive_electron_id  = "" # same as in susyCore
@@ -69,11 +69,17 @@ elif isolation == "relIso03":
 	lepAna.loose_electron_relIso = 0.5
 	lepAna.loose_muon_relIso = 0.5
 
+#########################
 # --- LEPTON SKIMMING ---
+#########################
+
+## OTHER LEPTON SKIMMER
+anyLepSkim.minLeptons = 0
+anyLepSkim.maxLeptons = 999
+
+# GOOD LEPTON SKIMMER -- FROM TTH (in Core already)
 ttHLepSkim.minLeptons = 0
 ttHLepSkim.maxLeptons = 999
-#LepSkim.idCut  = ""
-#LepSkim.ptCuts = []
 
 ####### JETS #########
 jetAna.jetPt = 30
@@ -184,7 +190,8 @@ selectedComponents = []
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-sample = 'MC'
+sample = 'Signal'
+#sample = 'MC'
 #sample = 'data'
 test = 1
 
@@ -196,9 +203,12 @@ if sample == "MC":
 	jecEra    = 'Summer15_25nsV2_MC'
 
 	isData = False
+	isSignal = False
 
 	# modify skim
-	ttHLepSkim.minLeptons = 1
+	anyLepSkim.minLeptons = 1
+	ttHLepSkim.minLeptons = 0
+
 
 	# -- new 74X samples
 	#from CMGTools.RootTools.samples.samples_13TeV_74X import *
@@ -240,6 +250,57 @@ if sample == "MC":
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 2
 			comp.splitFactor = len(comp.files)
+elif sample == "Signal":
+
+	print 'Going to process Signal'
+
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV2_MC.db'
+	jecEra    = 'Summer15_25nsV2_MC'
+
+	isData = False
+	isSignal = True
+
+	# modify skim
+	anyLepSkim.minLeptons = 0
+	ttHLepSkim.minLeptons = 0
+
+	# -- new 74X samples
+	#from CMGTools.RootTools.samples.samples_13TeV_74X import *
+	# -- samples at DESY
+	# MiniAODv1
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	# MiniAODv2
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
+
+	selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
+
+	if test==1:
+		# test a single component, using a single thread.
+		comp = T1tttt_mGo_1500to1525_mLSP_50to1125
+		comp.files = comp.files[:1]
+		selectedComponents = [comp]
+		comp.splitFactor = 1
+	elif test==2:
+		# test all components (1 thread per component).
+		for comp in selectedComponents:
+			comp.splitFactor = 1
+			comp.fineSplitFactor = 2
+			comp.files = comp.files[:1]
+	elif test==3:
+		# run all components (1 thread per component).
+		for comp in selectedComponents:
+			comp.fineSplitFactor = 2
+			comp.splitFactor = len(comp.files)
+	elif test==0:
+		# PRODUCTION
+		# run on everything
+
+		selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
+
+		for comp in selectedComponents:
+			comp.fineSplitFactor = 2
+			comp.splitFactor = len(comp.files)
+
 
 elif sample == "data":
 
@@ -249,21 +310,17 @@ elif sample == "data":
 	jecEra    = 'Summer15_25nsV5_DATA'
 
 	isData = True
+	isSignal = False
 
 	# modify skim
+	anyLepSkim.minLeptons = 1
 	ttHLepSkim.minLeptons = 0
+
 
 	# central samples
 #	from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
 	# samples at DESY
 	from CMGTools.SUSYAnalysis.samples.samples_13TeV_DATA2015_desy import *
-
-	#selectedComponents = [ SingleElectron_Run2015B, SingleMuon_Run2015B ]
-	#selectedComponents = [ SingleElectron_Run2015B ]
-	#selectedComponents = [ SingleElectron_Run2015B, SingleElectron_Run2015B_17Jul ]
-	#selectedComponents = [ SingleMuon_Run2015B, SingleMuon_Run2015B_17Jul ]
-	#selectedComponents = [ JetHT_Run2015B, JetHT_Run2015B_17Jul ]
-	#selectedComponents = [ HTMHT_Run2015B ]
 
 	selectedComponents = [ JetHT_Run2015D ] #, SingleElectron_Run2015D, SingleMuon_Run2015D ]
 	#selectedComponents = [ SingleElectron_Run2015D, SingleMuon_Run2015D ]
@@ -376,10 +433,6 @@ sequence = cfg.Sequence(susyCoreSequence+[
 		hbheFilterAna,
 		treeProducer,
 		])
-
-isSignal = False:
-for comp in selectedComponents:
-	if "SMS" in comp: isSignal = True
 
 # remove skimming for Data or Signal
 if isData or isSignal :
