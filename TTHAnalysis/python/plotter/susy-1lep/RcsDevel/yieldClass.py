@@ -79,7 +79,7 @@ class YieldStore:
 
                 if ('Scan' not in sample) and ('scan' not in sample):
                     # get normal sample yield
-                    yd = BinYield(getLepYield(hist, leptype))
+                    yd = BinYield(sample, getLepYield(hist, leptype))
                     self.addYield(sample,category,binName,yd)
                 else:
                     # get yields from scan
@@ -90,7 +90,7 @@ class YieldStore:
                         point = sample + "_mGo%i_mLSP%i" %(mGo,mLSP)
                         #point = (mGo,mLSP)
 
-                        yd = BinYield(yds[(mGo,mLSP)])
+                        yd = BinYield(point, yds[(mGo,mLSP)])
                         # store if yield is not empty -- temporary
                         #if yd.val > 0:
                         self.addYield(point,category,binName,yd)
