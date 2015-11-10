@@ -58,6 +58,8 @@ def getScanYields(hist,leptype = ('lep','sele')):
                     ycnt = (ydict[point][0] + ydict[mupoint][0], hypot(ydict[point][1], ydict[mupoint][1]))
                 else:
                     ycnt = ydict[point]
+                if 'syst' in hist.GetName():
+                    ycnt = (ycnt[0] / 2.0, ycnt[1] / 2.0)
                 ret[point] = ycnt
 
     elif leptype[0] == 'ele':
