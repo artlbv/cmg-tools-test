@@ -140,67 +140,9 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
             hQCDsubtr.Add(hQCDpred,-1)
 
         return (hQCDpred,hQCDsubtr)
-
-        '''
-        ## OLD
-        # take anti/selected yields for Electrons
-        ySeleEle = hOrig.GetBinContent(3,2); ySeleEleErr = hOrig.GetBinError(3,2);
-
-        yQCDFromAnti = fRatio*yAnti
-        ySeleEleMinusAnti = ySeleEle - fRatio*yAnti# if ySeleEle > fRatio*yAnti else 0
-
-        # error
-        ySeleEleMinusAntiErr = sqrt(ySeleEleErr**2 + (yAntiErr*fRatio)**2 + (yAnti*fRatioErr)**2)
-
-        # Set bin for electrons
-        hQCDsubtr.SetBinContent(3,2,ySeleEleMinusAnti)
-        hQCDsubtr.SetBinError(3,2,ySeleEleMinusAntiErr)
-
-        ## Apply correction on combined electrons
-        ySeleLep = hOrig.GetBinContent(2,2)
-        ySeleMu = hOrig.GetBinContent(1,2); ySeleMuErr = hOrig.GetBinError(1,2)
-
-        ySeleLepMinusAnti = ySeleMu + ySeleEleMinusAnti
-        ySeleLepMinusAntiErr = hypot(ySeleMuErr,ySeleEleMinusAntiErr)
-
-        # Set bin for combined leptons
-        hQCDsubtr.SetBinContent(2,2,ySeleLepMinusAnti)
-        hQCDsubtr.SetBinError(2,2,ySeleLepMinusAntiErr)
-
-        ## return corrected histogram
-        #hQCDsubtr.Write()
-        return hQCDsubtr
-        '''
     else:
         print "QCD estimate not yet implemented for muons"
         return 0
-
-'''
-def getRcsWqcd(tfile, pname, band = "MB", lep = "lep"):
-
-    rcsName = "Rcs_" + pname
-
-    ySR = getYield(tfile,rcsName,"Rcs_"+band+"/", (lep,"sel"))
-    yCR = getYield(tfile,rcsName,"Rcs_"+band+"/", (lep,"sel"))
-    yCRanti = getYield(tfile,rcsName,"CR_"+band+"/", (lep,"anti"))
-
-    kName = "Kappa_" + pname
-
-    kappa = getYield(tfile,kName,"Kappa_"+band+"/", (lep,"sel"))
-
-
-    ## Need 5 yields for RCS prediction
-    # * SB SR: sele
-    # * SB CR: sele & anti
-    # * CR: sele & anti
-    ## QCD:
-
-    ## Prediction
-    # SR = (CR-CRqcd) * SB_SR/(SB_CR-SB_CRqcd) * kappa
-
-
-    return 1
-'''
 
 def makeQCDsubtraction(fileList):
 
