@@ -4,18 +4,20 @@ import sys
 from math import *
 from ROOT import *
 
-def dumpCounts(tree):
+def dumpCounts(tree,cname = "counts.txt"):
 
-    hScan = TH2F("hScan","Mass scan",1000,1,2001,1000,-1,2001)
+    hCounts = TH2F("hCounts","Mass scan",1000,1,2001,1000,-1,2001)
+    hWeights = TH2F("hWeights","Mass scan",1000,1,2001,1000,-1,2001)
 
     #var = "mLSP:mGo" # for friend tree
     var = "GenSusyMNeutralino:GenSusyMGluino" # for cmg tuple
 
-    tree.Draw(var + '>>' + hScan.GetName(),"","goff")
+    tree.Draw(var + '>>' + hCounts.GetName(),"","goff")
+    tree.Draw(var + '>>' + hWeights.GetName(),"genWeight","goff")
 
-    totalEvts = hScan.GetEntries()
+    totalEvts = hCounts.GetEntries()
 
-    print hScan
+    print hCounts, hWeights
 
     print 'Total produced events:', totalEvts
 
@@ -24,38 +26,45 @@ def dumpCounts(tree):
     # round up to 5
     base = 5
 
-    for xbin in range(1,hScan.GetNbinsX()+1):
-        for ybin in range(1,hScan.GetNbinsY()+1):
+    for xbin in range(1,hCounts.GetNbinsX()+1):
+        for ybin in range(1,hCounts.GetNbinsY()+1):
 
-            cnt = hScan.GetBinContent(xbin,ybin)
+            cnt = hCounts.GetBinContent(xbin,ybin)
             if cnt == 0: continue
 
-            mGo = hScan.GetXaxis().GetBinCenter(xbin)
-            #mGo = hScan.GetXaxis().GetBinLowEdge(xbin)
-            mLSP = hScan.GetYaxis().GetBinCenter(ybin)
-            #mLSP = hScan.GetYaxis().GetBinLowEdge(ybin)
+            wgt = hWeights.GetBinContent(xbin,ybin)
+
+            mGo = hCounts.GetXaxis().GetBinCenter(xbin)
+            #mGo = hCounts.GetXaxis().GetBinLowEdge(xbin)
+            mLSP = hCounts.GetYaxis().GetBinCenter(ybin)
+            #mLSP = hCounts.GetYaxis().GetBinLowEdge(ybin)
 
             # round up to base (5)
             mGo = int(base * round(mGo/base))
             mLSP = int(base * round(mLSP/base))
 
             #print "Found %i entries for mass point %i,%i" %(cnt, mGo,mLSP)
-            cntDict[(mGo,mLSP)] = cnt
+            cntDict[(mGo,mLSP)] = (cnt,wgt)
 
     # write file
-    with open("counts.txt","w") as cfile:
+    with open(cname,"a") as cfile:
 
-        cfile.write("Total\t" + str(totalEvts) + "\n")
-        cfile.write("#mGo\tmLSP\tcounts\n")
+        #cfile.write("Total\t" + str(totalEvts) + "\n")
+        cfile.write("#mGo\tmLSP\tTotal\tCounts\tgenWeigt\n")
 
         for point in cntDict:
-            if cntDict[point] > 0:
-                line = "%i\t%i\t%i\n" %(point[0],point[1],cntDict[point])
-                cfile.write(line)
+
+            #write only count for each point
+            #line = "%i\t%i\t%i\n" %(point[0],point[1],cntDict[point])
+
+            # write count, weight and total for each point
+            line = "%i\t%i\t%i\t%i\t%.3f\n" %(point[0],point[1],totalEvts,cntDict[point][0],cntDict[point][1])
+
+            cfile.write(line)
 
     #raw_input("exit")
 
-def dumpTree(fileName):
+def dumpTree(fileName,cname = "counts.txt"):
     tfile  = TFile(fileName, "READ")
 
     if not tfile:
@@ -64,13 +73,23 @@ def dumpTree(fileName):
 
     ## Get tree from file
     # for friend trees
-    tree = tfile.Get('sf/t')
+    #tree = tfile.Get('sf/t')
     # for cmg trees
-    #tree = tfile.Get('tree')
+    tree = tfile.Get('tree')
 
-    dumpCounts(tree)
+    dumpCounts(tree,cname)
 
     tfile.Close()
+
+def dumpTrees(fileList):
+
+    cname = "counts.txt"
+
+    # overwrite file
+    cf = open(cname,"w"); cf.close()
+
+    for fname in fileList:
+        dumpTree(fname,cname)
 
 def dumpChain(fileList):
 
@@ -97,6 +116,7 @@ if __name__ == "__main__":
         print '#No file names given'
         exit(0)
 
-    dumpChain(fileList)
+    #dumpChain(fileList)
+    dumpTrees(fileList)
 
     print 'Finished'
