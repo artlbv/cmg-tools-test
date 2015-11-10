@@ -23,7 +23,7 @@ def getPnames(fname,tdir):
 
     return pnames
 
-def getRcsHist(tfile, hname, band = "SB", merge = False):
+def getRcsHist(tfile, hname, band = "SB", merge = True):
 
     hSR = tfile.Get("SR_"+band+"/"+hname)
     hCR = tfile.Get("CR_"+band+"/"+hname)
