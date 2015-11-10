@@ -26,7 +26,7 @@ with open(xsecFile,"r") as xfile:
     #print sorted(xsecGlu.keys())
 
 cntsSusy = {} # dict for signal counts
-cntTotal = 0
+#cntTotal = 0
 
 cntFile = "../python/tools/t1ttt_scan_counts.txt"
 
@@ -36,14 +36,10 @@ with open(cntFile,"r") as cfile:
 
     for line in lines:
         if line[0] == '#': continue
-        elif line[0] == "T":
-            print line
-            (txt, tot) = line.split()
-            cntTotal = int(float(tot))
         else:
-            (mGo,mLSP,cnt) = line.split()
+            (mGo,mLSP,tot,cnt,wgt) = line.split()
             #print 'Importet', mGo, mLSP, cnt, 'from', line
-            cntsSusy[(int(mGo),int(mLSP))] = int(cnt)
+            cntsSusy[(int(mGo),int(mLSP))] = (int(tot),int(cnt),float(wgt))
 
     print 'Filled %i items to dict' % (len(cntsSusy))
     print "Finished signal parameter load"
@@ -55,7 +51,7 @@ class EventVars1L_signal:
     def __init__(self):
         self.branches = [
             'mGo','mLSP','susyXsec',
-            'susyNgen','totalNgen'
+            'susyNgen','totalNgen','susyWgen',
             ]
 
     def listBranches(self):
@@ -102,12 +98,16 @@ class EventVars1L_signal:
                 print 'Xsec not found for mGo', mGo
 
             # Number of generated events
-            ret['totalNgen'] = cntTotal
+            #ret['totalNgen'] = cntTotal
 
             if (mGo,mLSP) in cntsSusy:
-                ret['susyNgen'] = cntsSusy[(mGo,mLSP)]
+                ret['totalNgen'] = cntsSusy[(mGo,mLSP)][0]
+                ret['susyNgen'] = cntsSusy[(mGo,mLSP)][1]
+                ret['susyWgen'] = cntsSusy[(mGo,mLSP)][2]
             else:
+                ret['totalNgen'] = 1
                 ret['susyNgen'] = 1
+                ret['susyWgen'] = 1
 
         return ret
 
