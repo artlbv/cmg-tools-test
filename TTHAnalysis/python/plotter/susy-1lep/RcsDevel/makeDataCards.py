@@ -3,13 +3,12 @@ import sys
 
 from yieldClass import *
 from ROOT import *
-def printDataCard(ydsBkg, ydsObs, sampsSig):
+def printDataCard(yds, ydsObs, ydsSysSig):
     signalPoint =  {'m1': ('mGlu',1500) , 'm2': ('mLSP',100) }
     signalName = ('%s_%s') % signalPoint['m1'] + ('_%s_%s') % signalPoint['m2']
-    print ydsBkg
-    bins = sorted(ydsBkg.keys())
-    sampNames = [x.name for x in ydsBkg[bins[0]]]
-    sampNames.append(signalName)
+    bins = sorted(yds.keys())
+    sampNames = [x.name for x in (yds[bins[0]]) ]
+    nSamps = len(sampNames)
     print sampNames
     precision = 4
 
@@ -28,19 +27,27 @@ def printDataCard(ydsBkg, ydsObs, sampsSig):
         kpatt = " %%%ds "  % klen
         fpatt = " %%%d.%df " % (klen,3)
         datacard.write('##----------------------------------\n')
-        datacard.write('bin             '+(" ".join([kpatt % bin     for p in sampNames]))+"\n")
-        datacard.write('process         '+(" ".join([kpatt % p          for p in sampNames]))+"\n")
-        datacard.write('process         '+(" ".join([kpatt % iproc[p]    for p in sampNames]))+"\n")
-        datacard.write('rate            '+(" ".join([fpatt % yd.val for yd in ydsBkg[bin]]))+"\n")
+        datacard.write('bin'+ ( ' ' * 32) +(" ".join([kpatt % bin     for p in sampNames]))+"\n")
+        datacard.write('process'+ ( ' ' * 30)  +(" ".join([kpatt % p          for p in sampNames]))+"\n")
+        datacard.write('process'+ ( ' ' * 30)  +(" ".join([kpatt % iproc[p]    for p in sampNames]))+"\n")
+        datacard.write('rate'+ ( ' ' * 35)  +(" ".join([fpatt % yd.val for yd in yds[bin]]))+"\n")
         #            datacard.write('##----------------------------------\n')
-        for yd in ydsBkg[bin]:
-            datacard.write(('MCstats lnN' ) + " ".join([kpatt % numToBar(1.0+(yd.err/(yd.val+0.01))) +"\n"]))        
+        datacard.write('Lumi lnN' + (' ' * 33) +  " ".join([kpatt % numToBar(1.0+0.05) for yd in yds[bin]]) + '\n')
+        for i,yd in enumerate(yds[bin]):
+            before = '       -  ' * i
+            after = '       -  ' * (nSamps - i - 1)
+            datacard.write('MCstats' + yd.name + ' lnN  ' + (' ' * (28-len(yd.name)))  + before + " ".join([kpatt % numToBar(1.0+(yd.err/(yd.val+0.01))) ]) +  after +"\n")        
+        for i, yd in enumerate(ydsSigSys[bin]):
+            before = '       -  ' * (nSamps - i - 1)
+            sys = yd.name[yd.name.find('Scan_') + 5:yd.name.find('_mGo')]
+
+            datacard.write(sys + ' lnN  ' + (' ' * (28))  + before + " ".join([kpatt % numToBar(1 + yd.val) ]) +"\n")
     return 1
 
 def numToBar(num):
     r = num
     if type(num) == float and abs(num - 1.0) < 0.001:
-        r = '-'
+        r = '   -  '
     else: r = '%1.3f' % num
     return r
 
@@ -61,26 +68,30 @@ if __name__ == "__main__":
     ## Create Yield Storage
 
     yds6 = YieldStore("lepYields")
-    yds9 = YieldStore("lepYields")
+   # yds9 = YieldStore("lepYields")
 
-    pattern = "lumi3fb_puWeight/grid/merged/LT*NJ6*"
+    pattern = "lumi3fb_puWeight/*/merged/LT*NJ6*"
     yds6.addFromFiles(pattern,("lep","sele")) 
-    pattern = "lumi3fb_puWeight/grid/merged/LT*NJ9*"
-    yds9.addFromFiles(pattern,("lep","sele"))
+    #pattern = "lumi3fb_puWeight/*/merged/LT*NJ9*"
+    #yds9.addFromFiles(pattern,("lep","sele"))
     
 
 
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
 
     printSamps = ['TTsemiLep','TTdiLep','TTV','SingleT', 'WJets', 'DY', 'QCD','background']
-
+    yds6.showStats()
     cat = 'SR_MB'
-    sampsBkg = [('TTsemiLep',cat),('TTdiLep',cat),('TTV',cat), ('SingleT',cat), ('WJets',cat), ('DY',cat), ('QCD',cat),]
-    ydsBkg = yds6.getMixDict(sampsBkg)
+
     sampsObs = [('background',cat),]
     ydsObs = yds6.getMixDict(sampsObs)
-    yds6.showStats()
-    sampsSig = [('TTsemiLep',cat),]
-    print 'Obs', ydsObs
-    print 'all', yds6
-    printDataCard(ydsBkg, ydsObs, sampsSig)
+    sampsBkg = [('TTsemiLep',cat),('TTdiLep',cat),('TTV',cat), ('SingleT',cat), ('WJets',cat), ('DY',cat), ('QCD',cat),]
+    sampsSig = [('T1tttt_Scan_mGo1500_mLSP0',cat),]
+    sampsSys = [('T1tttt_Scan_Xsec_syst_mGo1500_mLSP0',cat), ]
+    #signal still is scaled wrong double check
+    samps = sampsBkg + sampsSig
+    ydsSig = yds6.getMixDict(sampsSig)
+    yds = yds6.getMixDict(samps)
+    ydsSigSys = yds6.getMixDict(sampsSys)
+
+    printDataCard(yds, ydsObs, ydsSigSys)
