@@ -30,7 +30,6 @@ TTJets_LO_HT2500toInf  = kreator.makeMCComponent("TTJets_LO_HT2500toInf", "/TTJe
 #TTs = [ TTJets, TTJets_LO , TTJets_SingleLeptonFromTbar, TTJets_SingleLeptonFromTbar_ext, TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromT_ext, TTJets_DiLepton, TTJets_DiLepton_ext, TTLep_pow, TTJets_LO_HT600to800, TTJets_LO_HT800to1200, TTJets_LO_HT1200to2500, TTJets_LO_HT2500toInf]
 TTs = [ TTJets_LO ]
 
-'''
 ## Single Top
 # cross sections: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
 
@@ -46,7 +45,6 @@ T_tWch_DS = kreator.makeMCComponent("T_tWch_DS", "/ST_tW_top_5f_DS_inclusiveDeca
 SingleTop = [
     TToLeptons_tch_amcatnlo, TToLeptons_tch_amcatnlo_ext,  TToLeptons_sch_amcatnlo, TBar_tWch, T_tWch, T_tWch_DS, TBar_tWch_DS,
 ]
-'''
 
 '''
 ### V+jets inclusive (from https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV)
@@ -63,7 +61,6 @@ DYJetsToNuNu_M50 = kreator.makeMCComponent("DYJetsToNuNu_M50", "/DYJetsToNuNu_Tu
 VJets = [ WJetsToLNu, WJetsToLNu_LO,  DYJetsToLL_M10to50, DYJetsToLL_M5to50_LO, DYJetsToLL_M50, DYJetsToLL_M50_LO, DYJetsToNuNu_M50]
 '''
 
-'''
 # DY HT bins:
 #https://twiki.cern.ch/twiki/bin/view/CMS/SummaryTable1G25ns#DY_Z
 DYJetsToLL_M50_HT100to200 = kreator.makeMCComponent("DYJetsToLL_M50_HT100to200", "/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root",139.4*1.23)
@@ -77,6 +74,7 @@ DYJetsToLL_M50_HT200to400,
 DYJetsToLL_M50_HT400to600,
 DYJetsToLL_M50_HT600toInf,
 ]
+'''
 DYJetsToLL_M5to50_HT100to200 = kreator.makeMCComponent("DYJetsToLL_M5to50_HT100to200", "/DYJetsToLL_M-5to50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root", 224.2) #LO
 DYJetsToLL_M5to50_HT200to400 = kreator.makeMCComponent("DYJetsToLL_M5to50_HT200to400", "/DYJetsToLL_M-5to50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root", 37.2) #LO
 DYJetsToLL_M5to50_HT400to600 = kreator.makeMCComponent("DYJetsToLL_M5to50_HT400to600", "/DYJetsToLL_M-5to50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root", 3.581) #LO
@@ -88,7 +86,7 @@ DYJetsToLL_M5to50_HT400to600,
 DYJetsToLL_M5to50_HT600toInf
 ]
 '''
-'''
+
 ### W+jets
 WJetsToLNu_HT100to200 = kreator.makeMCComponent("WJetsToLNu_HT100to200", "/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root",1347*1.21)
 WJetsToLNu_HT200to400 = kreator.makeMCComponent("WJetsToLNu_HT200to400", "/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root",360*1.21)
@@ -109,12 +107,12 @@ WJetsToLNu_HT800to1200,
 WJetsToLNu_HT1200to2500,
 WJetsToLNu_HT2500toInf
 ]
-'''
 
 ### QCD
 # QCD HT bins (cross sections from McM)
 #QCD_HT100to200 = kreator.makeMCComponent("QCD_HT100to200", "/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root", 2.75*10**7)
 #QCD_HT200to300 = kreator.makeMCComponentFromDESY("QCD_HT200to300", "/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root",1735000)
+
 QCD_HT300to500 = kreator.makeMCComponent("QCD_HT300to500", "/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root",367000)
 QCD_HT500to700 = kreator.makeMCComponent("QCD_HT500to700", "/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root",29400)
 QCD_HT700to1000 = kreator.makeMCComponentFromDESY("QCD_HT700to1000", "/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root",6524)
@@ -133,22 +131,22 @@ QCD_HT1500to2000,
 QCD_HT2000toInf
 ]
 
-'''
+
 ###TTV
 TTWToLNu = kreator.makeMCComponent("TTWToLNu", "/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root", 0.2043)
 TTWToQQ = kreator.makeMCComponent("TTWToQQ", "/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root", 0.40620)
 TTZToQQ = kreator.makeMCComponent("TTZToQQ","/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root", 0.5297)
 TTZToLLNuNu = kreator.makeMCComponent("TTZToLLNuNu","/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v2/MINIAODSIM", "CMS", ".*root", 0.2529)
 
-TTGJets = kreator.makeMCComponent("TTGJets","/TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root", 3.697)
+#TTGJets = kreator.makeMCComponent("TTGJets","/TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM", "CMS", ".*root", 3.697)
 
-TTV = [TTWToLNu, TTWToQQ, TTZToQQ, TTZToLLNuNu, TTGJets]
-'''
+TTV = [TTWToLNu, TTWToQQ, TTZToQQ, TTZToLLNuNu]#, TTGJets]
+
 ### ----------------------------- summary ----------------------------------------
 
 
 #mcSamples_Asymptotic25ns = TTs + SingleTop + VJets + DYJetsM50HT + DYJetsM5to50HT + WJetsToLNuHT + GJetsHT + QCDHT + QCDPtbcToE + QCDPt + QCDPtEMEnriched + QCD_Mu5 +  DiBosons + TriBosons + TTV + Higgs
-mcSamples_Asymptotic25ns = TTs + QCDHT# + WJetsToLNuHT
+mcSamples_Asymptotic25ns = TTs + QCDHT + WJetsToLNuHT + SingleTop + DYJetsM50HT + TTV
 
 mcSamples = mcSamples_Asymptotic25ns
 

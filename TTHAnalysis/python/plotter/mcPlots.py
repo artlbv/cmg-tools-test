@@ -821,6 +821,10 @@ class PlotMaker:
                 if doRatio:
                     p2.cd(); 
                     rdata,rnorm,rnorm2,rline = doRatioHists(pspec,pmap,total,totalSyst, maxRange=options.maxRatioRange, fitRatio=options.fitRatio)
+                    # write ratio also to dir
+                    rdata.SetName(stack.GetName().replace("stack","ratio"))
+                    dir.WriteTObject(rdata)
+
                 if self._options.printPlots:
                     for ext in self._options.printPlots.split(","):
                         fdir = self._options.printDir;

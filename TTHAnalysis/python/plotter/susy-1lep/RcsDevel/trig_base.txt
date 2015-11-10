@@ -7,7 +7,14 @@ Trigger: !isData || (isData && (HLT_EleHT350 || HLT_MuHT350))
 # use the following line to pick leptons only from the corresponding PD
 XOR: !isData || (isData && ((PD_SingleEle && nEl==1) || (PD_SingleMu && nMu==1)))
 
-nJetBase: nJets >= 3
+#nJetBase: nJets >= 3
+nJetBase: nJets30Clean >= 3
+
 2.JetPt > 80: Jet2_pt > 80
 Filters : !isData || (isData && Flag_goodVertices && Flag_HBHENoiseFilter_fix && Flag_CSCTightHaloFilter && Flag_eeBadScFilter && Flag_HBHENoiseIsoFilter)
+
+# updates for Anti electrons
+updAnti_HoE:  (Selected == 1) || (Selected == -1 && Lep_hOverE > 0.05)
+#updAnti_Lp:  (Selected == 1) || (Selected == -1 && Lp > 0.5)
+
 base: 1
