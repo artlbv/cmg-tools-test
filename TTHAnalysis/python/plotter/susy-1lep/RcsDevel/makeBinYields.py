@@ -14,13 +14,11 @@ from math import hypot
 #dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
 
 Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2"
-mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_anyLepSkim"
-# old data
-dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
+mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_SM_Signal"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_T1ttt_Scans"
 
-#FTdir = "FriendTrees_MC/"
-#Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/"
-#FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/Friends/"
+# new data
+dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/Data/ele_CBID_1p5fb"
 
 def addOptions(options):
 
@@ -48,9 +46,10 @@ def addOptions(options):
     if options.signal:
         options.var =  "mLSP:mGo*(nEl-nMu)"
         #options.bins = "60,-1500,1500,30,0,1500"
-        options.bins = "34,-1700,1700,10,0,1500"
+        #options.bins = "34,-1700,1700,10,0,1500"
+        options.bins = "161,-2012.5,2012.5,41,-25,2025.5"
 
-        options.friendTrees = [("sf/t",mcFTdir+"/evVarFriend_{cname}.root")]
+        options.friendTrees = [("sf/t",sigFTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
 
     elif options.grid:
