@@ -50,7 +50,7 @@ def dumpCounts(tree,cname = "counts.txt"):
     with open(cname,"a") as cfile:
 
         #cfile.write("Total\t" + str(totalEvts) + "\n")
-        cfile.write("#mGo\tmLSP\tTotal\tCounts\tgenWeigt\n")
+        cfile.write("#mGo\tmLSP\tTotal\tCounts\tgenWeight\n")
 
         for point in cntDict:
 
