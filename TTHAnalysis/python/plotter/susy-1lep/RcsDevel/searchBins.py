@@ -27,12 +27,12 @@ binsNB['NB3i'] = ('nBJet >= 3','$\geq$ 3')
 
 # NJ Bins
 binsNJ = {}
-binsNJ['NJ34'] = ('3 <= nJets && nJets <= 4','[3, 4]')
-binsNJ['NJ4i'] = ('4 <= nJets','$\geq$ 4')
-binsNJ['NJ45f9'] = ('4 <= nJets && nJets <= 5','[4, 5]')
-binsNJ['NJ45f6'] = ('4 <= nJets && nJets <= 5','[4, 5]')
-binsNJ['NJ68'] = ('6 <= nJets && nJets <= 8','[6, 8]')
-binsNJ['NJ9i'] = ('9 <= nJets','$\geq$ 9')
+binsNJ['NJ34'] = ('3 <= nJets30Clean && nJets30Clean <= 4','[3, 4]')
+binsNJ['NJ4i'] = ('4 <= nJets30Clean','$\geq$ 4')
+binsNJ['NJ45f9'] = ('4 <= nJets30Clean && nJets30Clean <= 5','[4, 5]')
+binsNJ['NJ45f6'] = ('4 <= nJets30Clean && nJets30Clean <= 5','[4, 5]')
+binsNJ['NJ68'] = ('6 <= nJets30Clean && nJets30Clean <= 8','[6, 8]')
+binsNJ['NJ9i'] = ('9 <= nJets30Clean','$\geq$ 9')
 
 ## Signal/Control region (wrt dPhi)
 binsSR = {}

@@ -2,9 +2,92 @@
 #import re, sys, os, os.path
 
 import glob, os, sys
-from math import hypot
+from math import hypot,sqrt
 from ROOT import *
 
+#########################
+### For yieldClass
+#########################
+
+# round up masses to base (5)
+base = 5
+
+def getLepYield(hist,leptype = ('lep','sele')):
+
+    if hist.GetNbinsX() == 1:
+        return (hist.GetBinContent(1),hist.GetBinError(1))
+
+    elif hist.GetNbinsX() == 3 and hist.GetNbinsY() == 2:
+
+        if leptype == ('mu','anti'):
+            return (hist.GetBinContent(1,1),hist.GetBinError(1,1))
+        elif leptype == ('mu','sele'):
+            return (hist.GetBinContent(1,2),hist.GetBinError(1,2))
+        elif leptype == ('ele','anti'):
+            return (hist.GetBinContent(3,1),hist.GetBinError(3,1))
+        elif leptype == ('ele','sele'):
+            return (hist.GetBinContent(3,2),hist.GetBinError(3,2))
+        elif leptype == ('lep','anti'):
+            return (hist.GetBinContent(2,1),hist.GetBinError(2,1))
+        elif leptype == ('lep','sele'):
+            return (hist.GetBinContent(2,2),hist.GetBinError(2,2))
+    else:
+        return (hist.Integral(),sqrt(hist.Integral()))
+
+def getScanYields(hist,leptype = ('lep','sele')):
+
+    ydict = {}
+
+    for xbin in range(1,hist.GetNbinsX()+1):
+        for ybin in range(1,hist.GetNbinsY()+1):
+
+            ycnt = hist.GetBinContent(xbin,ybin)
+            yerr = hist.GetBinError(xbin,ybin)
+
+            # skip empty bins for now
+            if ycnt == 0: continue
+
+            xpar = hist.GetXaxis().GetBinCenter(xbin); #xpar = int(xpar)
+            ypar = hist.GetYaxis().GetBinCenter(ybin); #ypar = int(ypar)
+
+            # round up to base (5)
+            base = 5
+            xpar = int(base * round(xpar/base))
+            ypar = int(base * round(ypar/base))
+
+            ydict[(xpar,ypar)] = (ycnt,yerr)
+
+    # filter out lepton yields
+    ret = {}
+
+    if leptype[0] == 'lep':
+        for point in ydict:
+            if point[0] > 0: # sum ele + mu yield
+                mupoint = (-point[0],point[1])
+                if mupoint in ydict:
+                    ycnt = (ydict[point][0] + ydict[mupoint][0], hypot(ydict[point][1], ydict[mupoint][1]))
+                else:
+                    ycnt = ydict[point]
+                ret[point] = ycnt
+
+    elif leptype[0] == 'ele':
+        for point in ydict:
+            if point[0] > 0: # ele + mu yield
+                ycnt = ydict[point]
+                ret[point] = ycnt
+
+    elif leptype[0] == 'mu':
+        for point in ydict:
+            if point[0] < 0: # ele + mu yield
+                ycnt = ydict[point]
+                ret[(-point[0],point[1])] = ycnt
+
+    #print 'done', ret
+    return ret
+
+#########################
+### For Old yield disctionaries
+#########################
 
 def getYield(tfile, hname = "background",bindir = "", leptype = ('lep','sele')):
 
