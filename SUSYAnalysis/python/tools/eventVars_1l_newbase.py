@@ -1,11 +1,14 @@
-from CMGTools.TTHAnalysis.treeReAnalyzer import *
-from ROOT import TLorentzVector, TVector2, std
 import ROOT
 import time
 import itertools
 import PhysicsTools.Heppy.loadlibs
 import array
 import operator
+
+from CMGTools.TTHAnalysis.treeReAnalyzer import *
+from ROOT import TLorentzVector, TVector2, std
+
+from math import sqrt
 
 #################
 ### Cuts and WP
@@ -155,7 +158,9 @@ class EventVars1L_base:
             # no HF stuff
             'METNoHF', 'LTNoHF', 'dPhiNoHF',
             ## jets
-            'HT','nJets','nJets30','nJets40','nBJet','nBJets30','nBJets40',
+            'HT','nJets','nBJet',
+            ("nJets30","I"),("Jets30Idx","I",50,"nJets30"),'nBJets30','nJets30Clean',
+            'nJets40','nBJets40',
             "htJet30j", "htJet30ja","htJet40j",
             'Jet1_pt','Jet2_pt',
             ## top tags
@@ -312,12 +317,13 @@ class EventVars1L_base:
 
                 if eleID == 'CB':
                     # ELE CutBased ID
-                    # check MVA WPs
-                    passTightID = (lep.SPRING15_25ns_v1 == 4)
-                    passMediumID = (lep.SPRING15_25ns_v1 >= 3)
-                    passLooseID = (lep.SPRING15_25ns_v1 >= 2)
-                    passVetoID = (lep.SPRING15_25ns_v1 >= 1)
-                    passAnyID = (lep.SPRING15_25ns_v1 >= 0)
+                    eidCB = lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz
+
+                    passTightID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz == 4)
+                    passMediumID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz >= 3)
+                    #passLooseID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz >= 2)
+                    passVetoID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz >= 1)
+                    #passAnyID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz >= 0)
 
                 elif eleID == 'MVA':
                     # ELE MVA ID
@@ -347,7 +353,7 @@ class EventVars1L_base:
                         selectedVetoLeps.append(lep)
 
                 # anti-selected
-                elif not passMediumID:#passLooseID:
+                elif not passMediumID:#passVetoID:
 
                     # all anti leptons are veto for selected
                     selectedVetoLeps.append(lep)
@@ -363,11 +369,60 @@ class EventVars1L_base:
                         antiTightLepsIdx.append(idx);
                     else:
                         antiVetoLeps.append(lep)
-                else:
+                # Veto leptons
+                elif passVetoID:
                     # the rest is veto for selected and anti
                     selectedVetoLeps.append(lep)
                     antiVetoLeps.append(lep)
+                #else:
+                #    antiVetoLeps.append(lep)
+
         # end lepton loop
+
+
+        ###################
+        # EXTRA Loop for lepOther -- for anti-selected leptons
+        ###################
+
+        eles = [l for l in Collection(event,"LepOther","nLepOther")]
+
+        for idx,lep in enumerate(eles):
+
+            # check acceptance
+            lepEta = abs(lep.eta)
+            if(lepEta > 2.5): continue
+
+            # Pt cut
+            if lep.pt < 10: continue
+
+            if(abs(lep.pdgId) == 11):
+
+                # pass variables
+                #passIso = False
+                #passConv = False
+
+                if eleID == 'CB':
+                    # ELE CutBased ID
+                    eidCB = lep.eleCBID_SPRING15_25ns
+                    passMediumID = (eidCB >= 3)
+                    passVetoID = (eidCB >= 1)
+                else:
+                    passMediumID = False
+                    passVetoID = False
+
+                # Cuts for Anti-selected electrons
+                if not passMediumID:
+                    # should always be true for LepOther
+
+                    #if not lep.conVeto:
+                    if lep.miniRelIso < Lep_miniIsoCut:
+                        antiTightLeps.append(lep)
+                        antiTightLepsIdx.append(idx);
+
+                elif not passVetoID:
+                    # should not happen with anyLep skim
+                    if lep.miniRelIso < Lep_miniIsoCut:
+                        antiVetoLeps.append(lep)
 
         # choose common lepton collection: select selected or anti lepton
         if len(selectedTightLeps) > 0:
@@ -428,7 +483,8 @@ class EventVars1L_base:
 
             ret['Lep_relIso'] = tightLeps[0].relIso03
             ret['Lep_miniIso'] = tightLeps[0].miniRelIso
-            if hasattr(event,"hOverE"): ret['Lep_hOverE'] = tightLeps[0].hOverE
+            #if hasattr(event,"LepGood_hOverE"):
+            ret['Lep_hOverE'] = tightLeps[0].hOverE
 
         elif len(leps) > 0: # fill it with leading lepton
             ret['Lep_Idx'] = 0
@@ -440,33 +496,59 @@ class EventVars1L_base:
 
             ret['Lep_relIso'] = leps[0].relIso03
             ret['Lep_miniIso'] = leps[0].miniRelIso
-            if hasattr(event,"hOverE"): ret['Lep_hOverE'] = ret['Lep_hOverE'] = leps[0].hOverE
+            #if hasattr(event,"LepGood_hOverE"):
+            ret['Lep_hOverE'] = ret['Lep_hOverE'] = leps[0].hOverE
 
         ### JETS
-        centralJet30 = []
+        centralJet30 = []; centralJet30idx = []
         centralJet40 = []
 
         for i,j in enumerate(jets):
             if j.pt>30 and abs(j.eta)<centralEta:
                 centralJet30.append(j)
+                centralJet30idx.append(i)
             if j.pt>40 and abs(j.eta)<centralEta:
                 centralJet40.append(j)
 
+        # jets 30 (cmg cleaning only)
         nJetC = len(centralJet30)
         ret['nJets']   = nJetC
         ret['nJets30']   = nJetC
+        # store indeces
+        ret['Jets30Idx'] = centralJet30idx
+        #print "nJets30:", len(centralJet30), " nIdx:", len(centralJet30idx)
 
+        # jets 40
         nJet40C = len(centralJet40)
         ret['nJets40']   = nJet40C
 
-        if nJetC > 0:
-            ret['Jet1_pt'] = centralJet30[0].pt
-        if nJetC > 1:
-            ret['Jet2_pt'] = centralJet30[1].pt
+        # local cleaning from leptons
+        cJet30Clean = []
+        dRminCut = 0.4
 
-        ret['LSLjetptGT80'] = 1 if sum([j.pt>80 for j in centralJet30])>=2 else 0
+        for jet in centralJet30:
+            dRmin = 99
+            # find nearest lepton
+            for lep in tightLeps:
+                dR = jet.p4().DeltaR(lep.p4())
+                if dR < dRmin: dRmin = dR
+            # add jet if no lepton in vicinity
+            if dRmin > dRminCut: cJet30Clean.append(jet)
 
-        ret['htJet30j']  = sum([j.pt for j in centralJet30])
+        #print "Non-clean jets: ", nJetC, "\tclean jets:", len(cJet30Clean)
+        # cleaned jets
+        nJet30C = len(cJet30Clean)
+        ret['nJets30Clean'] = len(cJet30Clean)
+
+        if nJet30C > 0:
+            ret['Jet1_pt'] = cJet30Clean[0].pt
+        if nJet30C > 1:
+            ret['Jet2_pt'] = cJet30Clean[1].pt
+
+        # imho, use Jet2_pt > 80 instead
+        ret['LSLjetptGT80'] = 1 if sum([j.pt>80 for j in cJet30Clean])>=2 else 0
+
+        ret['htJet30j']  = sum([j.pt for j in cJet30Clean])
         ret['htJet30ja'] = sum([j.pt for j in jets if j.pt>30])
 
         ret['htJet40j']  = sum([j.pt for j in centralJet40])
@@ -482,7 +564,7 @@ class EventVars1L_base:
         BJetMedium30 = []
         BJetMedium40 = []
 
-        for i,j in enumerate(centralJet30):
+        for i,j in enumerate(cJet30Clean):
             if j.btagCSV > btagWP:
                 BJetMedium30.append(j)
 
@@ -490,8 +572,10 @@ class EventVars1L_base:
             if j.btagCSV > btagWP:
                 BJetMedium40.append(j)
 
+        # using cleaned collection!
         ret['nBJet']   = len(BJetMedium30)
         ret['nBJets30']   = len(BJetMedium30)
+        # using normal collection
         ret['nBJets40']   = len(BJetMedium40)
 
         # deltaPhi between the (single) lepton and the reconstructed W (lep + MET)
@@ -510,7 +594,8 @@ class EventVars1L_base:
             LT = tightLeps[0].pt + event.met_pt
             Lp = tightLeps[0].pt / recoWp4.Pt() * cos(dPhiLepW)
 
-            MT = recoWp4.Mt()
+            #MT = recoWp4.Mt() # doesn't work
+            MT = sqrt(2*metp4.Pt()*tightLeps[0].pt * (1-cos(dPhiLepW)))
 
             ## no HF
             recoWNoHFp4 =  tightLeps[0].p4() + metNoHFp4
@@ -543,7 +628,7 @@ class EventVars1L_base:
             if LT < 250:   isSR = 0
             elif LT > 250: isSR = dPhi > 0.75
             # BLIND data
-            if event.isData and nJetC >= 5:
+            if event.isData and nJet30C >= 5:
                 isSR = - isSR
         # Multi-B SRs
         else:
@@ -553,7 +638,7 @@ class EventVars1L_base:
             elif LT > 600: isSR = dPhi > 0.5
 
             # BLIND data
-            if event.isData and nJetC >= 6:
+            if event.isData and nJet30C >= 6:
                 isSR = - isSR
 
         ret['isSR'] = isSR
