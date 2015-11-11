@@ -458,13 +458,6 @@ if __name__ == "__main__":
     # Read options and args
     (options,args) = parser.parse_args()
 
-    '''
-    doClosure = False
-    doPlots = True
-    inclTemplate = True
-    mcData = False #True # take data from file or generate toys
-    '''
-
     ## Check options
     if options.doClosure and not options.mcData:
         #print "Do you really want to make a closure test with Data? [y/n]"
@@ -529,14 +522,28 @@ if __name__ == "__main__":
 
     print 'Finished fitting. Saving Canvases...'
 
+    ##### SAVING
+
     # Suffix for Data/MC
     if options.mcData: suff = "_MC"
     else: suff = "_Data"
 
+    # Get infile dir name
+    indir= os.path.dirname(infileName)
+
+    plotDir = indir + "/QCDFits/"
+
+    # label inclusive or not
+    if options.inclTemplate: plotDir += "InclTemplate/"
+    else: plotDir += "NonInclTemplate/"
+
+    if not os.path.isdir(plotDir):os.mkdir(plotDir)
+    print "Saving results to" , plotDir
+
     # save plots to root file
     pureFname = os.path.basename(infileName)
 
-    outfile = TFile('plots/Fits/'+pureFname.replace('.root','_plots'+suff+'.root'),'RECREATE')
+    outfile = TFile(plotDir+pureFname.replace('.root','_plots'+suff+'.root'),'RECREATE')
     print 'Saving plots to file', outfile.GetName()
 
     extList = ['.png','.pdf']
@@ -546,7 +553,7 @@ if __name__ == "__main__":
         canv.Write()
         # write in different extensions
         for ext in extList:
-            canv.SaveAs('plots/'+canv.GetName()+suff+ext)
+            canv.SaveAs(plotDir+canv.GetName()+suff+ext)
 
     # save ratio hist
     hRatio.Write()
@@ -566,7 +573,7 @@ if __name__ == "__main__":
 
     txtFname+=suff+".txt"
 
-    with open(txtFname,"w") as ftxt:
+    with open(plotDir+txtFname,"w") as ftxt:
 
         headline = "#Bin\tF-Ratio\tError\n"
         ftxt.write(headline)
