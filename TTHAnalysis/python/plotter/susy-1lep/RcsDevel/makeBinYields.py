@@ -25,8 +25,8 @@ def addOptions(options):
     # LUMI (overwrite default 19/fb)
     if options.lumi > 19:
         options.lumi = 3
-    else:
-        options.lumi = 1.26
+    #else:
+    #    options.lumi = 1.26
 
     # set tree options
     options.path = Tdir
