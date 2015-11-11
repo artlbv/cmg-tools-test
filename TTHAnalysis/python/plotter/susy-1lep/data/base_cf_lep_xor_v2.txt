@@ -1,5 +1,5 @@
 # blind data
-blind: !isData || (isData && run <= 257599)
+#blind: !isData || (isData && run <= 257599)
 #CR: isSR == 0
 
 HTskim > 350: HT > 350
