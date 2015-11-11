@@ -242,13 +242,13 @@ if sample == "MC":
 
 		#selectedComponents =[ TTJets_LO_25ns ]
 		#selectedComponents = [ TTJets_HT600to800 , TTJets_HT800to1200, TTJets_HT1200to2500, TTJets_HT2500toInf] + WJetsToLNuHT + QCD_HT + TTV + DYJetsM50HT
-		#selectedComponents += [TTJets_SingleLeptonFromT_ext1 , TTJets_SingleLeptonFromTbar_ext1 , TTJets_DiLepton_ext1]
+		selectedComponents = [TTJets_SingleLeptonFromT_ext1 , TTJets_SingleLeptonFromTbar_ext1 , TTJets_DiLepton_ext1]
 		#selectedComponents = [TTJets_DiLepton]
 		#selectedComponents = [TTJets_DiLepton_ext1]
 		#selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
 
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 elif sample == "Signal":
 

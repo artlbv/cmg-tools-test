@@ -44,6 +44,7 @@ def decryptBinName(binname):
     #binname = binname.replace('NJ34','N_{jet} #in [3,4] ')
 
     if "LT" not in binname: binname += "L_{T} #geq 250"
+    elif "LTi" in binname: binname = binname.replace("LTi","L_{T} #geq 250")
     elif "LT1" in binname: binname = binname.replace("LT1","L_{T} #in [250,350]")
     elif "LT2" in binname: binname = binname.replace("LT2","L_{T} #in [350,450]")
     elif "LT3" in binname: binname = binname.replace("LT3","L_{T} #in [450,600]")
@@ -208,7 +209,8 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+binname]) # hack to keep arguments alive
     else:
         import re
-        incName = re.sub('LT[0-9]_','',binname)
+        incName = re.sub('LT[0-9]','LTi',binname) # use LTi as inclusive template
+        if 'pdfQCDanti_'+incName not in _pdfStore: incName = re.sub('LT[0-9]_','',binname) # remove LTx to get incl template
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+incName]) # hack to keep arguments alive
     _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(kCyan),RooFit.LineStyle(5),RooFit.Name('QCDfit'))
     # plot only EWK
@@ -302,7 +304,7 @@ def getQCDratio(tfile, options, binname = 'incl'):
     # get full BKG, QCD and EWK histos
     (hData,hEWKsele,hQCDsele,hQCDanti) = getHistsFromFile(tfile, binname,  options.mcData)
 
-    if options.verbose > 0:
+    if options.verbose > 1:
         # Print some info
         print 10*'-'
         print 'Number of events in anti-selected bin'
@@ -327,7 +329,10 @@ def getQCDratio(tfile, options, binname = 'incl'):
     # take anti from LT-inclusive QCD:
     if options.inclTemplate:
         import re
-        incName = re.sub('LT[0-9]_','',binname)
+        incName = re.sub('LT[0-9]','LTi',binname) # use LTi as inclusive template
+        if 'QCDanti_'+incName not in _hStore: incName = re.sub('LT[0-9]_','',binname) # remove LTx to get incl template
+        if 'QCDanti_'+incName not in _hStore: print "Didn't find inclusive template!";
+
         if options.verbose > 0:
             print 'Using template', incName, 'instead of', binname
         hQCDanti = _hStore['QCDanti_'+incName]
@@ -432,9 +437,6 @@ def plotFratios(resList, isClosure = False):
 
 if __name__ == "__main__":
 
-    # disable RooFit info
-    RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
-
     # OPTIONS
 
     from optparse import OptionParser
@@ -449,21 +451,18 @@ if __name__ == "__main__":
     parser.add_option("-b","--batch", dest="batch",default=False, action="store_true", help="Batch mode")
     parser.add_option("-c","--closure", dest="doClosure",default=False, action="store_true", help="Do closure of MC/Fit")
     parser.add_option("-p","--plot", dest="doPlot",default=True, action="store_true", help="Make Lp plots")
-    parser.add_option("-i","--inclTempl", dest="inclTemplate",default=True, action="store_true", help="Use Lp template from inclusive LT bin")
+    parser.add_option("-i","--inclTempl", dest="inclTemplate",default=False, action="store_true", help="Use Lp template from inclusive LT bin")
     parser.add_option("--mc","--mcData", dest="mcData",default=False, action="store_true", help="Use pseudo-data from MC")
     # int/floats
     parser.add_option("-v","--verbose",  dest="verbose",  default=1,  type="int",    help="Verbosity level (0 = quiet, 1 = verbose, 2+ = more)")
-    parser.add_option("-l","--lumi",  dest="lumi",  default=1.26,  type="float",    help="Luminosity in /fb")
+    parser.add_option("-l","--lumi",  dest="lumi",  default=1.55,  type="float",    help="Luminosity in /fb")
 
     # Read options and args
     (options,args) = parser.parse_args()
 
-    '''
-    doClosure = False
-    doPlots = True
-    inclTemplate = True
-    mcData = False #True # take data from file or generate toys
-    '''
+    # disable RooFit info
+    if options.verbose < 3:
+        RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
 
     ## Check options
     if options.doClosure and not options.mcData:
@@ -508,7 +507,7 @@ if __name__ == "__main__":
     #binNames = ['incl','NJ34']
     #binNames = ['NJ34']
     #binNames = ['NJ34','LT1_NJ34']
-    binNames = ['NJ34','LT1_NJ34','LT2_NJ34','LT3_NJ34','LT4_NJ34']
+    binNames = ['LTi_NJ34','LT1_NJ34','LT2_NJ34','LT3_NJ34','LT4_NJ34']
 
     #binNames += ['NJ45','LT0_NJ45','LT1_NJ45','LT2_NJ45','LT3_NJ45','LT4_NJ45']
     #binNames += ['NJ68','LT0_NJ68','LT1_NJ68','LT2_NJ68','LT3_NJ68','LT4_NJ68']
@@ -529,24 +528,41 @@ if __name__ == "__main__":
 
     print 'Finished fitting. Saving Canvases...'
 
+    ##### SAVING
+
     # Suffix for Data/MC
     if options.mcData: suff = "_MC"
     else: suff = "_Data"
 
+    # Get infile dir name
+    indir= os.path.dirname(infileName)
+
+    plotDir = indir + "/QCDFits/"
+
+    # label inclusive or not
+    if options.inclTemplate: plotDir += "InclTemplate/"
+    else: plotDir += "NonInclTemplate/"
+
+    if not os.path.isdir(plotDir): os.makedirs(plotDir)
+    print "Saving results to" , plotDir
+
     # save plots to root file
     pureFname = os.path.basename(infileName)
 
-    outfile = TFile('plots/Fits/'+pureFname.replace('.root','_plots'+suff+'.root'),'RECREATE')
+    outfile = TFile(plotDir+pureFname.replace('.root','_plots'+suff+'.root'),'RECREATE')
     print 'Saving plots to file', outfile.GetName()
 
     extList = ['.png','.pdf']
+
+    if options.verbose < 2:
+        gROOT.ProcessLine("gErrorIgnoreLevel = kWarning;")
 
     for canvKey in _canvStore:
         canv = _canvStore[canvKey]
         canv.Write()
         # write in different extensions
         for ext in extList:
-            canv.SaveAs('plots/'+canv.GetName()+suff+ext)
+            canv.SaveAs(plotDir+canv.GetName()+suff+ext)
 
     # save ratio hist
     hRatio.Write()
@@ -566,7 +582,7 @@ if __name__ == "__main__":
 
     txtFname+=suff+".txt"
 
-    with open(txtFname,"w") as ftxt:
+    with open(plotDir+txtFname,"w") as ftxt:
 
         headline = "#Bin\tF-Ratio\tError\n"
         ftxt.write(headline)
