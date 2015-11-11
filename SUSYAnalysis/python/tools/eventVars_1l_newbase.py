@@ -17,6 +17,29 @@ from math import sqrt
 ## Eta requirement
 centralEta = 2.4
 
+###########
+# Jets
+###########
+
+corrJEC = "norm" # can be "norm","up","down
+
+print
+print 30*'#'
+print 'Going to use', corrJEC , 'JEC!'
+print 30*'#'
+
+def recalcMET(metp4, oldjets, newjets):
+
+    deltaJetP4 = ROOT.TLorentzVector(0,0,0,0)
+
+    for ind,jet in enumerate(oldjets):
+        deltaJetP4 += jet.p4()
+
+    for ind,jet in enumerate(newjets):
+        deltaJetP4 -= jet.p4()
+
+    return (metp4 - deltaJetP4)
+
 ## B tag Working points
 ## CSV (v1 -- Run1) WPs
 #btag_LooseWP = 0.244
@@ -35,6 +58,11 @@ centralEta = 2.4
 btag_LooseWP = 0.605
 btag_MediumWP = 0.890
 btag_TightWP = 0.990
+
+
+###########
+# Electrons
+###########
 
 eleID = 'CB' # 'MVA' or 'CB'
 
@@ -218,28 +246,7 @@ class EventVars1L_base:
         '''
 
         leps = [l for l in Collection(event,"LepGood","nLepGood")]
-        jets = [j for j in Collection(event,"Jet","nJet")]
-
-        njet = len(jets); nlep = len(leps)
-
-        ## make MET
-        metp4 = ROOT.TLorentzVector(0,0,0,0)
-        metp4.SetPtEtaPhiM(event.met_pt,event.met_eta,event.met_phi,event.met_mass)
-        ret["MET"] = metp4.Pt()
-
-        ## MET NO HF
-        metNoHFp4 = ROOT.TLorentzVector(0,0,0,0)
-        metNoHFp4.SetPtEtaPhiM(event.metNoHF_pt,event.metNoHF_eta,event.metNoHF_phi,event.metNoHF_mass)
-        ret["METNoHF"] = metNoHFp4.Pt()
-
-        ## MET FILTERS for data
-        if event.isData:
-            #ret['METfilters'] = event.Flag_goodVertices and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter)
-            #ret['METfilters'] = event.nVert > 0 and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter
-            # add HCAL Iso Noise
-            ret['METfilters'] = event.nVert > 0 and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter and event.Flag_HBHENoiseFilter_fix and event.Flag_HBHENoiseIsoFilter
-        else:
-            ret['METfilters'] = 1
+        nlep = len(leps)
 
         ### LEPTONS
         Selected = False
@@ -499,7 +506,22 @@ class EventVars1L_base:
             #if hasattr(event,"LepGood_hOverE"):
             ret['Lep_hOverE'] = ret['Lep_hOverE'] = leps[0].hOverE
 
-        ### JETS
+        ########
+        ### Jets
+        ########
+        jets = [j for j in Collection(event,"Jet","nJet")]
+        njet = len(jets)
+
+        # Apply JEC up/down variations if needed
+        if corrJEC == "norm":
+            pass # don't do anything
+        elif corrJEC == "up":
+            for jet in jets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECUp
+
+            # recalc MET
+        elif corrJEC == "down":
+            for jet in jets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECDown
+
         centralJet30 = []; centralJet30idx = []
         centralJet40 = []
 
@@ -577,6 +599,35 @@ class EventVars1L_base:
         ret['nBJets30']   = len(BJetMedium30)
         # using normal collection
         ret['nBJets40']   = len(BJetMedium40)
+
+        ######
+        # MET
+        #####
+        metp4 = ROOT.TLorentzVector(0,0,0,0)
+        metp4.SetPtEtaPhiM(event.met_pt,event.met_eta,event.met_phi,event.met_mass)
+
+        # recalc MET
+        if corrJEC != "norm":
+            # get original jet collection
+            oldjets = [j for j in Collection(event,"Jet","nJet")]
+            metp4 = recalcMET(metp4,oldjets,jets)
+
+        ret["MET"] = metp4.Pt()
+
+        ## MET NO HF
+        metNoHFp4 = ROOT.TLorentzVector(0,0,0,0)
+        metNoHFp4.SetPtEtaPhiM(event.metNoHF_pt,event.metNoHF_eta,event.metNoHF_phi,event.metNoHF_mass)
+        ret["METNoHF"] = metNoHFp4.Pt()
+
+        ## MET FILTERS for data
+        if event.isData:
+            #ret['METfilters'] = event.Flag_goodVertices and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter)
+            #ret['METfilters'] = event.nVert > 0 and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter
+            # add HCAL Iso Noise
+            ret['METfilters'] = event.nVert > 0 and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter and event.Flag_HBHENoiseFilter_fix and event.Flag_HBHENoiseIsoFilter
+        else:
+            ret['METfilters'] = 1
+
 
         # deltaPhi between the (single) lepton and the reconstructed W (lep + MET)
         dPhiLepW = -999 # set default value to -999 to spot "empty" entries
