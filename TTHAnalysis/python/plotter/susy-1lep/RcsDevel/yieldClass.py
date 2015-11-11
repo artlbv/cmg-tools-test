@@ -64,9 +64,9 @@ class YieldStore:
         # get list of dirs
         dirList = [dirKey.ReadObj() for dirKey in gDirectory.GetListOfKeys() if dirKey.IsFolder() == 1]
 
+        # Loop over yield categories
         for catDir in dirList:
             catDir.cd()
-
             category = catDir.GetName()
 
             # get list of histograms
@@ -91,9 +91,7 @@ class YieldStore:
                         point = sample + "_mGo%i_mLSP%i" %(mGo,mLSP)
                         #point = (mGo,mLSP)
 
-                        yd = BinYield(point, category, yds[(mGo,mLSP)])
-                        # store if yield is not empty -- temporary
-                        #if yd.val > 0:
+                        yd = BinYield(yds[(mGo,mLSP)])
                         self.addYield(point,category,binName,yd)
 
         return 1
@@ -259,7 +257,7 @@ if __name__ == "__main__":
     yds = YieldStore("bla")
     yds.addFromFiles(pattern)
 
-    #yds.showStats()
+    yds.showStats()
 
     #yds.printBins("QCD","CR_SB")
     #yds.getSampsDict("QCD",["CR_SB","CR_MB"])
@@ -276,15 +274,18 @@ if __name__ == "__main__":
         ]
     #print yds.getMixDict(samps)
     yds.printMixBins(samps)
-    '''
+
     #print yds.yields
 
+    '''
     cat = "SR_MB"
 
     samps = [
-        ("EWK",cat),
-        ("T1tttt_Scan_mGo1500_mLSP0",cat),
-        ("T1tttt_Scan_mGo1200_mLSP750",cat),
+        #("EWK",cat),
+        ("T1tttt_Scan_mGo1500_mLSP100",cat),
+        ("T1tttt_Scan_mGo1200_mLSP800",cat),
         ]
     #print yds.getMixDict(samps)
     yds.printMixBins(samps)
+
+    print [s for s in yds.samples if "1500" in s]
