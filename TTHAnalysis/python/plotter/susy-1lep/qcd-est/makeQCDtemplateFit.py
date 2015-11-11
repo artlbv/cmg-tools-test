@@ -44,6 +44,7 @@ def decryptBinName(binname):
     #binname = binname.replace('NJ34','N_{jet} #in [3,4] ')
 
     if "LT" not in binname: binname += "L_{T} #geq 250"
+    elif "LTi" in binname: binname = binname.replace("LTi","L_{T} #geq 250")
     elif "LT1" in binname: binname = binname.replace("LT1","L_{T} #in [250,350]")
     elif "LT2" in binname: binname = binname.replace("LT2","L_{T} #in [350,450]")
     elif "LT3" in binname: binname = binname.replace("LT3","L_{T} #in [450,600]")
@@ -208,7 +209,7 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+binname]) # hack to keep arguments alive
     else:
         import re
-        incName = re.sub('LT[0-9]_','LTi',binname) # use LTi as inclusive template
+        incName = re.sub('LT[0-9]','LTi',binname) # use LTi as inclusive template
         if 'pdfQCDanti_'+incName not in _pdfStore: incName = re.sub('LT[0-9]_','',binname) # remove LTx to get incl template
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+incName]) # hack to keep arguments alive
     _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(kCyan),RooFit.LineStyle(5),RooFit.Name('QCDfit'))
@@ -328,7 +329,10 @@ def getQCDratio(tfile, options, binname = 'incl'):
     # take anti from LT-inclusive QCD:
     if options.inclTemplate:
         import re
-        incName = re.sub('LT[0-9]_','',binname)
+        incName = re.sub('LT[0-9]','LTi',binname) # use LTi as inclusive template
+        if 'QCDanti_'+incName not in _hStore: incName = re.sub('LT[0-9]_','',binname) # remove LTx to get incl template
+        if 'QCDanti_'+incName not in _hStore: print "Didn't find inclusive template!";
+
         if options.verbose > 0:
             print 'Using template', incName, 'instead of', binname
         hQCDanti = _hStore['QCDanti_'+incName]
@@ -433,9 +437,6 @@ def plotFratios(resList, isClosure = False):
 
 if __name__ == "__main__":
 
-    # disable RooFit info
-    RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
-
     # OPTIONS
 
     from optparse import OptionParser
@@ -458,6 +459,10 @@ if __name__ == "__main__":
 
     # Read options and args
     (options,args) = parser.parse_args()
+
+    # disable RooFit info
+    if options.verbose < 3:
+        RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
 
     ## Check options
     if options.doClosure and not options.mcData:
@@ -502,7 +507,7 @@ if __name__ == "__main__":
     #binNames = ['incl','NJ34']
     #binNames = ['NJ34']
     #binNames = ['NJ34','LT1_NJ34']
-    binNames = ['NJ34','LT1_NJ34','LT2_NJ34','LT3_NJ34','LT4_NJ34']
+    binNames = ['LTi_NJ34','LT1_NJ34','LT2_NJ34','LT3_NJ34','LT4_NJ34']
 
     #binNames += ['NJ45','LT0_NJ45','LT1_NJ45','LT2_NJ45','LT3_NJ45','LT4_NJ45']
     #binNames += ['NJ68','LT0_NJ68','LT1_NJ68','LT2_NJ68','LT3_NJ68','LT4_NJ68']
@@ -538,7 +543,7 @@ if __name__ == "__main__":
     if options.inclTemplate: plotDir += "InclTemplate/"
     else: plotDir += "NonInclTemplate/"
 
-    if not os.path.isdir(plotDir):os.mkdir(plotDir)
+    if not os.path.isdir(plotDir): os.makedirs(plotDir)
     print "Saving results to" , plotDir
 
     # save plots to root file
@@ -548,6 +553,9 @@ if __name__ == "__main__":
     print 'Saving plots to file', outfile.GetName()
 
     extList = ['.png','.pdf']
+
+    if options.verbose < 2:
+        gROOT.ProcessLine("gErrorIgnoreLevel = kWarning;")
 
     for canvKey in _canvStore:
         canv = _canvStore[canvKey]
