@@ -18,7 +18,6 @@ def printLatexFooter(f):
     f.write('\\end{tabular} \n')
     f.write('\\end{table} \n')   
 
-
 if __name__ == "__main__":
 
     ## remove '-b' option
@@ -48,6 +47,7 @@ if __name__ == "__main__":
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
 
     printSamps = ['TTsemiLep','TTdiLep','TTV','SingleT', 'WJets', 'DY', 'QCD','background']
+
     
     cats = ('SR_MB', 'CR_MB', 'SR_SB', 'CR_SB')
     for cat in cats:

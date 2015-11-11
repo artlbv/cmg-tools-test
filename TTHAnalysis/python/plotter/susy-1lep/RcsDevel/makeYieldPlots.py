@@ -365,13 +365,6 @@ if __name__ == "__main__":
     yds.showStats()
 
     '''
-    samps = [
-        ("QCD","CR_SB"),
-        ("QCD_QCDpred","CR_SB"),
-        ("QCD_QCDsubtr","CR_SB"),
-        ]
-
-    yds.printMixBins(samps)
 
     #ydQCD = yds.getSampDict("QCD","CR_SB")
     #hist = makeSampHisto(ydQCD,"QCD_CRSB")
@@ -402,12 +395,14 @@ if __name__ == "__main__":
     rcsHists = makeSampHists(yds,sampsRcs)
     hKappa = makeSampHists(yds,[("EWK","Kappa")])[0]
 
+
     prepKappaHist(hKappa)
 
     canv = plotHists("bla",rcsHists,hKappa)
 
     '''
     cat = "SR_MB"
+
 
     #mcSamps = [samp for samp in yds.samples if ("backgr" not in samp or "data" not in samp or "EWK" not in samp)]
     mcSamps = ['DY','TTV','SingleT','WJets','TT','QCD']
@@ -442,7 +437,8 @@ if __name__ == "__main__":
     #canv = plotHists(cat,[ratio])
 
     #hist.Draw("p")
-
+    
     if not _batchMode: raw_input("Enter any key to exit")
-
     canv.SaveAs("BinPlots/"+mask+canv.GetName()+".pdf")
+
+    
