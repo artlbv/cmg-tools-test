@@ -48,7 +48,7 @@ def getPredHist(tfile, hname):
 
     hRcsMB = tfile.Get("Rcs_SB/"+hname)
 
-    if 'data' in hname:
+    if ('data' in hname) or ("background" in hname):
         # use EWK template
         hKappa = tfile.Get("Kappa/EWK")
     else:
@@ -83,6 +83,19 @@ def readQCDratios(fname = "lp_LTbins_NJ34_f-ratios_MC.txt"):
     #print fDict
 
     return fDict
+
+def getPoissonHist(tfile, pname = "background", band = "CR_MB"):
+    # sets all bin errors to sqrt(N)
+
+    hist = tfile.Get(band+"/"+pname).Clone(pname+"_poisson")
+
+    if "TH" not in hist.ClassName(): return 0
+
+    for ix in range(1,hist.GetNbinsX()+1):
+        for iy in range(1,hist.GetNbinsY()+1):
+            hist.SetBinError(ix,iy,sqrt(hist.GetBinContent(ix,iy)))
+
+    return hist
 
 def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True, lep = "ele"):
     ## returns two histograms:
@@ -147,11 +160,9 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
 def makeQCDsubtraction(fileList):
 
     # define hists to make QCD estimation
-    pnames = ["background","data","QCD"] # process name
-    #pnames = ["background","QCD"] # process name
-
-    #pnames = getPnames(fileList[0],'SR_MB') # get process names from file
-    #print 'Found these hists:', pnames
+    #pnames = ["background","data","QCD"] # process name
+    pnames = ["background","QCD"] # process name
+    pnames += ["background_poisson","QCD_poisson"] # process name
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
@@ -175,6 +186,29 @@ def makeQCDsubtraction(fileList):
                     #hNew.Write()
                     hQCDpred.Write()
                     hQCDsubtr.Write()
+                tfile.cd()
+
+        tfile.Close()
+
+def makePoissonErrors(fileList):
+
+    # define hists to make make poisson errors
+    pnames = ["background","QCD","EWK"] # process name
+
+    bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
+
+    for fname in fileList:
+        tfile = TFile(fname,"UPDATE")
+
+        for pname in pnames:
+            for bindir in bindirs:
+
+                hist = getPoissonHist(tfile,pname,bindir)
+
+                if hist:
+                    tfile.cd(bindir)
+                    # overwrite old hist
+                    hist.Write()#"",TObject.kOverwrite)
                 tfile.cd()
 
         tfile.Close()
@@ -290,12 +324,13 @@ def makeClosureHists(fileList):
         for pname in pnames:
 
             hPred = tfile.Get("SR_MB_predict/"+pname)#+"_pred")
-            hExp = tfile.Get("SR_MB/"+pname)
+            hObs = tfile.Get("SR_MB/"+pname)
 
-            hDiff = hExp.Clone(hExp.GetName())#+"_diff")
+            hDiff = hObs.Clone(hObs.GetName())#+"_diff")
             hDiff.Add(hPred,-1)
 
-            hDiff.GetYaxis().SetTitle("Expected - Predicted")
+            #hDiff.GetYaxis().SetTitle("Observed - Predicted/Observed")
+            hDiff.Divide(hObs)
 
             tfile.cd("Closure")
             hDiff.Write()
@@ -320,15 +355,17 @@ if __name__ == "__main__":
         print "No pattern given!"
         exit(0)
 
+
+    # append / if pattern is a dir
+    if os.path.isdir(pattern): pattern += "/"
+
     # find files matching pattern
     fileList = glob.glob(pattern+"*.root")
 
+    makePoissonErrors(fileList)
     makeQCDsubtraction(fileList)
     makeKappaHists(fileList)
     makePredictHists(fileList)
     makeClosureHists(fileList)
-
-    #tfile = TFile(fileList[0],"UPDATE")
-    #getQCDsubtrHisto(tfile,"background","")
 
     print 'Finished'
