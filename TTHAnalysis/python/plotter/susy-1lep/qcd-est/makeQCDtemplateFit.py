@@ -208,7 +208,8 @@ def plotHists(binname = 'incl', inclTemplate = False, mcData = True, addHists = 
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+binname]) # hack to keep arguments alive
     else:
         import re
-        incName = re.sub('LT[0-9]_','',binname)
+        incName = re.sub('LT[0-9]_','LTi',binname) # use LTi as inclusive template
+        if 'pdfQCDanti_'+incName not in _pdfStore: incName = re.sub('LT[0-9]_','',binname) # remove LTx to get incl template
         argset = RooArgSet(_pdfStore['pdfQCDanti_'+incName]) # hack to keep arguments alive
     _pdfStore['pdfTemplate'].plotOn(frame,RooFit.Components(argset),RooFit.LineColor(kCyan),RooFit.LineStyle(5),RooFit.Name('QCDfit'))
     # plot only EWK
