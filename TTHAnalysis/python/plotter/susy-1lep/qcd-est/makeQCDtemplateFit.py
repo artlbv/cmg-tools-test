@@ -449,7 +449,7 @@ if __name__ == "__main__":
     parser.add_option("-b","--batch", dest="batch",default=False, action="store_true", help="Batch mode")
     parser.add_option("-c","--closure", dest="doClosure",default=False, action="store_true", help="Do closure of MC/Fit")
     parser.add_option("-p","--plot", dest="doPlot",default=True, action="store_true", help="Make Lp plots")
-    parser.add_option("-i","--inclTempl", dest="inclTemplate",default=True, action="store_true", help="Use Lp template from inclusive LT bin")
+    parser.add_option("-i","--inclTempl", dest="inclTemplate",default=False, action="store_true", help="Use Lp template from inclusive LT bin")
     parser.add_option("--mc","--mcData", dest="mcData",default=False, action="store_true", help="Use pseudo-data from MC")
     # int/floats
     parser.add_option("-v","--verbose",  dest="verbose",  default=1,  type="int",    help="Verbosity level (0 = quiet, 1 = verbose, 2+ = more)")
