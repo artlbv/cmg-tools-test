@@ -303,7 +303,7 @@ def getQCDratio(tfile, options, binname = 'incl'):
     # get full BKG, QCD and EWK histos
     (hData,hEWKsele,hQCDsele,hQCDanti) = getHistsFromFile(tfile, binname,  options.mcData)
 
-    if options.verbose > 0:
+    if options.verbose > 1:
         # Print some info
         print 10*'-'
         print 'Number of events in anti-selected bin'
@@ -454,7 +454,7 @@ if __name__ == "__main__":
     parser.add_option("--mc","--mcData", dest="mcData",default=False, action="store_true", help="Use pseudo-data from MC")
     # int/floats
     parser.add_option("-v","--verbose",  dest="verbose",  default=1,  type="int",    help="Verbosity level (0 = quiet, 1 = verbose, 2+ = more)")
-    parser.add_option("-l","--lumi",  dest="lumi",  default=1.26,  type="float",    help="Luminosity in /fb")
+    parser.add_option("-l","--lumi",  dest="lumi",  default=1.55,  type="float",    help="Luminosity in /fb")
 
     # Read options and args
     (options,args) = parser.parse_args()
