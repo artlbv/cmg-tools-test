@@ -324,13 +324,18 @@ class EventVars1L_base:
 
                 if eleID == 'CB':
                     # ELE CutBased ID
-                    eidCB = lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz
+                    if hasattr(event,"LepGood_eleCBID_SPRING15_25ns_ConvVetoDxyDz"):
+                        eidCB = lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz
+                    elif hasattr(event,"LepGood_SPRING15_25ns_v1"):
+                        eidCB = lep.SPRING15_25ns_v1
+                    else:
+                        eidCB = -1
 
-                    passTightID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz == 4)
-                    passMediumID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz >= 3)
-                    #passLooseID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz >= 2)
-                    passVetoID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz >= 1)
-                    #passAnyID = (lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz >= 0)
+                    passTightID = (eidCB == 4)
+                    passMediumID = (eidCB >= 3)
+                    #passLooseID = (eidCB >= 2)
+                    passVetoID = (eidCB >= 1)
+                    #passAnyID = (eidCB >= 0)
 
                 elif eleID == 'MVA':
                     # ELE MVA ID
@@ -410,7 +415,11 @@ class EventVars1L_base:
 
                 if eleID == 'CB':
                     # ELE CutBased ID
-                    eidCB = lep.eleCBID_SPRING15_25ns
+                    if hasattr(event,"LepOther_eleCBID_SPRING15_25ns"):
+                        eidCB = lep.eleCBID_SPRING15_25ns
+                    else:
+                        eidCB = -1
+
                     passMediumID = (eidCB >= 3)
                     passVetoID = (eidCB >= 1)
                 else:
@@ -490,8 +499,8 @@ class EventVars1L_base:
 
             ret['Lep_relIso'] = tightLeps[0].relIso03
             ret['Lep_miniIso'] = tightLeps[0].miniRelIso
-            #if hasattr(event,"LepGood_hOverE"):
-            ret['Lep_hOverE'] = tightLeps[0].hOverE
+            if hasattr(event,"LepGood_hOverE") or hasattr(event,"LepOther_hOverE"):
+                ret['Lep_hOverE'] = tightLeps[0].hOverE
 
         elif len(leps) > 0: # fill it with leading lepton
             ret['Lep_Idx'] = 0
@@ -503,8 +512,8 @@ class EventVars1L_base:
 
             ret['Lep_relIso'] = leps[0].relIso03
             ret['Lep_miniIso'] = leps[0].miniRelIso
-            #if hasattr(event,"LepGood_hOverE"):
-            ret['Lep_hOverE'] = ret['Lep_hOverE'] = leps[0].hOverE
+            if hasattr(event,"LepGood_hOverE") or hasattr(event,"LepOther_hOverE"):
+                ret['Lep_hOverE'] = ret['Lep_hOverE'] = leps[0].hOverE
 
         ########
         ### Jets
