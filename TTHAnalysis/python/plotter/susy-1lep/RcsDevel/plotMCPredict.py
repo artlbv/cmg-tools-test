@@ -24,13 +24,14 @@ if __name__ == "__main__":
     #basename = basename.replace("_SR","")
     mask = basename.replace("*","X_")
 
+    lumi = 3
+    CMS_lumi.lumi_13TeV = str(lumi) + " fb^{-1}"
+    CMS_lumi.extraText = "Simulation"
+
     ## Create Yield Storage
     yds = YieldStore("lepYields")
     yds.addFromFiles(pattern,("lep","sele"))
     yds.showStats()
-
-    mcSamps = ['DY','QCD','TTV','SingleT','WJets','TT']#
-    #mcSamps = ['WJets','TT','QCD']
 
     # update colors
     colorDict["EWK_exp"] = kBlack
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     #ratio = getPull(hEWKpred,hEWKexp)
     #ratio.GetYaxis().SetRangeUser(0,5)
 
-    canv = plotHists("test_EWK_pred",[hEWKpred_pois,hEWKpred,hEWKexp])#,ratio)
+    canv = plotHists("testV2_EWK_pred",[hEWKpred_pois,hEWKpred,hEWKexp])#,ratio)
 
     if not _batchMode:
         if "q" in raw_input("Enter any key to exit (or 'q' to stop): "): exit(0)
