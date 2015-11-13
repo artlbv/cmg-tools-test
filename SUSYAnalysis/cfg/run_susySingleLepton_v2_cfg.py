@@ -93,7 +93,7 @@ if jetAna.cleanSelectedLeptons:	jetAna.minLepPt = 10
 
 ## JEC -- see preprocessor for MET
 #use default for 25 ns from susycore Summer15_25nsV2_MC
-#jetAna.mcGT = "Summer15_25nsV5_MC"
+jetAna.mcGT = "Summer15_25nsV6_MC"
 jetAna.dataGT = "Summer15_25nsV6_DATA"
 
 jetAna.doQG = True
@@ -198,12 +198,12 @@ test = 0
 
 if sample == "MC":
 
-	print 'Going to process MC'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV2_MC.db'
-	jecEra    = 'Summer15_25nsV2_MC'
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV6_MC.db'
+	jecEra    = 'Summer15_25nsV6_MC'
 
 	isData = False
+	isSignal = False
 
 	# modify skim
 	anyLepSkim.minLeptons = 1
@@ -246,6 +246,60 @@ if sample == "MC":
 			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 
+elif sample == "Signal":
+
+	print 'Going to process Signal'
+
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV6_MC.db'
+	jecEra    = 'Summer15_25nsV6_MC'
+
+	isData = False
+	isSignal = True
+
+	# modify skim
+	anyLepSkim.minLeptons = 0
+	ttHLepSkim.minLeptons = 0
+
+	# -- new 74X samples
+	#from CMGTools.RootTools.samples.samples_13TeV_74X import *
+	# -- samples at DESY
+	# MiniAODv1
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_Signals_desy import *
+	# MiniAODv2
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
+
+	#selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
+
+	if test==1:
+		# test a single component, using a single thread.
+		comp = T1tttt_mGo_1500to1525_mLSP_50to1125
+		comp.files = comp.files[:1]
+		selectedComponents = [comp]
+		comp.splitFactor = 1
+	elif test==2:
+		# test all components (1 thread per component).
+		for comp in selectedComponents:
+			comp.splitFactor = 1
+			comp.fineSplitFactor = 2
+			comp.files = comp.files[:1]
+	elif test==3:
+		# run all components (1 thread per component).
+		for comp in selectedComponents:
+			comp.fineSplitFactor = 2
+			comp.splitFactor = len(comp.files)
+	elif test==0:
+		# PRODUCTION
+		# run on everything
+
+		selectedComponents = [ T1tttt_mGo_1200_mLSP_1to825, T1tttt_mGo_1900to1950_mLSP_0to1450 ]
+
+		for comp in selectedComponents:
+			comp.fineSplitFactor = 2
+			comp.splitFactor = len(comp.files)
+
+
+
 elif sample == "data":
 
 	print 'Going to process DATA'
@@ -254,9 +308,10 @@ elif sample == "data":
 	jecEra    = 'Summer15_25nsV6_DATA'
 
 	isData = True
+	isSignal = False
 
-	# modify skim -- don't skim data on leptons!
-	anyLepSkim.minLeptons = 0
+	# modify skim
+	anyLepSkim.minLeptons = 1
 	ttHLepSkim.minLeptons = 0
 
 	# central samples
@@ -385,15 +440,14 @@ sequence = cfg.Sequence(susyCoreSequence+[
 		treeProducer,
 		])
 
-
-isSignal = False
-#for comp in selectedComponents:
-#	if "SMS" in comp: isSignal = True
-
 # remove skimming for Data or Signal
 if isData or isSignal :
 	sequence.remove(ttHHTSkimmer)
 #	sequence.remove(ttHSTSkimmer)
+
+if isSignal:
+	sequence.remove(eventFlagsAna)
+	sequence.remove(hbheFilterAna)
 
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
