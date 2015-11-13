@@ -199,8 +199,8 @@ if sample == "MC":
 
 	print 'Going to process MC'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV2_MC.db'
-	jecEra    = 'Summer15_25nsV2_MC'
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV6_MC.db'
+	jecEra    = 'Summer15_25nsV6_MC'
 
 	isData = False
 	isSignal = False
@@ -307,8 +307,8 @@ elif sample == "data":
 
 	print 'Going to process DATA'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV5_DATA.db'
-	jecEra    = 'Summer15_25nsV5_DATA'
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV6_DATA.db'
+	jecEra    = 'Summer15_25nsV6_DATA'
 
 	isData = True
 	isSignal = False
