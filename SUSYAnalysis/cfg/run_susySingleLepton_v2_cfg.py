@@ -91,17 +91,22 @@ jetAna.jetEta = 2.4
 jetAna.cleanSelectedLeptons = True
 if jetAna.cleanSelectedLeptons:	jetAna.minLepPt = 10
 
-## JEC -- see preprocessor for MET
+## JEC
 #use default for 25 ns from susycore Summer15_25nsV2_MC
 jetAna.mcGT = "Summer15_25nsV6_MC"
 jetAna.dataGT = "Summer15_25nsV6_DATA"
 
+jetAna.applyL2L3Residual = True
+
+# add also JEC up/down shifts corrections
+jetAna.addJECShifts = True
+
 jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
-jetAna.recalibrateJets = True # false for miniAOD v2!
+jetAna.recalibrateJets = True #
 
-## MET -- check preprocessor
-metAna.recalibrate = True #should be false in susycore, already
+## MET
+metAna.recalibrate = True # can be true for MiniAODv2!
 
 ## Iso Track
 isoTrackAna.setOff=False
@@ -193,8 +198,9 @@ selectedComponents = []
 isData = True # default, but will be overwritten below
 
 #sample = 'MC'
-sample = 'data'
-test = 0
+#sample = 'data'
+sample = 'Signal'
+test = 1
 
 if sample == "MC":
 
@@ -265,15 +271,17 @@ elif sample == "Signal":
 	# -- samples at DESY
 	# MiniAODv1
 	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
-	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_Signals_desy import *
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_Signals_desy import *
 	# MiniAODv2
 	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_MiniAODv2_Signals_desy import *
 
-	#selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
+	selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125, T1tttt_mGo_1200_mLSP_1to825, T1tttt_mGo_1900to1950_mLSP_0to1450 ]
 
 	if test==1:
 		# test a single component, using a single thread.
-		comp = T1tttt_mGo_1500to1525_mLSP_50to1125
+		#comp = T1tttt_mGo_1500to1525_mLSP_50to1125
+		comp = T1tttt_mGo_1200_mLSP_1to825
 		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
@@ -281,12 +289,12 @@ elif sample == "Signal":
 		# test all components (1 thread per component).
 		for comp in selectedComponents:
 			comp.splitFactor = 1
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.files = comp.files[:1]
 	elif test==3:
 		# run all components (1 thread per component).
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 	elif test==0:
 		# PRODUCTION
@@ -295,7 +303,7 @@ elif sample == "Signal":
 		selectedComponents = [ T1tttt_mGo_1200_mLSP_1to825, T1tttt_mGo_1900to1950_mLSP_0to1450 ]
 
 		for comp in selectedComponents:
-			comp.fineSplitFactor = 2
+			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 
 
@@ -359,53 +367,9 @@ elif sample == "data":
 			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 
-
-
-removeResiduals = False
-
-# use consistent JEC residuals for MET and Jets
-if removeResiduals:
-	jetAna.applyL2L3Residual = False
-else:
-	jetAna.applyL2L3Residual = True
-
-'''
-# -------------------- Running pre-processor
-preprocessor = None
-doMETpreprocessor = True
-if doMETpreprocessor:
-	import tempfile
-	import subprocess
-	tempfile.tempdir=os.environ['CMSSW_BASE']+'/tmp'
-	tfile, tpath = tempfile.mkstemp(suffix='.py',prefix='MET_preproc_')
-	os.close(tfile)
-	extraArgs=[]
-	if isData:
-		extraArgs.append('--isData')
-		GT= '74X_dataRun2_Prompt_v1'
-	else:
-		GT= 'MCRUN2_74_V9A'
-	if removeResiduals:extraArgs.append('--removeResiduals')
-	args = ['python',
-		os.path.expandvars('$CMSSW_BASE/python/CMGTools/ObjectStudies/corMETMiniAOD_cfgCreator.py'),\
-			'--GT='+GT,
-		'--outputFile='+tpath,
-		'--jecDBFile='+jecDBFile,
-		'--jecEra='+jecEra
-		] + extraArgs
-#print "Making pre-processorfile:"
-#print " ".join(args)
-	subprocess.call(args)
-	staticname = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
-	import filecmp
-	if os.path.isfile(staticname) and filecmp.cmp(tpath,staticname):
-		os.system("rm %s"%tpath)
-	else:
-		os.system("mv %s %s"%(tpath,staticname))
-	preprocessorFile = staticname
-	from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
-	preprocessor = CmsswPreprocessor(preprocessorFile)
-'''
+## PDF weights
+PDFWeights = []
+#PDFWeights = [ ("CT10",53), ("MSTW2008lo68cl",41), ("NNPDF21_100",101) ]
 
 #--------- Tree Producer
 from CMGTools.TTHAnalysis.analyzers.treeProducerSusySingleLepton import *
@@ -453,5 +417,4 @@ from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
 		     sequence = sequence,
 		     services = [],
-		     #preprocessor=preprocessor,
 		     events_class = Events)
