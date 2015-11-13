@@ -2,6 +2,7 @@
 from CMGTools.TTHAnalysis.plotter.mcAnalysis import *
 import sys, os, os.path
 
+#from searchBins import *
 from searchBins import *
 from math import hypot
 
@@ -279,13 +280,20 @@ if __name__ == "__main__":
     # make cut list
     cDict = {}
 
-    cDict = cutDictCR
-    cDict.update(cutDictSR)
+    doNjet6 = True
+    if doNjet6:
+        cDict.update(cutDictCR)
+        cDict.update(cutDictSR)
 
     doNjet9 = False
     if doNjet9:
         cDict.update(cutDictSRf9)
         cDict.update(cutDictCRf9)
+
+    doNjet5 = False
+    if doNjet5:
+        cDict.update(cutDictSRf5)
+        cDict.update(cutDictCRf5)
 
     #cDict = cutQCD #QCD
     #cDict = cutIncl #Inclusive
