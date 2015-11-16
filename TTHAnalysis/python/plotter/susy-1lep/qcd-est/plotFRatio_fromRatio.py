@@ -34,7 +34,7 @@ doTransp = True
 def doLegend():
 
     #leg = TLegend(0.65,0.7,0.85,0.9)
-    leg = TLegend(0.45,0.7,0.65,0.9)
+    leg = TLegend(0.45,0.7,0.7,0.9)
     leg.SetBorderSize(1)
     leg.SetTextFont(62)
     leg.SetTextSize(0.04)
@@ -120,7 +120,11 @@ if __name__ == "__main__":
         outName = os.path.basename(infile).replace(".root","_ratios.root")
         print 'Out file name is', outName
 
-    outfile = TFile("plots/fRatios/"+outName, "RECREATE")
+    outdir = os.path.dirname(infile)
+
+    if not os.path.isdir(outdir+"/fRatios"): os.makedirs(outdir+"/fRatios")
+
+    outfile = TFile(outdir+"/fRatios/"+outName, "RECREATE")
 
     if not tfile:
         print "Couldn't open the file"
@@ -152,10 +156,11 @@ if __name__ == "__main__":
 
         if i == 0:
             hist.GetYaxis().SetNdivisions(505)
-            #hist.GetYaxis().SetRangeUser(0,0.045)
-            hist.GetYaxis().SetRangeUser(0,0.55)
+            hist.GetYaxis().SetRangeUser(0,0.45)
+            #hist.GetYaxis().SetRangeUser(0,0.05)
             hist.GetYaxis().SetTitleOffset(1.2)
             hist.GetYaxis().SetTitleSize(0.05)
+            hist.GetYaxis().SetLabelSize(0.03)
             hist.GetYaxis().SetTitle("F_{sel-to-anti}")
             #hist.GetYaxis().SetTitle("R_{CS}")
 
@@ -179,7 +184,9 @@ if __name__ == "__main__":
     if not batchMode:
         raw_input("Press 'Enter' to continue")
 
-    canv.SaveAs(outfile.GetName().replace(".root",".pdf"))
+    exts = [".pdf",".png"]
+    for ext in exts:
+        canv.SaveAs(outfile.GetName().replace(".root",ext))
 
     tfile.Close()
     outfile.Close()
