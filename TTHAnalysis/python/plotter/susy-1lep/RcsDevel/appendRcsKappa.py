@@ -48,7 +48,7 @@ def getPredHist(tfile, hname):
 
     hRcsMB = tfile.Get("Rcs_SB/"+hname)
 
-    if ('data' in hname) or ("background" in hname):
+    if ('data' in hname) or ("background" in hname) or ("poisson" in hname):
         # use EWK template
         hKappa = tfile.Get("Kappa/EWK")
     else:

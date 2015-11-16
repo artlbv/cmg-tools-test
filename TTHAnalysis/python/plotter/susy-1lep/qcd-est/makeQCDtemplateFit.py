@@ -547,9 +547,12 @@ if __name__ == "__main__":
     print "Saving results to" , plotDir
 
     # save plots to root file
-    pureFname = os.path.basename(infileName)
+    pureFname = os.path.basename(infileName).replace(".root","")
 
-    outfile = TFile(plotDir+pureFname.replace('.root','_plots'+suff+'.root'),'RECREATE')
+    if not options.doClosure:        pureFname += '_f-ratios'
+    else:        pureFname += '_closure'
+
+    outfile = TFile(plotDir+pureFname+'_plots'+suff+'.root','RECREATE')
     print 'Saving plots to file', outfile.GetName()
 
     extList = ['.png','.pdf']
@@ -577,10 +580,7 @@ if __name__ == "__main__":
         print 40*'\\/'
 
     # Write results to txt file
-    if not options.doClosure:        txtFname = pureFname.replace('.root','_f-ratios')
-    else:        txtFname = pureFname.replace('.root','_closure')
-
-    txtFname+=suff+".txt"
+    txtFname =suff+".txt"
 
     with open(plotDir+txtFname,"w") as ftxt:
 

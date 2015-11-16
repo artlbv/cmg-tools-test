@@ -42,7 +42,8 @@ if __name__ == "__main__":
     hSele = makeSampHisto(ydsSele,"QCD",cat,"QCD_Sele_"+cat)
     hSele.SetTitle("Selected")
 
-    ratio = getRatio(hSele,hAnti)
+    #ratio = getRatio(hSele,hAnti)
+    ratio = getPull(hSele,hAnti)
     ratio.GetYaxis().SetRangeUser(-0.45,0.45)
 
     #canv = plotHists("Sele_Vs_HE_New_AntiEle_"+cat,[hAnti,hSele],ratio)
