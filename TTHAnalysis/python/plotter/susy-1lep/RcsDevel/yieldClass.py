@@ -91,7 +91,7 @@ class YieldStore:
                         point = sample + "_mGo%i_mLSP%i" %(mGo,mLSP)
                         #point = (mGo,mLSP)
 
-                        yd = BinYield(yds[(mGo,mLSP)])
+                        yd = BinYield(point, category, yds[(mGo,mLSP)])
                         self.addYield(point,category,binName,yd)
 
         return 1
@@ -230,8 +230,13 @@ class YieldStore:
             elif LT == LT0 and HT == HT0:
                 f.write('  &  & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin)
 
+            print yds[bin]
             for yd in yds[bin]:
-                f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
+                if yd == 0:
+                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (0.0, 0.0))
+                else:
+                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
+
 
             f.write(' \\\ \n')
         f.write(' \\hline \n')
