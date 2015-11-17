@@ -210,8 +210,8 @@ class YieldStore:
         yds = self.getMixDict(samps)
         nSource = len(samps)
         nCol = nSource + 4
-        precision = 5
-        f.write('\multicolumn{' + str(nCol) + '}{|c|}{' +label +'} \\\ \\hline \n')
+        f.write('\multicolumn{' + str(nCol) + '}{|c|}{' +label +'} \\\ \n')
+        f.write('\multicolumn{' + str(nCol) + '}{|c|}{'  '} \\\ \\hline \n')
         f.write('$L_T$ & $H_T$ & nB & binName &' +  ' %s ' % ' & '.join(map(str, printSamps)) + ' \\\ \n')
         f.write(' $[$ GeV $]$  &   $[$GeV$]$ & &  '  + (nSource *'%(tab)s  ') % dict(tab = '&') + ' \\\ \\hline \n')
 
@@ -232,9 +232,12 @@ class YieldStore:
 
             print yds[bin]
             for yd in yds[bin]:
+                precision = 2
                 if yd == 0:
                     f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (0.0, 0.0))
                 else:
+                    if 'Rcs' in yd.cat or 'Kappa' in yd.cat:
+                        precision = 4
                     f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
 
 
