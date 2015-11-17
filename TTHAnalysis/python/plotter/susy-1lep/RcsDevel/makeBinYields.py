@@ -15,6 +15,7 @@ from math import hypot
 #dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
 
 Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2"
+
 mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_anyLepSkim"
 sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_T1ttt_Scans"
 
@@ -50,7 +51,7 @@ def addOptions(options):
         #options.bins = "34,-1700,1700,10,0,1500"
         options.bins = "161,-2012.5,2012.5,41,-25,2025.5"
 
-        options.friendTrees = [("sf/t",sigFTdir+"/evVarFriend_{cname}.root")]
+        options.friendTreesMC = [("sf/t",sigFTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
 
     elif options.grid:
@@ -285,7 +286,7 @@ if __name__ == "__main__":
         cDict.update(cutDictCR)
         cDict.update(cutDictSR)
 
-    doNjet9 = False
+    doNjet9 = True
     if doNjet9:
         cDict.update(cutDictSRf9)
         cDict.update(cutDictCRf9)
