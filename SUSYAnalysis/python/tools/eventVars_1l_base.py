@@ -318,9 +318,9 @@ class EventVars1L_base:
 
                 if eleID == 'CB':
                     # ELE CutBased ID
-                    if hasattr(event,"LepGood_eleCBID_SPRING15_25ns_ConvVetoDxyDz"):
+                    if hasattr(lep,"eleCBID_SPRING15_25ns_ConvVetoDxyDz"):
                         eidCB = lep.eleCBID_SPRING15_25ns_ConvVetoDxyDz
-                    elif hasattr(event,"LepGood_SPRING15_25ns_v1"):
+                    elif hasattr(lep,"SPRING15_25ns_v1"):
                         eidCB = lep.SPRING15_25ns_v1
                     else:
                         eidCB = -1
@@ -390,10 +390,10 @@ class EventVars1L_base:
         # EXTRA Loop for lepOther -- for anti-selected leptons
         ###################
 
-        eles = [l for l in Collection(event,"LepOther","nLepOther")]
-        #eles = []
+        otherleps = [l for l in Collection(event,"LepOther","nLepOther")]
+        #otherleps = []
 
-        for idx,lep in enumerate(eles):
+        for idx,lep in enumerate(otherleps):
 
             # check acceptance
             lepEta = abs(lep.eta)
@@ -410,7 +410,7 @@ class EventVars1L_base:
 
                 if eleID == 'CB':
                     # ELE CutBased ID
-                    if hasattr(event,"LepOther_eleCBID_SPRING15_25ns"):
+                    if hasattr(lep,"eleCBID_SPRING15_25ns"):
                         eidCB = lep.eleCBID_SPRING15_25ns
                     else:
                         eidCB = -1
@@ -494,7 +494,7 @@ class EventVars1L_base:
 
             ret['Lep_relIso'] = tightLeps[0].relIso03
             ret['Lep_miniIso'] = tightLeps[0].miniRelIso
-            if hasattr(event,"LepGood_hOverE") or hasattr(event,"LepOther_hOverE"):
+            if hasattr(tightLeps[0],"hOverE"):
                 ret['Lep_hOverE'] = tightLeps[0].hOverE
 
         elif len(leps) > 0: # fill it with leading lepton
@@ -507,7 +507,7 @@ class EventVars1L_base:
 
             ret['Lep_relIso'] = leps[0].relIso03
             ret['Lep_miniIso'] = leps[0].miniRelIso
-            if hasattr(event,"LepGood_hOverE") or hasattr(event,"LepOther_hOverE"):
+            if hasattr(leps[0],"hOverE"):
                 ret['Lep_hOverE'] = ret['Lep_hOverE'] = leps[0].hOverE
 
         ########
@@ -559,7 +559,7 @@ class EventVars1L_base:
 
         for lep in tightLeps:
             # don't clean LepGood
-            if lep not in eles: continue
+            if lep not in otherleps: continue
 
             jNear, dRmin = None, 99
             # find nearest jet
@@ -578,7 +578,7 @@ class EventVars1L_base:
             print "Non-clean jets: ", nJetC, "\tclean jets:", len(cJet30Clean)
             print jets
             print leps
-            print eles
+            print otherleps
         '''
 
         # cleaned jets
