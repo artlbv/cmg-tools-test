@@ -161,6 +161,7 @@ ele_miniIsoCut = 0.1
 muo_miniIsoCut = 0.2
 Lep_miniIsoCut = 0.4
 
+## Lepton cuts (for MVAID)
 goodEl_lostHits = 0
 goodEl_sip3d = 4
 goodMu_sip3d = 4
@@ -223,8 +224,8 @@ class EventVars1L_base:
         ##############################
         if event.isData:
             ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 0
-            ret['PD_SingleMu'] = 1
+            ret['PD_SingleEle'] = 1
+            ret['PD_SingleMu'] = 0
         else:
             ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
@@ -397,6 +398,7 @@ class EventVars1L_base:
         ###################
 
         eles = [l for l in Collection(event,"LepOther","nLepOther")]
+        #eles = []
 
         for idx,lep in enumerate(eles):
 
@@ -553,20 +555,39 @@ class EventVars1L_base:
         nJet40C = len(centralJet40)
         ret['nJets40']   = nJet40C
 
-        # local cleaning from leptons
+        ##############################
+        ## Local cleaning from leptons
+        ##############################
         cJet30Clean = []
         dRminCut = 0.4
 
-        for jet in centralJet30:
-            dRmin = 99
-            # find nearest lepton
-            for lep in tightLeps:
-                dR = jet.p4().DeltaR(lep.p4())
-                if dR < dRmin: dRmin = dR
-            # add jet if no lepton in vicinity
-            if dRmin > dRminCut: cJet30Clean.append(jet)
+        # Do cleaning a la CMG: clean max 1 jet for each lepton (the nearest)
+        cJet30Clean = centralJet30
 
-        #print "Non-clean jets: ", nJetC, "\tclean jets:", len(cJet30Clean)
+        for lep in tightLeps:
+            # don't clean LepGood
+            if lep not in eles: continue
+
+            jNear, dRmin = None, 99
+            # find nearest jet
+            for jet in centralJet30:
+
+                dR = jet.p4().DeltaR(lep.p4())
+                if dR < dRmin:
+                    jNear, dRmin = jet, dR
+
+            # remove nearest jet
+            if dRmin < dRminCut:
+                cJet30Clean.remove(jNear)
+
+        '''
+        if nJetC !=  len(cJet30Clean):
+            print "Non-clean jets: ", nJetC, "\tclean jets:", len(cJet30Clean)
+            print jets
+            print leps
+            print eles
+        '''
+
         # cleaned jets
         nJet30C = len(cJet30Clean)
         ret['nJets30Clean'] = len(cJet30Clean)
@@ -635,6 +656,7 @@ class EventVars1L_base:
             # add HCAL Iso Noise
             ret['METfilters'] = event.nVert > 0 and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter and event.Flag_HBHENoiseFilter_fix and event.Flag_HBHENoiseIsoFilter
         else:
+            ret['passCSCFilterList'] = 1
             ret['METfilters'] = 1
 
 
