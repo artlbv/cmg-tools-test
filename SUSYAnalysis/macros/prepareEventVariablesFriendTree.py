@@ -12,14 +12,16 @@ MODULES.append( ('1l_Triggers', EventVars1L_triggers()) )
 # for pileup
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_pileup import EventVars1L_pileup
 MODULES.append( ('1l_Pileup', EventVars1L_pileup()) )
-
+# for Filters
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_filters import EventVars1L_filters
+MODULES.append( ('1l_Filters', EventVars1L_filters()) )
 # for signal masses
-#from CMGTools.SUSYAnalysis.tools.eventVars_1l_signal import EventVars1L_signal
-#MODULES.append( ('1l_Signal', EventVars1L_signal()) )
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_signal import EventVars1L_signal
+MODULES.append( ('1l_Signal', EventVars1L_signal()) )
 #
 
-from CMGTools.SUSYAnalysis.tools.eventVars_1l_WeightsForSystematics import EventVars1LWeightsForSystematics
-MODULES.append( ('1l_SysWeights', EventVars1LWeightsForSystematics()) )
+#from CMGTools.SUSYAnalysis.tools.eventVars_1l_WeightsForSystematics import EventVars1LWeightsForSystematics
+#MODULES.append( ('1l_SysWeights', EventVars1LWeightsForSystematics()) )
 
 '''
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_bkgDilep import EventVars1L_bkgDilep
@@ -95,12 +97,14 @@ if options.listModules:
         print "   '%s': %s" % (n,x)
     exit()
 
-if len(args) != 2 or not os.path.isdir(args[0]) or not os.path.isdir(args[1]):
+if len(args) != 2 or not os.path.isdir(args[0]):
     print "Usage: program <TREE_DIR> <OUT>"
     exit()
 if len(options.chunks) != 0 and len(options.datasets) != 1:
     print "must specify a single dataset with -d if using -c to select chunks"
     exit()
+
+if not os.path.isdir(args[1]): os.makedirs(args[1])
 
 jobs = []
 
@@ -119,7 +123,7 @@ for D in glob(args[0]+"/*"):
             for dm in  options.datasetMatches:
                 if re.match(dm,short): found = True
             if not found: continue
-        data = ("DoubleMu" in short or "MuEG" in short or "DoubleElectron" in short or "SingleMu" in short)
+        data = ("DoubleMu" in short or "MuEG" in short or "DoubleElectron" in short or "SingleMu" in short or "SingleEl" in short)
         f = ROOT.TFile.Open(fname);
         t = f.Get(treename)
         entries = t.GetEntries()
@@ -180,10 +184,17 @@ if options.naf:
     import os, sys
     import subprocess
 
+    outdir = args[1]
+
+    # check for number of jobs
+    if len(jobs) > 5000:
+        answ = raw_input("Do you really want to submit %i jobs? [y/n] " %len(jobs) )
+        if 'y' not in answ: exit()
+
     # make unique name for jobslist
     import time
     itime = int(time.time())
-    jobListName = 'jobList_%i.txt' %(itime)
+    jobListName = outdir+'/jobList_%i.txt' %(itime)
     jobList = open(jobListName,'w')
     print 'Filling %s with job commands' % (jobListName)
 
@@ -244,6 +255,13 @@ def _runIt(myargs):
     print "==== %s starting (%d entries) ====" % (name, nev)
     booker = Booker(fout)
     modulesToRun = MODULES
+    '''
+    # remove filter module for MC
+    if not data:
+        print modulesToRun
+        print "removing filters module"
+        modulesToRun.remove( ('1l_Filters', EventVars1L_filters()) )
+    '''
     if options.modules != []:
         toRun = {}
         for m,v in MODULES:
