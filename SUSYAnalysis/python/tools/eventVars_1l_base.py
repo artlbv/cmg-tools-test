@@ -275,43 +275,36 @@ class EventVars1L_base:
             # MUONS
             ###################
             if(abs(lep.pdgId) == 13):
+                ## Lower ID is POG_LOOSE (see cfg)
 
-                # pass variables
-                passID = False
-                passIso = False
+                # ID, IP and Iso check:
+                passID = lep.mediumMuonId == 1
+                passIso = lep.miniRelIso < muo_miniIsoCut
+                passIP = lep.sip3d < goodMu_sip3d
 
-                # ID and Iso check:
-                if lep.mediumMuonId == 1 and lep.sip3d < goodMu_sip3d:
-                    passID = True
-                if lep.miniRelIso < muo_miniIsoCut:
-                    passIso = True
+                if passID:
+                    if passIso and passIP:
+                        # selected muons
+                        selectedTightLeps.append(lep)
+                        selectedTightLepsIdx.append(idx)
 
-                # mimic selected muons (ID TBC)
-                if passIso:
-
-                    # fill
-                    if passID and passIso:
-                        selectedTightLeps.append(lep);
-                        selectedTightLepsIdx.append(idx);
-
-                        antiVetoLeps.append(lep)
-                    else:
-                        selectedVetoLeps.append(lep);
-
-                elif lep.miniRelIso > muo_miniIsoCut:
-
-                    # all anti are veto for selected
-                    selectedVetoLeps.append(lep);
-
-                    if passID:
-                        antiTightLeps.append(lep);
-                        antiTightLepsIdx.append(idx);
-                    else:
                         antiVetoLeps.append(lep);
+
+                    #elif lep.miniRelIso > muo_miniIsoCut:
+                    #elif passID:
+                    else:
+                        selectedVetoLeps.append(lep)
+
+                        # anti-selected muons
+                        antiTightLeps.append(lep)
+                        antiTightLepsIdx.append(idx)
+                    #else:
+                    #    selectedVetoLeps.append(lep)
+                    #    antiVetoLeps.append(lep)
                 else:
-                    # veto and anti-selected
-                    selectedVetoLeps.append(lep);
-                    antiTightLeps.append(lep)
+                    # all Muons failing Medium ID are veto for sele/anti
+                    selectedVetoLeps.append(lep)
+                    antiVetoLeps.append(lep)
 
             ###################
             # ELECTRONS
@@ -656,7 +649,7 @@ class EventVars1L_base:
             # add HCAL Iso Noise
             ret['METfilters'] = event.nVert > 0 and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter and event.Flag_HBHENoiseFilter_fix and event.Flag_HBHENoiseIsoFilter
         else:
-            ret['passCSCFilterList'] = 1
+            #ret['passCSCFilterList'] = 1
             ret['METfilters'] = 1
 
 
