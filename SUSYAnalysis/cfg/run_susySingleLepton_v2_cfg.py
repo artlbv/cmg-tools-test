@@ -61,8 +61,6 @@ if isolation == "miniIso":
 	lepAna.miniIsolationVetoLeptons = None
 	lepAna.loose_muon_isoCut     = lambda muon : muon.miniRelIso < 0.4
 	lepAna.loose_electron_isoCut = lambda elec : elec.miniRelIso < 0.4
-	lepAna.inclusive_electron_isoCut = lambda elec : elec.miniRelIso < 1.0 # trigger like (0.8)
-	lepAna.inclusive_muon_isoCut = lambda muon : muon.miniRelIso < 1.0 # trigger like (0.8)
 elif isolation == "relIso03":
 	# normal relIso03
 	lepAna.ele_isoCorr = "rhoArea"
@@ -239,8 +237,8 @@ if sample == "MC":
 		# PRODUCTION
 		# run on everything
 
-		#selectedComponents =  QCDHT#[ TTJets_LO ]
-		selectedComponents =  [TTJets_LO] #SingleTop + DYJetsM50HT + TTV
+		selectedComponents =  QCDHT #[ TTJets_LO ]
+		#selectedComponents =  #SingleTop + DYJetsM50HT + TTV
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 1
@@ -305,7 +303,7 @@ elif sample == "data":
 PDFWeights = []
 #PDFWeights = [ ("CT10",53), ("MSTW2008lo68cl",41), ("NNPDF21_100",101) ]
 #PDFWeights = [ ("CT10nlo",53),("MSTW2008nlo68cl",41),("NNPDF30LO",101),("NNPDF30_nlo_nf_5_pdfas",103), ("NNPDF30_lo_as_0130",101)]
-PDFWeights = [ ("NNPDF30_lo_as_0130",101) ]
+#PDFWeights = [ ("NNPDF30_lo_as_0130",101) ]
 # see for TTJets  https://github.com/cms-sw/genproductions/blob/c41ab29f3d86c9e53df8b0d76c12cd519adbf013/bin/MadGraph5_aMCatNLO/cards/production/13TeV/tt0123j_5f_ckm_LO_MLM/tt0123j_5f_ckm_LO_MLM_run_card.dat#L52
 # and then https://lhapdf.hepforge.org/pdfsets.html
 
