@@ -36,10 +36,11 @@ if __name__ == "__main__":
     # update colors
     colorDict["EWK_exp"] = kBlack
     colorDict["EWK_pred"] = kRed
-    colorDict["EWK_pois"] = kGreen
+    colorDict["EWK_pois"] = kBlack
     colorDict["EWK_pois_pred"] = kBlue
 
     hEWKexp = makeSampHisto(yds,"EWK","SR_MB","EWK_exp"); hEWKexp.SetTitle("EWK (Expected)")
+    hEWK_pois = makeSampHisto(yds,"EWK_poisson","SR_MB","EWK_pois"); hEWK_pois.SetTitle("EWK pois (Expected)"); hEWK_pois.SetName("data");
     hEWKpred = makeSampHisto(yds,"EWK","SR_MB_predict","EWK_pred"); hEWKpred.SetTitle("EWK (Predicted)")
     hEWKpred_pois = makeSampHisto(yds,"EWK_poisson","SR_MB_predict","EWK_pois_pred"); hEWKpred_pois.SetTitle("EWK pois (Predicted)")
 
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     #ratio = getPull(hEWKpred,hEWKexp)
     #ratio.GetYaxis().SetRangeUser(0,5)
 
-    canv = plotHists("testV2_EWK_pred",[hEWKpred_pois,hEWKpred,hEWKexp])#,ratio)
+    canv = plotHists("testV2_EWK_pred",[hEWK_pois, hEWKpred_pois,hEWKpred,hEWKexp])#,ratio)
 
     if not _batchMode:
         if "q" in raw_input("Enter any key to exit (or 'q' to stop): "): exit(0)
