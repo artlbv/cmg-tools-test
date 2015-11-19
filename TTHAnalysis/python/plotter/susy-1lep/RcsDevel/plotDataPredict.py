@@ -55,8 +55,8 @@ if __name__ == "__main__":
         hDataPred = makeSampHisto(yds,"data_QCDsubtr",cat,"Data_prediction"); hDataPred.SetTitle("Data (Pred)")
         hData = makeSampHisto(yds,"data_QCDsubtr","SR_MB","Data"); hData.SetTitle("Data")
 
-        #ratio = getRatio(hData,hDataPred)
-        ratio = getPull(hData,hDataPred)
+        ratio = getRatio(hData,hDataPred)
+        #ratio = getPull(hData,hDataPred)
         #ratio.GetYaxis().SetRangeUser(0,5)
 
         #canv = plotHists("DataNJ45_"+cat,[stack,hMCpred,hDataPred,hData,total],ratio)
