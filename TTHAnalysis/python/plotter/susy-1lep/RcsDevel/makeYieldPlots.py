@@ -284,7 +284,8 @@ def getCatLabel(name):
 
 def plotHists(cname, histList, ratio = None):
 
-    canv = TCanvas(cname,cname,1400,600)
+    #canv = TCanvas(cname,cname,1400,600)
+    canv = TCanvas(cname,cname,800,600)
     #leg = doLegend(len(histList)+1)
     leg = doLegend()
 
@@ -308,8 +309,8 @@ def plotHists(cname, histList, ratio = None):
 
         # 1 - line
         #xmin = ratio.GetXaxis().
-        #line = TLine(0,1,ratio.GetNbinsX(),1)
-        line = TLine(0,0,ratio.GetNbinsX(),0)
+        line = TLine(0,1,ratio.GetNbinsX(),1)
+        #line = TLine(0,0,ratio.GetNbinsX(),0)
         line.SetLineWidth(1)
         line.Draw()
         SetOwnership(line,0)
