@@ -2,6 +2,7 @@
 from CMGTools.TTHAnalysis.plotter.mcAnalysis import *
 import sys, os, os.path
 
+#from searchBins import *
 from searchBins import *
 from math import hypot
 
@@ -15,20 +16,18 @@ from math import hypot
 
 Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2"
 mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_anyLepSkim"
-# old data
-dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_T1ttt_Scans"
 
-#FTdir = "FriendTrees_MC/"
-#Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/"
-#FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/Links/Spring15_RunB_50ns/Friends/"
+# new data
+dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/Data/ele_CBID_1p5fb"
 
 def addOptions(options):
 
     # LUMI (overwrite default 19/fb)
     if options.lumi > 19:
         options.lumi = 3
-    else:
-        options.lumi = 1.26
+    #else:
+    #    options.lumi = 1.26
 
     # set tree options
     options.path = Tdir
@@ -48,9 +47,10 @@ def addOptions(options):
     if options.signal:
         options.var =  "mLSP:mGo*(nEl-nMu)"
         #options.bins = "60,-1500,1500,30,0,1500"
-        options.bins = "34,-1700,1700,10,0,1500"
+        #options.bins = "34,-1700,1700,10,0,1500"
+        options.bins = "161,-2012.5,2012.5,41,-25,2025.5"
 
-        options.friendTrees = [("sf/t",mcFTdir+"/evVarFriend_{cname}.root")]
+        options.friendTrees = [("sf/t",sigFTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
 
     elif options.grid:
@@ -280,13 +280,20 @@ if __name__ == "__main__":
     # make cut list
     cDict = {}
 
-    cDict = cutDictCR
-    cDict.update(cutDictSR)
+    doNjet6 = True
+    if doNjet6:
+        cDict.update(cutDictCR)
+        cDict.update(cutDictSR)
 
     doNjet9 = False
     if doNjet9:
         cDict.update(cutDictSRf9)
         cDict.update(cutDictCRf9)
+
+    doNjet5 = False
+    if doNjet5:
+        cDict.update(cutDictSRf5)
+        cDict.update(cutDictCRf5)
 
     #cDict = cutQCD #QCD
     #cDict = cutIncl #Inclusive

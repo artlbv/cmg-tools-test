@@ -9,13 +9,15 @@ from readYields import getLepYield, getScanYields
 class BinYield:
     ## Simple class for yield,error storing (instead of tuple)
 
-    def __init__(self, (val, err)):
+    def __init__(self, sample, cat, (val, err)):
+        self.name = sample
+        self.cat = cat
         self.val = val
         self.err = err
 
     # func that is called with print BinYield object
     def __repr__(self):
-        return "%4.2f +- %4.2f" % (self.val, self.err)
+        return "%s : %s : %4.2f +- %4.2f" % (self.name, self.cat, self.val, self.err)
 
 class YieldStore:
 
@@ -62,9 +64,9 @@ class YieldStore:
         # get list of dirs
         dirList = [dirKey.ReadObj() for dirKey in gDirectory.GetListOfKeys() if dirKey.IsFolder() == 1]
 
+        # Loop over yield categories
         for catDir in dirList:
             catDir.cd()
-
             category = catDir.GetName()
 
             # get list of histograms
@@ -75,9 +77,10 @@ class YieldStore:
 
                 sample = hist.GetName()
 
+
                 if ('Scan' not in sample) and ('scan' not in sample):
                     # get normal sample yield
-                    yd = BinYield(getLepYield(hist, leptype))
+                    yd = BinYield(sample, category, getLepYield(hist, leptype))
                     self.addYield(sample,category,binName,yd)
                 else:
                     # get yields from scan
@@ -89,9 +92,8 @@ class YieldStore:
                         #point = (mGo,mLSP)
 
                         yd = BinYield(yds[(mGo,mLSP)])
-                        # store if yield is not empty -- temporary
-                        #if yd.val > 0:
                         self.addYield(point,category,binName,yd)
+
         return 1
 
     def addFromFiles(self, pattern, leptype = ("lep","sele") ):
@@ -236,6 +238,7 @@ class YieldStore:
         return 1
 
 
+
 if __name__ == "__main__":
 
     import sys
@@ -254,7 +257,7 @@ if __name__ == "__main__":
     yds = YieldStore("bla")
     yds.addFromFiles(pattern)
 
-    #yds.showStats()
+    yds.showStats()
 
     #yds.printBins("QCD","CR_SB")
     #yds.getSampsDict("QCD",["CR_SB","CR_MB"])
@@ -271,15 +274,18 @@ if __name__ == "__main__":
         ]
     #print yds.getMixDict(samps)
     yds.printMixBins(samps)
-    '''
+
     #print yds.yields
 
+    '''
     cat = "SR_MB"
 
     samps = [
-        ("EWK",cat),
-        ("T1tttt_Scan_mGo1500_mLSP0",cat),
-        ("T1tttt_Scan_mGo1200_mLSP750",cat),
+        #("EWK",cat),
+        ("T1tttt_Scan_mGo1500_mLSP100",cat),
+        ("T1tttt_Scan_mGo1200_mLSP800",cat),
         ]
     #print yds.getMixDict(samps)
     yds.printMixBins(samps)
+
+    print [s for s in yds.samples if "1500" in s]
