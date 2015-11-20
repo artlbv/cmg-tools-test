@@ -7,12 +7,21 @@ from ROOT import *
 ## ROOT STYLE
 gStyle.SetOptTitle(0)
 gStyle.SetOptStat(0)
-gStyle.SetPadTopMargin(0.05)
+gStyle.SetPadTopMargin(0.075)
 gStyle.SetPadRightMargin(0.075)
 gStyle.SetPadBottomMargin(0.225)
 
+## CMS LUMI
+import CMS_lumi
+
+CMS_lumi.writeExtraText = 1
+CMS_lumi.extraText = "Preliminary"
+iPos = 11
+if( iPos==0 ): CMS_lumi.relPosX = 0.1
+
+
 ## Global vars
-_alpha = 0.75
+_alpha = 0.35
 colorList = [2,4,7,9,8,3,6] + range(10,50)
 _histStore = {}
 
@@ -69,6 +78,10 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     # yield dict
     ydict = yds.getSampDict(samp,cat)
 
+    if not ydict:
+        print "Could not read dict"
+        return 0
+
     # create histo
     binList = sorted(ydict.keys())
     nbins = len(binList)
@@ -87,8 +100,8 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     for ibin,bin in enumerate(binList):
 
         binLabel = bin
-        binLabel = binLabel.replace("_NJ68","")
-        binLabel = binLabel.replace("_NJ9i","")
+        #binLabel = binLabel.replace("_NJ68","")
+        #binLabel = binLabel.replace("_NJ9i","")
         #binLabel = binLabel.replace("_",",")
 
         newLabel = "#splitline"
@@ -100,6 +113,8 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
             newLabel = "#splitline{%s}{%s}" %(splitbins[0],splitbins[1])
         elif nbins == 3:
             newLabel = "#splitline{%s}{#splitline{%s}{%s}}" %(splitbins[0],splitbins[1],splitbins[2])
+        elif nbins == 4:
+            newLabel = "#splitline{%s}{#splitline{%s}{#splitline{%s}{%s}}}" %(splitbins[0],splitbins[1],splitbins[2],splitbins[3])
         else:
             newLabel = binLabel
         '''
@@ -260,13 +275,16 @@ def getCatLabel(name):
     cname = name
     cname = cname.replace("_"," ")
     cname = cname.replace("SB","N_{j} #in [4,5]")
-    cname = cname.replace("MB","N_{j} #in [6,8]")
+    #cname = cname.replace("MB","N_{j} #in [6,8]")
+    #cname = cname.replace("MB","N_{j} #geq 9")
+    cname = cname.replace("MB","N_{j} #geq 6")
+    #cname = cname.replace("MB","N_{j} == 5")
 
     return cname
 
 def plotHists(cname, histList, ratio = None):
 
-    canv = TCanvas(cname,cname,1000,600)
+    canv = TCanvas(cname,cname,1400,600)
     #leg = doLegend(len(histList)+1)
     leg = doLegend()
 
@@ -302,6 +320,10 @@ def plotHists(cname, histList, ratio = None):
 
     plotOpt = ""
 
+    # get Y-maximum/minimum
+    ymax = 1.3*max([h.GetMaximum() for h in histList])
+    ymin = 0.8*min([h.GetMinimum() for h in histList])
+
     for i,hist in enumerate(histList):
 
         if  hist.ClassName() == 'THStack':
@@ -310,6 +332,7 @@ def plotHists(cname, histList, ratio = None):
             hist.GetYaxis().SetTitle("Events")
             hist.GetYaxis().SetTitleSize(0.06)
             hist.GetYaxis().SetTitleOffset(0.6)
+
             if ratio == None: hist.GetYaxis().SetLabelSize(0.04)
             else: hist.GetYaxis().SetLabelSize(0.05)
 
@@ -322,12 +345,19 @@ def plotHists(cname, histList, ratio = None):
             hist.Draw(plotOpt+"E2")
             leg.AddEntry(hist,"MC Uncertainty","f")
         else:
-            hist.Draw(plotOpt+"pE2")
+            if len(histList) < 3:
+                hist.Draw(plotOpt+"pE2")
+            else:
+                hist.Draw(plotOpt+"pE2")
             leg.AddEntry(hist,hist.GetTitle(),"pf")
 
         # remove axis label with ratio
         if i == 0 and ratio != None:
             hist.GetXaxis().SetLabelOffset(1)
+
+            # range
+            hist.SetMaximum(ymax)
+            hist.SetMinimum(ymin)
 
         if "same" not in plotOpt: plotOpt += "same"
 
@@ -335,7 +365,11 @@ def plotHists(cname, histList, ratio = None):
     leg.Draw()
     SetOwnership(leg,0)
 
-    #if ratio != None:
+# draw CMS lumi
+    if ratio != None:
+        CMS_lumi.CMS_lumi(p1, 4, iPos)
+    else:
+        CMS_lumi.CMS_lumi(canv, 4, iPos)
 
     return canv
 
@@ -365,13 +399,6 @@ if __name__ == "__main__":
     yds.showStats()
 
     '''
-    samps = [
-        ("QCD","CR_SB"),
-        ("QCD_QCDpred","CR_SB"),
-        ("QCD_QCDsubtr","CR_SB"),
-        ]
-
-    yds.printMixBins(samps)
 
     #ydQCD = yds.getSampDict("QCD","CR_SB")
     #hist = makeSampHisto(ydQCD,"QCD_CRSB")
@@ -402,12 +429,14 @@ if __name__ == "__main__":
     rcsHists = makeSampHists(yds,sampsRcs)
     hKappa = makeSampHists(yds,[("EWK","Kappa")])[0]
 
+
     prepKappaHist(hKappa)
 
     canv = plotHists("bla",rcsHists,hKappa)
 
     '''
     cat = "SR_MB"
+
 
     #mcSamps = [samp for samp in yds.samples if ("backgr" not in samp or "data" not in samp or "EWK" not in samp)]
     mcSamps = ['DY','TTV','SingleT','WJets','TT','QCD']
@@ -444,5 +473,4 @@ if __name__ == "__main__":
     #hist.Draw("p")
 
     if not _batchMode: raw_input("Enter any key to exit")
-
     canv.SaveAs("BinPlots/"+mask+canv.GetName()+".pdf")

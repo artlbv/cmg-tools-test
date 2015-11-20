@@ -9,6 +9,9 @@ from ROOT import *
 ### For yieldClass
 #########################
 
+# round up masses to base (5)
+base = 5
+
 def getLepYield(hist,leptype = ('lep','sele')):
 
     if hist.GetNbinsX() == 1:
@@ -38,12 +41,19 @@ def getScanYields(hist,leptype = ('lep','sele')):
     for xbin in range(1,hist.GetNbinsX()+1):
         for ybin in range(1,hist.GetNbinsY()+1):
 
-            xpar = hist.GetXaxis().GetBinLowEdge(xbin); xpar = int(xpar)
-            #xpar = hist.GetXaxis().GetBinCenter(xbin); xpar = int(xpar)
-            ypar = hist.GetYaxis().GetBinLowEdge(ybin); ypar = int(ypar)
-            #ypar = hist.GetYaxis().GetBinCenter(ybin); ypar = int(ypar)
             ycnt = hist.GetBinContent(xbin,ybin)
             yerr = hist.GetBinError(xbin,ybin)
+
+            # skip empty bins for now
+            if ycnt == 0: continue
+
+            xpar = hist.GetXaxis().GetBinCenter(xbin); #xpar = int(xpar)
+            ypar = hist.GetYaxis().GetBinCenter(ybin); #ypar = int(ypar)
+
+            # round up to base (5)
+            base = 5
+            xpar = int(base * round(xpar/base))
+            ypar = int(base * round(ypar/base))
 
             ydict[(xpar,ypar)] = (ycnt,yerr)
 
@@ -58,6 +68,8 @@ def getScanYields(hist,leptype = ('lep','sele')):
                     ycnt = (ydict[point][0] + ydict[mupoint][0], hypot(ydict[point][1], ydict[mupoint][1]))
                 else:
                     ycnt = ydict[point]
+                if 'syst' in hist.GetName():
+                    ycnt = (ycnt[0] / 2.0, ycnt[1] / 2.0)
                 ret[point] = ycnt
 
     elif leptype[0] == 'ele':
