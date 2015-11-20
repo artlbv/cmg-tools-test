@@ -67,7 +67,6 @@ elif isolation == "relIso03":
 	lepAna.mu_isoCorr = "rhoArea"
 
 	lepAna.loose_electron_relIso = 0.5
-	lepAna.inclusive_electron_relIso = 0.5
 	lepAna.loose_muon_relIso = 0.5
 
 #########################
@@ -83,7 +82,7 @@ ttHLepSkim.minLeptons = 0
 ttHLepSkim.maxLeptons = 999
 
 ####### JETS #########
-jetAna.jetPt = 30
+jetAna.jetPt = 20
 jetAna.jetEta = 2.4
 
 # --- JET-LEPTON CLEANING ---
@@ -102,8 +101,10 @@ jetAna.smearJets = False #should be false in susycore, already
 jetAna.recalibrateJets = True # false for miniAOD v2!
 jetAna.applyL2L3Residual = True
 
+#jetAna.calculateType1METCorrection = True
+
 ## MET (can be used for MiniAODv2)
-metAna.recalibrate = True #should be false in susycore, already
+metAna.recalibrate = True
 
 ## Iso Track
 isoTrackAna.setOff=False
@@ -128,8 +129,8 @@ ttHEventAna = cfg.Analyzer(
 ## Insert the FatJet, SV, HeavyFlavour analyzers in the sequence
 susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
 			ttHFatJetAna)
-susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
-			ttHSVAna)
+#susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
+#			ttHSVAna)
 
 ## Single lepton + ST skim
 from CMGTools.TTHAnalysis.analyzers.ttHSTSkimmer import ttHSTSkimmer
@@ -148,6 +149,7 @@ ttHHTSkimmer = cfg.Analyzer(
 #from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import * # central trigger list
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15_1l import *
 
+#-------- TRIGGERS -----------
 triggerFlagsAna.triggerBits = {
 	## hadronic
 	'HT350' : triggers_HT350,
@@ -186,17 +188,12 @@ triggerFlagsAna.triggerBits = {
 	'EleHT400B': triggers_el_ht400_btag
 	}
 
-#-------- SAMPLES AND TRIGGERS -----------
-
-# select components
-selectedComponents = []
-
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
 sample = 'MC'
 #sample = 'data'
-test = 0
+test = 1
 
 if sample == "MC":
 
@@ -263,8 +260,9 @@ elif sample == "data":
 	#selectedComponents = [ SingleElectron_Run2015D, SingleMuon_Run2015D ]
 
 	# MiniAOD V2
-	selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4]#, JetHT_Run2015D_05Oct,JetHT_Run2015D_Promptv4]
+	#selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4]#, JetHT_Run2015D_05Oct,JetHT_Run2015D_Promptv4]
 	#selectedComponents = [ SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
+	selectedComponents = [ SingleElectron_Run2015D_Promptv4 ]
 
 	if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 
