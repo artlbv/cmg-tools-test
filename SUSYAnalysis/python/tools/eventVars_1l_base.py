@@ -16,12 +16,13 @@ from math import sqrt
 
 ## Eta requirement
 centralEta = 2.4
+eleEta = 2.4
 
 ###########
 # Jets
 ###########
 
-corrJEC = "norm" # can be "norm","up","down
+corrJEC = "central" # can be "central","up","down
 
 print
 print 30*'#'
@@ -37,6 +38,36 @@ def recalcMET(metp4, oldjets, newjets):
 
     for ind,jet in enumerate(newjets):
         deltaJetP4 -= jet.p4()
+
+    return (metp4 - deltaJetP4)
+
+def getRecalcMET(metp4, event, corrJEC = "central"):
+    ## newMETp4 = oldMETp4 - (Sum(oldJetsP4) - Sum(newJetsP4))
+
+    # don't du anything for data
+    if event.isData: return metp4
+
+    # check jets for MET exist in tree, else use normal jets collection (Jet)
+    jetName = "JetForMET"
+    if not hasattr(event,"n"+jetName): jetName = "Jet"
+
+    # get original jets used for MET:
+    oldjets = [j for j in Collection(event,jetName,"n"+jetName)]
+    # new jets will be old ones for now
+    newjets = oldjets
+
+    if corrJEC == "central":
+        pass # don't do anything
+    elif corrJEC == "up":
+        for jet in newjets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECUp
+    elif corrJEC == "down":
+        for jet in newjets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECDown
+
+    # vectorial summ of jets
+    deltaJetP4 = ROOT.TLorentzVector(0,0,0,0)
+
+    for jet in oldjets: deltaJetP4 += jet.p4()
+    for jet in newjets: deltaJetP4 -= jet.p4()
 
     return (metp4 - deltaJetP4)
 
@@ -115,7 +146,8 @@ def checkEleMVA(lep,WP = 'Tight', era = "Spring15" ):
     lepEta = abs(lep.eta)
 
     # eta cut
-    if lepEta > 2.4:
+    if lepEta > eleEta:
+        print "here"
         return False
 
     if era == "Spring15":
@@ -160,6 +192,7 @@ def checkEleMVA(lep,WP = 'Tight', era = "Spring15" ):
 ele_miniIsoCut = 0.1
 muo_miniIsoCut = 0.2
 Lep_miniIsoCut = 0.4
+trig_miniIsoCut = 0.8
 
 ## Lepton cuts (for MVAID)
 goodEl_lostHits = 0
@@ -224,8 +257,8 @@ class EventVars1L_base:
         ##############################
         if event.isData:
             ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 1
-            ret['PD_SingleMu'] = 0
+            ret['PD_SingleEle'] = 0
+            ret['PD_SingleMu'] = 1
         else:
             ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
@@ -264,17 +297,21 @@ class EventVars1L_base:
 
         for idx,lep in enumerate(leps):
 
-            # check acceptance
+            # for acceptance check
             lepEta = abs(lep.eta)
-            if(lepEta > 2.5): continue
 
             # Pt cut
             if lep.pt < 10: continue
+
+            # Iso cut -- to be compatible with the trigger
+            if lep.miniRelIso > trig_miniIsoCut: continue
 
             ###################
             # MUONS
             ###################
             if(abs(lep.pdgId) == 13):
+                if lepEta > 2.4: continue
+
                 ## Lower ID is POG_LOOSE (see cfg)
 
                 # ID, IP and Iso check:
@@ -282,35 +319,27 @@ class EventVars1L_base:
                 passIso = lep.miniRelIso < muo_miniIsoCut
                 passIP = lep.sip3d < goodMu_sip3d
 
-                if passID:
-                    if passIso and passIP:
-                        # selected muons
-                        selectedTightLeps.append(lep)
-                        selectedTightLepsIdx.append(idx)
+                # selected muons
+                if passID and passIso and passIP:
+                    selectedTightLeps.append(lep); selectedTightLepsIdx.append(idx)
 
-                        antiVetoLeps.append(lep);
-
-                    #elif lep.miniRelIso > muo_miniIsoCut:
-                    #elif passID:
-                    else:
-                        selectedVetoLeps.append(lep)
-
-                        # anti-selected muons
-                        antiTightLeps.append(lep)
-                        antiTightLepsIdx.append(idx)
-                    #else:
-                    #    selectedVetoLeps.append(lep)
-                    #    antiVetoLeps.append(lep)
+                    antiVetoLeps.append(lep);
                 else:
-                    # all Muons failing Medium ID are veto for sele/anti
                     selectedVetoLeps.append(lep)
-                    antiVetoLeps.append(lep)
+
+                # anti-selected muons
+                if not passIso:
+                    antiTightLeps.append(lep); antiTightLepsIdx.append(idx)
+                else:
+                    antiVetoLeps.append(lep);
 
             ###################
             # ELECTRONS
             ###################
 
-            if(abs(lep.pdgId) == 11):
+            elif(abs(lep.pdgId) == 11):
+
+                if lepEta > eleEta: continue
 
                 # pass variables
                 passIso = False
@@ -329,7 +358,6 @@ class EventVars1L_base:
                     passMediumID = (eidCB >= 3)
                     #passLooseID = (eidCB >= 2)
                     passVetoID = (eidCB >= 1)
-                    #passAnyID = (eidCB >= 0)
 
                 elif eleID == 'MVA':
                     # ELE MVA ID
@@ -340,7 +368,7 @@ class EventVars1L_base:
                 # selected
                 if passTightID:
 
-                    # all selected leptons are veto for anti
+                    # all tight leptons are veto for anti
                     antiVetoLeps.append(lep)
 
                     # Iso check:
@@ -353,8 +381,7 @@ class EventVars1L_base:
 
                     # fill
                     if passIso and passConv:
-                        selectedTightLeps.append(lep)
-                        selectedTightLepsIdx.append(idx);
+                        selectedTightLeps.append(lep); selectedTightLepsIdx.append(idx)
                     else:
                         selectedVetoLeps.append(lep)
 
@@ -364,15 +391,14 @@ class EventVars1L_base:
                     # all anti leptons are veto for selected
                     selectedVetoLeps.append(lep)
 
-                    # Iso check -- no iso check
-                    passIso = True
-                    # no conversion check
-                    passConv = True
+                    # Iso check
+                    passIso = lep.miniRelIso < Lep_miniIsoCut # should be true anyway
+                    # other checks
+                    passOther = lep.hOverE > 0.01
 
                     # fill
-                    if passIso and passConv:
-                        antiTightLeps.append(lep)
-                        antiTightLepsIdx.append(idx);
+                    if passIso and passOther:
+                        antiTightLeps.append(lep); antiTightLepsIdx.append(idx)
                     else:
                         antiVetoLeps.append(lep)
                 # Veto leptons
@@ -380,11 +406,7 @@ class EventVars1L_base:
                     # the rest is veto for selected and anti
                     selectedVetoLeps.append(lep)
                     antiVetoLeps.append(lep)
-                #else:
-                #    antiVetoLeps.append(lep)
-
         # end lepton loop
-
 
         ###################
         # EXTRA Loop for lepOther -- for anti-selected leptons
@@ -397,17 +419,42 @@ class EventVars1L_base:
 
             # check acceptance
             lepEta = abs(lep.eta)
-            if(lepEta > 2.5): continue
+            if lepEta > 2.4: continue
 
             # Pt cut
             if lep.pt < 10: continue
 
-            if(abs(lep.pdgId) == 11):
+            # Iso cut -- to be compatible with the trigger
+            if lep.miniRelIso > trig_miniIsoCut: continue
 
-                # pass variables
-                #passIso = False
-                #passConv = False
+            ############
+            # Muons
+            if(abs(lep.pdgId) == 13):
+                ## Lower ID is POG_LOOSE (see cfg)
 
+                # ID, IP and Iso check:
+                #passID = lep.mediumMuonId == 1
+                passIso = lep.miniRelIso > muo_miniIsoCut
+                # cuts like for the LepGood muons
+                #passIP = abs(lep.dxy) < 0.05 and abs(lep.dz) < 0.1
+
+                #if passIso and passID and passIP:
+                if passIso:
+                    antiTightLeps.append(lep)
+                    antiTightLepsIdx.append(idx)
+                else:
+                    antiVetoLeps.append(lep)
+
+            ############
+            # Electrons
+            elif(abs(lep.pdgId) == 11):
+
+                if(lepEta > eleEta): continue
+
+                ## Iso selection: ele should have MiniIso < 0.4 (for trigger)
+                if lep.miniRelIso > Lep_miniIsoCut: continue
+
+                ## Set Ele IDs
                 if eleID == 'CB':
                     # ELE CutBased ID
                     if hasattr(lep,"eleCBID_SPRING15_25ns"):
@@ -425,15 +472,18 @@ class EventVars1L_base:
                 if not passMediumID:
                     # should always be true for LepOther
 
+                    # other checks
+                    passOther = lep.hOverE > 0.01
+
                     #if not lep.conVeto:
-                    if lep.miniRelIso < Lep_miniIsoCut:
+                    if passOther:
                         antiTightLeps.append(lep)
                         antiTightLepsIdx.append(idx);
-
-                elif not passVetoID:
-                    # should not happen with anyLep skim
-                    if lep.miniRelIso < Lep_miniIsoCut:
+                    else:
                         antiVetoLeps.append(lep)
+
+                elif passVetoID: #all Medium+ eles in LepOther
+                    antiVetoLeps.append(lep)
 
         # choose common lepton collection: select selected or anti lepton
         if len(selectedTightLeps) > 0:
@@ -516,15 +566,14 @@ class EventVars1L_base:
         jets = [j for j in Collection(event,"Jet","nJet")]
         njet = len(jets)
 
-        # Apply JEC up/down variations if needed
-        if corrJEC == "norm":
-            pass # don't do anything
-        elif corrJEC == "up":
-            for jet in jets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECUp
-
-            # recalc MET
-        elif corrJEC == "down":
-            for jet in jets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECDown
+        # Apply JEC up/down variations if needed (only MC!)
+        if event.isData == False:
+            if corrJEC == "central":
+                pass # don't do anything
+            elif corrJEC == "up":
+                for jet in jets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECUp
+            elif corrJEC == "down":
+                for jet in jets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECDown
 
         centralJet30 = []; centralJet30idx = []
         centralJet40 = []
@@ -558,7 +607,7 @@ class EventVars1L_base:
         cJet30Clean = centralJet30
 
         for lep in tightLeps:
-            # don't clean LepGood
+            # don't clean LepGood, only LepOther
             if lep not in otherleps: continue
 
             jNear, dRmin = None, 99
@@ -573,13 +622,11 @@ class EventVars1L_base:
             if dRmin < dRminCut:
                 cJet30Clean.remove(jNear)
 
-        '''
-        if nJetC !=  len(cJet30Clean):
+        if nJetC !=  len(cJet30Clean) and False:
             print "Non-clean jets: ", nJetC, "\tclean jets:", len(cJet30Clean)
             print jets
             print leps
             print otherleps
-        '''
 
         # cleaned jets
         nJet30C = len(cJet30Clean)
@@ -630,10 +677,11 @@ class EventVars1L_base:
         metp4.SetPtEtaPhiM(event.met_pt,event.met_eta,event.met_phi,event.met_mass)
 
         # recalc MET
-        if corrJEC != "norm":
-            # get original jet collection
-            oldjets = [j for j in Collection(event,"Jet","nJet")]
-            metp4 = recalcMET(metp4,oldjets,jets)
+        if corrJEC != "central":
+            ## get original jet collection
+            # oldjets = [j for j in Collection(event,"Jet","nJet")]
+            # metp4 = recalcMET(metp4,oldjets,jets)
+            metp4 = getRecalcMET(metp4,event,corrJEC)
 
         ret["MET"] = metp4.Pt()
 
