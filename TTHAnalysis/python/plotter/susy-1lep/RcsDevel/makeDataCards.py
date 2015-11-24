@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 import sys
 
@@ -5,11 +6,12 @@ from yieldClass import *
 from ROOT import *
 def printDataCard(yds, ydsObs, ydsSysSig):
     bins = sorted(yds.keys())
+
     sampNames = [x.name for x in yds[bins[0]]]
     nSamps = len(sampNames)
     for x in sampNames:
         if "Scan_m" in x: signalName = x
-    print signalName
+
     precision = 4
     
     try:                                                                                                                     
@@ -53,7 +55,7 @@ def printDataCard(yds, ydsObs, ydsSysSig):
 
 def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
     bins = sorted(yds.keys())
-    print [x for x in yds[bins[0]]]
+
     catNames = [x.cat for x in yds[bins[0]] ]
     sampNames = [x.name for x in (yds[bins[0]]) ]
     sampUniqueNames = list(set(sampNames))
@@ -62,8 +64,7 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
 
     catUniqueNames = [x.cat for x in ydsObs[bins[0]] ]
     nSamps = len(sampNames)
-    print catNames
-    print catUniqueNames
+
     precision = 4
     
     
@@ -94,7 +95,7 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
         datacard.write('process'+ ( ' ' * 30)  +(" ".join([kpatt % p          for p in sampNames]))+"\n")
         datacard.write('process'+ ( ' ' * 30)  +(" ".join([kpatt % iproc[p]    for p in sampNames]))+"\n")
 
-        datacard.write('rate'+ ( ' ' * 37)  +(" ".join([fpatt % yd.val if type(yd) != int and 'Scan' in yd.name else '    1     '  for yd in yds[bin]]))+"\n")
+        datacard.write('rate'+ ( ' ' * 37)  +(" ".join([fpatt % yd.val if type(yd) != int and 'Scan' in yd.name else '   1     '  for yd in yds[bin]]))+"\n")
         #            datacard.write('##----------------------------------\n')
 #        datacard.write('Lumi lnN' + (' ' * 33) +  " ".join([kpatt % numToBar(1.0+0.05) for yd in yds[bin]]) + '\n')
 
@@ -102,16 +103,44 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
         sys = 'test'
         datacard.write(sys + ' lnN  ' + (' ' * (28))  + before + " ".join([kpatt % numToBar(1 + yd.val) for yd in ydsSigSys[bin]]) +"\n")
 
+    
+        params = ('kappa','beta','delta')
+        addParam = ''
+        for yd,p in zip(ydsKappa[bin], params):
+            Val = yd.val
+            Err = yd.err
+            name = p+'_'+ bin 
+            if 'QCD' in yd.name: name = p+yd.name +'_'+ bin 
+            if Val > 0.01 and p == 'beta':
+                addParam = addParam+p
+                datacard.write(name + ' param ' + numToBar(Val) +' ' + numToBar(Err) + '\n')
+            elif Val > 0.01 and p == 'delta':
+                addParam = addParam + p
+                datacard.write(name + ' param ' + numToBar(Val) +' ' + numToBar(Err) + '\n')
+            elif p == 'kappa':
+                datacard.write(name + ' param ' + numToBar(Val) +' ' + numToBar(Err) + '\n')
+        formula = '(@0*@1/@2*@3)'
+        paramIn = 'beta_' + bin + ',gamma_' + bin + ',delta_' + bin + ',kappa_' + bin
+        if 'beta' in addParam and 'delta' in addParam: 
+            formula = formula.replace('@0','(@0-@4)').replace('@2','(@2-@5)')
+            paramIn = paramIn +',betaQCD_' + bin + ',deltaQCD_' + bin
+        elif addParam == 'beta':
+            formula = formula.replace('@0','(@0-@4)')
+            paramIn = paramIn +',betaQCD_' + bin
+        elif addParam == 'delta': 
+            formula = formula.replace('@2','(@2-@4)')
+            paramIn = paramIn +',deltaQCD_' + bin
+            
         params = ('alpha','beta','gamma','delta')
         for yd,p in zip(ydsObs[bin], params):
             postFix = bin + '_' + yd.cat
             if p == 'alpha':
-                datacard.write(p + '_' + bin + ' rateParam ' +yd.cat + ' ' + yd.name + ' (@0*@1/@2*@3) beta_' + bin + ',gamma_' + bin + ',delta_' + bin + ',kappa_' + bin + '\n')
+                datacard.write(p + '_' + bin + ' rateParam ' +yd.cat + ' ' + yd.name + ' ' + formula + ' ' + paramIn + '\n')
             else:
                 datacard.write(p + '_' + bin + ' rateParam ' +yd.cat + ' ' + yd.name + ' ' + numToBar(yd.val) + ' \n')
-        kappaVal = ydsKappa[bin][0].val
-        kappaErr = ydsKappa[bin][0].err
-        datacard.write('kappa_'+ bin + ' param ' + numToBar(kappaVal) +' ' + numToBar(kappaErr) + '\n')
+
+        
+                
     return 1 
 
 def numToBar(num):
@@ -148,17 +177,23 @@ if __name__ == "__main__":
 
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
 
-    if 1==1:
+    for mLSP in range(50,900,50):
         for ydIn in (yds6, yds9):
+            print "making datacards for 1500/"+str(mLSP)
+            signal = 'T1tttt_Scan_mGo1500_mLSP'+str(mLSP)
             cat = 'SR_MB'
             sampsObs = [('background',cat),]
             ydsObs = ydIn.getMixDict(sampsObs)
             sampsBkg = [('TTsemiLep',cat),('TTdiLep',cat),('TTV',cat), ('SingleT',cat), ('WJets',cat), ('DY',cat), ('QCD',cat),]
-            sampsSig = [('T1tttt_Scan_mGo1500_mLSP200',cat),]
-            sampsSys = [('T1tttt_Scan_Xsec_syst_mGo1500_mLSP200',cat), ]
+            sampsSig = [(signal ,cat),]
+            sampsSys = [('T1tttt_Scan_Xsec_syst_mGo1500_mLSP'+str(mLSP),cat), ]
     #signal still is scaled wrong double check
             samps = sampsBkg + sampsSig
             ydsSig = ydIn.getMixDict(sampsSig)
+            if type(ydsSig.values()[0][0]) == int:
+                print "signal not available will skip"
+                continue
+
             yds = ydIn.getMixDict(samps)
             ydsSigSys = ydIn.getMixDict(sampsSys)
             
@@ -166,13 +201,13 @@ if __name__ == "__main__":
 
             cats = ('SR_MB', 'CR_MB', 'SR_SB','CR_SB')
             sampsABCDbkg = [('background',cat) for cat in cats]
-            sampsABCDsig = [('T1tttt_Scan_mGo1500_mLSP200',cat) for cat in cats]
-            sampsABCDSigSys = [('T1tttt_Scan_Xsec_syst_mGo1500_mLSP200',cat) for cat in cats ]
+            sampsABCDsig = [('T1tttt_Scan_mGo1500_mLSP'+str(mLSP),cat) for cat in cats]
+            sampsABCDSigSys = [('T1tttt_Scan_Xsec_syst_mGo1500_mLSP'+str(mLSP),cat) for cat in cats ]
             sampsABCD = sampsABCDbkg + sampsABCDsig
             
             ydsABCD = ydIn.getMixDict(sampsABCD)
             ydsObsABCD = ydIn.getMixDict(sampsABCDbkg)
-            ydsKappa = ydIn.getMixDict([('EWK','Kappa'), ])
+            ydsKappa = ydIn.getMixDict([('EWK','Kappa'), ('QCD','CR_MB'), ('QCD','CR_SB') ])
             ydsABCDSigSys = ydIn.getMixDict(sampsABCDSigSys)
-            print ydsABCDSigSys
+
             printABCDCard(ydsABCD, ydsObsABCD, ydsKappa, ydsABCDSigSys)
