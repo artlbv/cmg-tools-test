@@ -140,7 +140,6 @@ class YieldStore:
         if samp in self.yields:
             if cat in self.yields[samp]:
                 if bin in self.yields[samp][cat]:
-                    print self.yields[samp][cat][bin]
                     return self.yields[samp][cat][bin]
             return BinYield(samp, cat, (0, 0))
         return 0
