@@ -18,7 +18,7 @@ def printDataCard(yds, ydsObs, ydsSysSig):
         os.stat('datacards/' + signalName )                                                                                
     except:                                                                                                                  
         os.mkdir('datacards/' + signalName )
-    iproc = { key: i for (i,key) in enumerate(reversed(sampNames))}
+    iproc = { key: i for (i,key) in enumerate(sorted(reversed(sampNames)))}
 
     for i,bin in enumerate(bins):
         datacard = open('datacards/'+ signalName + '/' +bin + '.card.txt', 'w'); 
@@ -73,7 +73,9 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
     except:                                                                                                                  
         os.mkdir('datacardsABCD/' + signalName ) 
 
-    iproc = { key: i for (i,key) in enumerate(sampUniqueNames)}
+    print sampUniqueNames
+    iproc = { key: i for (i,key) in enumerate(sorted(reversed(sampUniqueNames)))}
+    print iproc
     for i,bin in enumerate(bins):
         datacard = open('datacardsABCD/'+ signalName+ '/' +bin + '.card.txt', 'w'); 
         datacard.write("## Datacard for bin %s (signal %s)\n"%(bin,signalName))
