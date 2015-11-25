@@ -193,14 +193,14 @@ isData = True # default, but will be overwritten below
 sample = 'Signal'
 #sample = 'MC'
 #sample = 'data'
-test = 1
+test = 0
 
 if sample == "MC":
 
 	print 'Going to process MC'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV2_MC.db'
-	jecEra    = 'Summer15_25nsV2_MC'
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV6_MC.db'
+	jecEra    = 'Summer15_25nsV6_MC'
 
 	isData = False
 	isSignal = False
@@ -268,11 +268,12 @@ elif sample == "Signal":
 	#from CMGTools.RootTools.samples.samples_13TeV_74X import *
 	# -- samples at DESY
 	# MiniAODv1
-	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_Signals_desy import *
 	# MiniAODv2
 	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
 
-	selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
+	#selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
 
 	if test==1:
 		# test a single component, using a single thread.
@@ -295,7 +296,7 @@ elif sample == "Signal":
 		# PRODUCTION
 		# run on everything
 
-		selectedComponents = [ T1tttt_mGo_1500to1525_mLSP_50to1125 ]
+		selectedComponents = [ T1tttt_mGo_1200_mLSP_1to825, T1tttt_mGo_1900to1950_mLSP_0to1450 ]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 2
@@ -306,8 +307,8 @@ elif sample == "data":
 
 	print 'Going to process DATA'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV5_DATA.db'
-	jecEra    = 'Summer15_25nsV5_DATA'
+	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV6_DATA.db'
+	jecEra    = 'Summer15_25nsV6_DATA'
 
 	isData = True
 	isSignal = False
@@ -404,6 +405,17 @@ if doMETpreprocessor:
 	preprocessor = CmsswPreprocessor(preprocessorFile)
 
 #--------- Tree Producer
+
+# if FastSimSignal remove EVENT FLAGS
+if not isSignal:
+	susySingleLepton_globalVariables += [
+            NTupleVariable("Flag_HBHENoiseFilter_fix", lambda ev: ev.hbheFilterNew, help="HBEHE baseline temporary filter decision"),
+            NTupleVariable("Flag_HBHEIsoNoiseFilter_fix", lambda ev: ev.hbheFilterIso, help="HBEHE isolation temporary filter decision"),
+	    ]
+
+
+
+
 from CMGTools.TTHAnalysis.analyzers.treeProducerSusySingleLepton import *
 treeProducer = cfg.Analyzer(
 	AutoFillTreeProducer, name='treeProducerSusySingleLepton',
@@ -438,6 +450,10 @@ sequence = cfg.Sequence(susyCoreSequence+[
 if isData or isSignal :
 	sequence.remove(ttHHTSkimmer)
 #	sequence.remove(ttHSTSkimmer)
+
+if isSignal:
+	sequence.remove(eventFlagsAna)
+	sequence.remove(hbheFilterAna)
 
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,

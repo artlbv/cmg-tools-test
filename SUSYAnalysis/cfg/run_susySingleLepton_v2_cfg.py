@@ -15,6 +15,7 @@ jsonAna.useLumiBlocks = True
 lepAna.packedCandidates = 'packedPFCandidates'
 
 ## ELECTRONS
+lepAna.loose_electron_eta = 2.4
 lepAna.loose_electron_pt  = 10
 lepAna.inclusive_electron_pt  = 10
 
@@ -32,9 +33,7 @@ if eleID == "CBID":
 	lepAna.inclusive_electron_dz     = 999. # no cut since embedded in ID
 
 elif eleID == "MVAID":
-	inclusive_electron_id  = "" # same as in susyCore
-
-	#lepAna.loose_electron_id = "POG_MVA_ID_Phys14_NonTrig_VLoose" # Phys14 era
+	lepAna.inclusive_electron_id  = "" # same as in susyCore
 	lepAna.loose_electron_id = "POG_MVA_ID_Spring15_NonTrig_VLoose" # Spring15 25ns era
 
 elif eleID == "Incl": # as inclusive as possible
@@ -50,6 +49,7 @@ elif eleID == "Incl": # as inclusive as possible
 
 ## MUONS
 lepAna.loose_muon_pt  = 10
+lepAna.inclusive_muon_pt  = 10
 
 # Isolation
 isolation = "miniIso"
@@ -61,14 +61,12 @@ if isolation == "miniIso":
 	lepAna.miniIsolationVetoLeptons = None
 	lepAna.loose_muon_isoCut     = lambda muon : muon.miniRelIso < 0.4
 	lepAna.loose_electron_isoCut = lambda elec : elec.miniRelIso < 0.4
-	lepAna.inclusive_electron_isoCut = lambda elec : elec.miniRelIso < 0.4
 elif isolation == "relIso03":
 	# normal relIso03
 	lepAna.ele_isoCorr = "rhoArea"
 	lepAna.mu_isoCorr = "rhoArea"
 
 	lepAna.loose_electron_relIso = 0.5
-	lepAna.inclusive_electron_relIso = 0.5
 	lepAna.loose_muon_relIso = 0.5
 
 #########################
@@ -84,24 +82,28 @@ ttHLepSkim.minLeptons = 0
 ttHLepSkim.maxLeptons = 999
 
 ####### JETS #########
-jetAna.jetPt = 30
+jetAna.jetPt = 20
 jetAna.jetEta = 2.4
 
 # --- JET-LEPTON CLEANING ---
-jetAna.cleanSelectedLeptons = True
-if jetAna.cleanSelectedLeptons:	jetAna.minLepPt = 10
+#jetAna.cleanSelectedLeptons = True
+jetAna.minLepPt = 10
 
-## JEC -- see preprocessor for MET
-#use default for 25 ns from susycore Summer15_25nsV2_MC
-#jetAna.mcGT = "Summer15_25nsV5_MC"
+## JEC
+jetAna.mcGT = "Summer15_25nsV6_MC"
 jetAna.dataGT = "Summer15_25nsV6_DATA"
+
+# add also JEC up/down shifts corrections
+jetAna.addJECShifts = True
 
 jetAna.doQG = True
 jetAna.smearJets = False #should be false in susycore, already
 jetAna.recalibrateJets = True # false for miniAOD v2!
+jetAna.applyL2L3Residual = True
 
-## MET -- check preprocessor
-metAna.recalibrate = True #should be false in susycore, already
+#jetAna.calculateType1METCorrection = True
+## MET (can be used for MiniAODv2)
+metAna.recalibrate = True
 
 ## Iso Track
 isoTrackAna.setOff=False
@@ -126,8 +128,8 @@ ttHEventAna = cfg.Analyzer(
 ## Insert the FatJet, SV, HeavyFlavour analyzers in the sequence
 susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
 			ttHFatJetAna)
-susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
-			ttHSVAna)
+#susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
+#			ttHSVAna)
 
 ## Single lepton + ST skim
 from CMGTools.TTHAnalysis.analyzers.ttHSTSkimmer import ttHSTSkimmer
@@ -146,6 +148,7 @@ ttHHTSkimmer = cfg.Analyzer(
 #from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import * # central trigger list
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15_1l import *
 
+#-------- TRIGGERS -----------
 triggerFlagsAna.triggerBits = {
 	## hadronic
 	'HT350' : triggers_HT350,
@@ -184,26 +187,20 @@ triggerFlagsAna.triggerBits = {
 	'EleHT400B': triggers_el_ht400_btag
 	}
 
-#-------- SAMPLES AND TRIGGERS -----------
-
-# select components
-selectedComponents = []
-
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-#sample = 'MC'
-sample = 'data'
-test = 0
+sample = 'MC'
+#sample = 'data'
+#sample = 'Signal'
+test = 1
 
 if sample == "MC":
 
 	print 'Going to process MC'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV2_MC.db'
-	jecEra    = 'Summer15_25nsV2_MC'
-
 	isData = False
+	isSignal = False
 
 	# modify skim
 	anyLepSkim.minLeptons = 1
@@ -239,24 +236,78 @@ if sample == "MC":
 		# PRODUCTION
 		# run on everything
 
-		#selectedComponents =  QCDHT#[ TTJets_LO ]
-		selectedComponents =  SingleTop + DYJetsM50HT + TTV
+		selectedComponents =  QCDHT #[ TTJets_LO ]
+		#selectedComponents =  #SingleTop + DYJetsM50HT + TTV
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 
+elif sample == "Signal":
+
+	print 'Going to process Signal'
+
+	isData = False
+	isSignal = True
+
+	# modify skim
+	anyLepSkim.minLeptons = 0
+	ttHLepSkim.minLeptons = 0
+
+	# -- new 74X samples
+	#from CMGTools.RootTools.samples.samples_13TeV_74X import *
+	# -- samples at DESY
+	# MiniAODv1
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_Signals_desy import *
+	# MiniAODv2
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_MiniAODv2_Signals_desy import *
+
+	# Benchmarks
+	#selectedComponents = [ T1tttt_mGo_1475to1500_mLSP_1to1250, T1tttt_mGo_1500to1525_mLSP_50to1125, T1tttt_mGo_1200_mLSP_1to825, T1tttt_mGo_1900to1950_mLSP_0to1450 ]
+	# Rest
+	selectedComponents = [T1tttt_mGo_1100_mLSP_1to775, T1tttt_mGo_1100to1125_mLSP_700to900, T1tttt_mGo_1150_mLSP_1to800, T1tttt_mGo_1150to1175_mLSP_750to925, T1tttt_mGo_1175_mLSP_950, T1tttt_mGo_1200to1225_mLSP_800to1000, T1tttt_mGo_1275_mLSP_900to975, T1tttt_mGo_1300to1325_mLSP_700to1100, T1tttt_mGo_1350to1375_mLSP_50to1025, T1tttt_mGo_1400_mLSP_1to1175, T1tttt_mGo_1425to1450_mLSP_1to1200, T1tttt_mGo_1450to1475_mLSP_50to1075, T1tttt_mGo_1525to1550_mLSP_1to1300, T1tttt_mGo_1600to1650_mLSP_1to1350, T1tttt_mGo_1700to1750_mLSP_1to1450, T1tttt_mGo_1800to1850_mLSP_1to1450, T1tttt_mGo_1850to1900_mLSP_1to1450, T1tttt_mGo_1950_mLSP_700to950, T1tttt_mGo_625_mLSP_275to375, T1tttt_mGo_625to650_mLSP_200to400, T1tttt_mGo_650to675_mLSP_250to425, T1tttt_mGo_700_mLSP_1to450, T1tttt_mGo_700to750_mLSP_200to500, T1tttt_mGo_750to775_mLSP_350to525, T1tttt_mGo_775_mLSP_475to550, T1tttt_mGo_800to825_mLSP_1to575, T1tttt_mGo_825to850_mLSP_200to600, T1tttt_mGo_850to875_mLSP_450to625, T1tttt_mGo_875to900_mLSP_1to650, T1tttt_mGo_950to975_mLSP_350to725, T1tttt_mGo_975_mLSP_600to750]
+
+	if test==1:
+		# test a single component, using a single thread.
+		#comp = T1tttt_mGo_1500to1525_mLSP_50to1125
+		comp = T1tttt_mGo_1200_mLSP_1to825
+		comp.files = comp.files[:1]
+		selectedComponents = [comp]
+		comp.splitFactor = 1
+	elif test==2:
+		# test all components (1 thread per component).
+		for comp in selectedComponents:
+			comp.splitFactor = 1
+			comp.fineSplitFactor = 1
+			comp.files = comp.files[:1]
+	elif test==3:
+		# run all components (1 thread per component).
+		for comp in selectedComponents:
+			comp.fineSplitFactor = 1
+			comp.splitFactor = len(comp.files)
+	elif test==0:
+		# PRODUCTION
+		# run on everything
+
+		#selectedComponents = [ T1tttt_mGo_1200_mLSP_1to825, T1tttt_mGo_1900to1950_mLSP_0to1450 ]
+
+		for comp in selectedComponents:
+			comp.fineSplitFactor = 1
+			comp.splitFactor = len(comp.files)
+
+
+
 elif sample == "data":
 
 	print 'Going to process DATA'
 
-	jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_25nsV6_DATA.db'
-	jecEra    = 'Summer15_25nsV6_DATA'
-
 	isData = True
+	isSignal = False
 
-	# modify skim -- don't skim data on leptons!
-	anyLepSkim.minLeptons = 0
+	# modify skim
+	anyLepSkim.minLeptons = 1
 	ttHLepSkim.minLeptons = 0
 
 	# central samples
@@ -268,8 +319,9 @@ elif sample == "data":
 	#selectedComponents = [ SingleElectron_Run2015D, SingleMuon_Run2015D ]
 
 	# MiniAOD V2
-	selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4]#, JetHT_Run2015D_05Oct,JetHT_Run2015D_Promptv4]
+	#selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4]#, JetHT_Run2015D_05Oct,JetHT_Run2015D_Promptv4]
 	#selectedComponents = [ SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
+	selectedComponents = [ SingleElectron_Run2015D_Promptv4 ]
 
 	if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 
@@ -304,53 +356,13 @@ elif sample == "data":
 			comp.fineSplitFactor = 1
 			comp.splitFactor = len(comp.files)
 
-
-
-removeResiduals = False
-
-# use consistent JEC residuals for MET and Jets
-if removeResiduals:
-	jetAna.applyL2L3Residual = False
-else:
-	jetAna.applyL2L3Residual = True
-
-'''
-# -------------------- Running pre-processor
-preprocessor = None
-doMETpreprocessor = True
-if doMETpreprocessor:
-	import tempfile
-	import subprocess
-	tempfile.tempdir=os.environ['CMSSW_BASE']+'/tmp'
-	tfile, tpath = tempfile.mkstemp(suffix='.py',prefix='MET_preproc_')
-	os.close(tfile)
-	extraArgs=[]
-	if isData:
-		extraArgs.append('--isData')
-		GT= '74X_dataRun2_Prompt_v1'
-	else:
-		GT= 'MCRUN2_74_V9A'
-	if removeResiduals:extraArgs.append('--removeResiduals')
-	args = ['python',
-		os.path.expandvars('$CMSSW_BASE/python/CMGTools/ObjectStudies/corMETMiniAOD_cfgCreator.py'),\
-			'--GT='+GT,
-		'--outputFile='+tpath,
-		'--jecDBFile='+jecDBFile,
-		'--jecEra='+jecEra
-		] + extraArgs
-#print "Making pre-processorfile:"
-#print " ".join(args)
-	subprocess.call(args)
-	staticname = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
-	import filecmp
-	if os.path.isfile(staticname) and filecmp.cmp(tpath,staticname):
-		os.system("rm %s"%tpath)
-	else:
-		os.system("mv %s %s"%(tpath,staticname))
-	preprocessorFile = staticname
-	from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
-	preprocessor = CmsswPreprocessor(preprocessorFile)
-'''
+## PDF weights
+PDFWeights = []
+#PDFWeights = [ ("CT10",53), ("MSTW2008lo68cl",41), ("NNPDF21_100",101) ]
+#PDFWeights = [ ("CT10nlo",53),("MSTW2008nlo68cl",41),("NNPDF30LO",101),("NNPDF30_nlo_nf_5_pdfas",103), ("NNPDF30_lo_as_0130",101)]
+#PDFWeights = [ ("NNPDF30_lo_as_0130",101) ]
+# see for TTJets  https://github.com/cms-sw/genproductions/blob/c41ab29f3d86c9e53df8b0d76c12cd519adbf013/bin/MadGraph5_aMCatNLO/cards/production/13TeV/tt0123j_5f_ckm_LO_MLM/tt0123j_5f_ckm_LO_MLM_run_card.dat#L52
+# and then https://lhapdf.hepforge.org/pdfsets.html
 
 #--------- Tree Producer
 from CMGTools.TTHAnalysis.analyzers.treeProducerSusySingleLepton import *
@@ -364,8 +376,6 @@ treeProducer = cfg.Analyzer(
 	globalObjects = susySingleLepton_globalObjects,
 	collections = susySingleLepton_collections,
 	)
-
-
 
 ## TEMPORARY
 # HBHE filter analyzer
@@ -385,19 +395,17 @@ sequence = cfg.Sequence(susyCoreSequence+[
 		treeProducer,
 		])
 
-
-isSignal = False
-#for comp in selectedComponents:
-#	if "SMS" in comp: isSignal = True
-
 # remove skimming for Data or Signal
 if isData or isSignal :
 	sequence.remove(ttHHTSkimmer)
 #	sequence.remove(ttHSTSkimmer)
 
+if isSignal:
+	sequence.remove(eventFlagsAna)
+	sequence.remove(hbheFilterAna)
+
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
 		     sequence = sequence,
 		     services = [],
-		     #preprocessor=preprocessor,
 		     events_class = Events)
