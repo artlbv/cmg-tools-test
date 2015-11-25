@@ -24,6 +24,7 @@ if( iPos==0 ): CMS_lumi.relPosX = 0.1
 _alpha = 0.35
 colorList = [2,4,7,9,8,3,6] + range(10,50)
 _histStore = {}
+_lines = []
 
 _batchMode = True
 
@@ -33,16 +34,18 @@ colorDict = {'TT': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-
 def doLegend(nEntr = None):
 
     if nEntr:
-        leg = TLegend(0.65,0.875-(nEntr*0.2),0.85,0.875)
+        leg = TLegend(0.45,0.875-(nEntr*0.2),0.65,0.875)
     else:
-        leg = TLegend(0.65,0.5,0.85,0.85)
+        leg = TLegend(0.45,0.5,0.65,0.85)
     leg.SetBorderSize(1)
     leg.SetTextFont(62)
     leg.SetTextSize(0.03321678)
     leg.SetLineColor(0)
     #leg.SetLineStyle(1)
     #leg.SetLineWidth(1)
-    leg.SetFillColor(0)
+    if _batchMode == False: leg.SetFillColor(0)
+    else: leg.SetFillColorAlpha(0,_alpha)
+
     leg.SetFillStyle(1001)
 
     return leg
@@ -83,7 +86,13 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
         return 0
 
     # create histo
-    binList = sorted(ydict.keys())
+    #binList = sorted(ydict.keys())
+    binList = []
+    # sort bins by NJ
+    binList = [b for b in sorted(ydict.keys()) if 'NJ5' in b]
+    binList = [b for b in sorted(ydict.keys()) if 'NJ6' in b]
+    binList += [b for b in sorted(ydict.keys()) if 'NJ9' in b]
+
     nbins = len(binList)
 
     if hname == "": hname = samp + "_" + cat
@@ -143,7 +152,7 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
             hist.SetFillColorAlpha(col,_alpha)
         else:
             hist.SetFillColor(col)
-            hist.SetFillStyle(1001)
+            hist.SetFillStyle(3001)
 
     hist.SetLineColor(col)
     hist.SetMarkerColor(col)
@@ -174,13 +183,35 @@ def makeSampHists(yds,samps):
 
     return histList
 
+def getMarks(hist):
+
+    # line markers
+    marks = []
+    ltmark = 0
+
+    for bin in range(1,hist.GetNbinsX()+1):
+        # for vertical lines
+        binLabel = hist.GetXaxis().GetBinLabel(bin).replace("#splitline{","")
+        #print binLabel
+
+        ltbin = binLabel.split("}")[0] # should be LT
+        #print ltbin, ltmark
+        if ltmark == 0: ltmark = ltbin
+        elif ltmark != ltbin:
+            ltmark = ltbin
+            marks.append(bin)
+
+    return marks
+
+
 def getRatio(histA,histB):
 
     ratio = histA.Clone("ratio_"+histA.GetName()+"_"+histB.GetName())
     ratio.Divide(histB)
 
     #ratio.GetYaxis().SetTitle("Ratio")
-    ratio.GetYaxis().SetTitle(histA.GetTitle()+"/"+histB.GetTitle())
+    title = "#frac{%s}{%s}" %(histA.GetTitle(),histB.GetTitle())
+    ratio.GetYaxis().SetTitle(title)
     ratio.GetYaxis().CenterTitle()
     ratio.GetYaxis().SetNdivisions(505)
     ratio.GetYaxis().SetTitleSize(0.1)
@@ -214,7 +245,7 @@ def getPull(histA,histB):
 
     #pull.GetYaxis().SetTitle("Pull")
     #title = "#frac{%s - %s}{%s}" %(histA.GetTitle(),histB.GetTitle(),histB.GetTitle())
-        title = "#frac{%s - %s}{#sigma(%s)}" %(histA.GetTitle(),histB.GetTitle(),histA.GetTitle())
+    title = "#frac{%s - %s}{#sigma(%s)}" %(histA.GetTitle(),histB.GetTitle(),histA.GetTitle())
     pull.GetYaxis().SetTitle(title)
     pull.GetYaxis().CenterTitle()
     pull.GetYaxis().SetNdivisions(505)
@@ -354,6 +385,22 @@ def plotHists(cname, histList, ratio = None):
         # remove axis label with ratio
         if i == 0 and ratio != None:
             hist.GetXaxis().SetLabelOffset(1)
+
+        if i == 0:
+
+            marks = getMarks(hist)
+            # do vertical lines
+            if len(marks) != 0:
+                #print marks
+                axis = hist.GetXaxis()
+                for i,mark in enumerate(marks):
+                    pos = axis.GetBinLowEdge(mark)
+                    line = TLine(pos,ymin,pos,ymax)
+                    #line.SetName("line_mark_"+str(mark))
+                    line.SetLineStyle(3)
+                    if i == 3: line.SetLineStyle(2) # nj6 -> nj9
+                    line.Draw("same")
+                    _lines.append(line)
 
             # range
             hist.SetMaximum(ymax)
