@@ -34,9 +34,9 @@ colorDict = {'TT': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-
 def doLegend(nEntr = None):
 
     if nEntr:
-        leg = TLegend(0.45,0.875-(nEntr*0.2),0.65,0.875)
+        leg = TLegend(0.4,0.875-(nEntr*0.2),0.6,0.875)
     else:
-        leg = TLegend(0.45,0.5,0.65,0.85)
+        leg = TLegend(0.4,0.5,0.6,0.85)
     leg.SetBorderSize(1)
     leg.SetTextFont(62)
     leg.SetTextSize(0.03321678)
@@ -223,6 +223,7 @@ def getRatio(histA,histB):
     ratio.GetXaxis().SetLabelSize(0.1)
 
     ratio.SetLineColor(1)
+    ratio.SetMarkerColor(1)
     ratio.SetFillColor(0)
     ratio.SetFillStyle(0)
 
@@ -344,6 +345,23 @@ def plotHists(cname, histList, ratio = None):
         line.SetLineWidth(1)
         line.Draw()
         SetOwnership(line,0)
+
+        # plot bins separator
+        marks = getMarks(ratio)
+        # do vertical lines
+        if len(marks) != 0:
+            #print marks
+            axis = ratio.GetXaxis()
+            ymin = ratio.GetMinimum(); ymax = ratio.GetMaximum()
+            for i,mark in enumerate(marks):
+                pos = axis.GetBinLowEdge(mark)
+                line = TLine(pos,ymin,pos,ymax)
+                #line.SetName("line_mark_"+str(mark))
+                line.SetLineStyle(3)
+                if i == 3: line.SetLineStyle(2) # nj6 -> nj9
+                line.Draw("same")
+                _lines.append(line)
+
 
         p1.cd();
     else:
