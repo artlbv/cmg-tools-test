@@ -57,26 +57,30 @@ class YieldStore:
         # Open file and get bin name
         tfile = TFile(fname,"READ")
         bfname = os.path.basename(fname)
-        binName = bfname.replace("_SR.merge.root","")
-        binName = binName.replace(".merge.root","")
+        binName = bfname[:bfname.find(".")]
+        binName = binName.replace("_SR","")
+        #binName = binName.replace(".merge.root","")
         #print binName
 
         # get list of dirs
         dirList = [dirKey.ReadObj() for dirKey in gDirectory.GetListOfKeys() if dirKey.IsFolder() == 1]
+        # append also current dir
+        dirList.append(gDirectory.CurrentDirectory())
 
         # Loop over yield categories
         for catDir in dirList:
             catDir.cd()
             category = catDir.GetName()
+            if category == tfile.GetName(): category = "root"
 
             # get list of histograms
             histList = [histKey.ReadObj() for histKey in gDirectory.GetListOfKeys() if histKey.IsFolder() != 1]
 
             ## Loop over hists and save to dicts
             for hist in histList:
+                if "TH" not in hist.ClassName(): continue
 
                 sample = hist.GetName()
-
 
                 if ('Scan' not in sample) and ('scan' not in sample):
                     # get normal sample yield
@@ -94,6 +98,7 @@ class YieldStore:
                         yd = BinYield(yds[(mGo,mLSP)])
                         self.addYield(point,category,binName,yd)
 
+        tfile.Close()
         return 1
 
     def addFromFiles(self, pattern, leptype = ("lep","sele") ):
