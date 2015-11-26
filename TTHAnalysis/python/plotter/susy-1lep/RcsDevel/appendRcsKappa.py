@@ -51,6 +51,7 @@ def getPredHist(tfile, hname):
     if ('data' in hname) or ("background" in hname) or ("poisson" in hname):
         # use EWK template
         hKappa = tfile.Get("Kappa/EWK")
+        if not hKappa: hKappa = tfile.Get("Kappa/"+hname)
     else:
         hKappa = tfile.Get("Kappa/"+hname)
 
@@ -160,8 +161,8 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
 def makeQCDsubtraction(fileList):
 
     # define hists to make QCD estimation
-    #pnames = ["background","data","QCD"] # process name
-    pnames = ["background","QCD"] # process name
+    pnames = ["background","data","QCD"] # process name
+    #pnames = ["background","QCD"] # process name
     pnames += ["background_poisson","QCD_poisson"] # process name
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
@@ -194,6 +195,7 @@ def makePoissonErrors(fileList):
 
     # define hists to make make poisson errors
     pnames = ["background","QCD","EWK"] # process name
+    #pnames = [] # process name
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
