@@ -7,27 +7,18 @@ from searchBins import *
 from math import hypot
 
 # trees
-#Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/"
-#FTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/Spring15/Links/Friends/"
-
-#Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns"
-#mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID_PUave70mb"
-#dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
-
-Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2"
-mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_anyLepSkim"
-sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_T1ttt_Scans"
+Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2"
+mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/MC/allSamps_pu69mb"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Signals/T1tttt_pu69mb"
 
 # new data
-dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/Data/ele_CBID_1p5fb"
+dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Data/trig_skim_2p1fb"
 
 def addOptions(options):
 
     # LUMI (overwrite default 19/fb)
     if options.lumi > 19:
-        options.lumi = 3
-    #else:
-    #    options.lumi = 1.26
+        options.lumi = 2.1
 
     # set tree options
     options.path = Tdir
@@ -55,7 +46,6 @@ def addOptions(options):
 
     elif options.grid:
         options.var =  "Selected:(nEl-nMu)"
-        #options.bins = "2,-1.5,1.5,2,-1.5,1.5"
         options.bins = "3,-1.5,1.5,2,-1.5,1.5"
 
     elif options.plot:
@@ -157,7 +147,8 @@ def writeYields(options):
                     print 'adding for ewk', p
                     ewkMC.append(report[p])
 
-            report['x_background'] = mergePlots("x_background", totalMC)
+        report['x_background'] = mergePlots("x_background", totalMC)
+        if 'TT' in mca.listBackgrounds():
             report['x_EWK'] = mergePlots("x_EWK", ewkMC)
 
     '''
@@ -268,9 +259,6 @@ if __name__ == "__main__":
     # make normal plots
     parser.add_option("--plot", dest="plot", action="store_true", default=False, help="Do normal plot")
 
-    #parser.add_option("--dummy",  dest="dummyYieldsForZeroBkg", action="store_true", default=False, help="Set dummy yields such it corresponds to 0.01 for 4/fb");
-    #parser.add_option("--ignoreEmptySignal",  dest="ignoreEmptySignal", action="store_true", default=False, help="Do not write out a datacard if the expected signal is less than 0.01");
-
     # Read options and args
     (options,args) = parser.parse_args()
 
@@ -285,7 +273,7 @@ if __name__ == "__main__":
         cDict.update(cutDictCR)
         cDict.update(cutDictSR)
 
-    doNjet9 = False
+    doNjet9 = True
     if doNjet9:
         cDict.update(cutDictSRf9)
         cDict.update(cutDictCRf9)
