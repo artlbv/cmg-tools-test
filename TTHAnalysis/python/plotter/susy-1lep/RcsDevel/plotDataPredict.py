@@ -35,7 +35,7 @@ if __name__ == "__main__":
     colorDict["MC_prediction"] = kGreen
     colorDict["Data_prediction"] = kRed
 
-    CMS_lumi.lumi_13TeV = str(1.55) + " fb^{-1}"
+    CMS_lumi.lumi_13TeV = str(2.1) + " fb^{-1}"
     CMS_lumi.extraText = "Preliminary"
 
     # Category
@@ -60,8 +60,8 @@ if __name__ == "__main__":
         #ratio.GetYaxis().SetRangeUser(0,5)
 
         #canv = plotHists("DataNJ45_"+cat,[stack,hMCpred,hDataPred,hData,total],ratio)
-        canv = plotHists("DataNJ45_1p5fb_"+cat,[stack,total,hDataPred,hData],ratio)
-
+        canv = plotHists("DataNJ45_2p1fb_"+cat+'_'+mask,[stack,total,hDataPred,hData],ratio)
+        print canv.GetName()
         for hist in [stack,total,hDataPred,hData]:
             hist.GetYaxis().SetRangeUser(0,15)
 
@@ -70,5 +70,5 @@ if __name__ == "__main__":
 
         exts = [".pdf",".png"]
         for ext in exts:
-            canv.SaveAs("BinPlots/Data/stacks/"+mask+canv.GetName()+ext)
+            canv.SaveAs("BinPlots/Data/stacks/"+canv.GetName()+ext)
 
