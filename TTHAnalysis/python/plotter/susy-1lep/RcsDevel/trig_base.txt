@@ -14,7 +14,7 @@ nJetBase: nJets30Clean >= 3
 #Filters : !isData || (isData && Flag_goodVertices && Flag_HBHENoiseFilter_fix && Flag_CSCTightHaloFilter && Flag_eeBadScFilter && Flag_HBHENoiseIsoFilter)
 
 # updates for Anti electrons
-updAnti_HoE:  (Selected == 1) || (Selected == -1 && Lep_hOverE > 0.01)
+#updAnti_HoE:  (Selected == 1) || (Selected == -1 && Lep_hOverE > 0.01)
 #updAnti_Lp:  (Selected == 1) || (Selected == -1 && Lp > 0.5)
 
 base: 1
