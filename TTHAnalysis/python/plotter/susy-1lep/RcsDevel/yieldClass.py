@@ -105,7 +105,7 @@ class YieldStore:
         fileList = glob.glob(pattern+"*.root")
         nFiles = len(fileList)
 
-        print "## Starting to add yields from %i files like " %(nFiles) + pattern + ": ", ; sys.stdout.flush()
+        print "## Starting to add yields for %s from %i files like " %(self.name,nFiles) + pattern + ": ", ; sys.stdout.flush()
         # progress bar
         progbar_width = nFiles
         # setup progbar
@@ -141,6 +141,8 @@ class YieldStore:
             if cat in self.yields[samp]:
                 if bin in self.yields[samp][cat]:
                     return self.yields[samp][cat][bin]
+            # return zero if sample is in dict (for scans)
+            return BinYield(samp,cat,(0,0))
         return 0
 
     def getSampDict(self,samp,cat):
