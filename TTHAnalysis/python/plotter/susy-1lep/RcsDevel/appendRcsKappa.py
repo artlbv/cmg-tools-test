@@ -160,8 +160,8 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
 def makeQCDsubtraction(fileList):
 
     # define hists to make QCD estimation
-    #pnames = ["background","data","QCD"] # process name
-    pnames = ["background","QCD"] # process name
+    pnames = ["background","data","QCD"] # process name
+    #pnames = ["background","QCD"] # process name
     pnames += ["background_poisson","QCD_poisson"] # process name
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
@@ -366,6 +366,6 @@ if __name__ == "__main__":
     makeQCDsubtraction(fileList)
     makeKappaHists(fileList)
     makePredictHists(fileList)
-    makeClosureHists(fileList)
+    #makeClosureHists(fileList)
 
     print 'Finished'
