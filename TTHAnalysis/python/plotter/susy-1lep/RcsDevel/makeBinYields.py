@@ -184,12 +184,14 @@ def writeYields(options):
 
     return 1
 
-def submitJobs(args, nchunks):
+def submitJobs(args, nchunks, outdir = "./"):
+
+    if not os.path.exists(outdir): os.makedirs(outdir)
 
     # make unique name for jobslist
     import time
     itime = int(time.time())
-    jobListName = 'jobList_%i.txt' %(itime)
+    jobListName = outdir+"/"+'jobList_%i.txt' %(itime)
     jobList = open(jobListName,'w')
     print 'Filling %s with job commands' % (jobListName)
 
@@ -283,8 +285,12 @@ if __name__ == "__main__":
         cDict.update(cutDictSRf5)
         cDict.update(cutDictCRf5)
 
-    #cDict = cutQCD #QCD
+    cDict = cutQCDsyst #QCD
     #cDict = cutIncl #Inclusive
+    #print cDict.keys();
+    ##rint sorted([k for k in cDict.keys() if "NB0i" in k])
+    #print sorted([k for k in cDict.keys() if "NB1" in k])
+    #exit(0)
 
     # for LT/HT plots
     #cDict = cutLTbinsSR
@@ -295,7 +301,7 @@ if __name__ == "__main__":
     if options.batch:
         print "Going to prepare batch jobs..."
         subargs =  sys.argv
-        submitJobs(subargs, len(binList))
+        submitJobs(subargs, len(binList),options.outdir)
         exit(0)
 
     print "Beginning processing locally..."
