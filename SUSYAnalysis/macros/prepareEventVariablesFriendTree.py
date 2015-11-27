@@ -5,7 +5,7 @@ import os.path, re
 
 MODULES = []
 
-from CMGTools.SUSYAnalysis.tools.eventVars_1l_newbase import EventVars1L_base
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_base import EventVars1L_base
 MODULES.append( ('1l_Basics', EventVars1L_base()) )
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_triggers import EventVars1L_triggers
 MODULES.append( ('1l_Triggers', EventVars1L_triggers()) )
