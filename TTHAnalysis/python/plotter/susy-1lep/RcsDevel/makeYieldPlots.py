@@ -110,10 +110,18 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     # fill histo
     for ibin,bin in enumerate(binList):
 
-        binLabel = bin
-        binLabel = binLabel.replace("LTi","")
-        binLabel = binLabel.replace("NB0","")
-        binLabel = binLabel.replace("NB2i","")
+        #binLabel = bin
+        binLabel = ydict[bin].label
+        if binLabel = "": binLabel = bin
+        # standart replacements
+        binLabel = binLabel.replace("_SR","")
+        binLabel = binLabel.replace("_CR","")
+        binLabel = binLabel.replace("f6","")
+        binLabel = binLabel.replace("f9","")
+
+        #binLabel = binLabel.replace("LTi","")
+        #binLabel = binLabel.replace("NB0","")
+        #binLabel = binLabel.replace("NB2i","")
 
         #binLabel = binLabel.replace("_NJ68","")
         #binLabel = binLabel.replace("_NJ9i","")
@@ -239,7 +247,7 @@ def getPull(histA,histB):
     #pull.Divide(histB)
 
     for ibin in range(1,pull.GetNbinsX()+1):
-        err = histA.GetBinError(ibin)
+        err = histB.GetBinError(ibin)
         if err > 0:
             pull.SetBinContent(ibin,pull.GetBinContent(ibin)/err)
             pull.SetBinError(ibin,pull.GetBinError(ibin)/err)
@@ -249,7 +257,9 @@ def getPull(histA,histB):
 
     #pull.GetYaxis().SetTitle("Pull")
     #title = "#frac{%s - %s}{%s}" %(histA.GetTitle(),histB.GetTitle(),histB.GetTitle())
-    title = "#frac{%s - %s}{#sigma(%s)}" %(histA.GetTitle(),histB.GetTitle(),histA.GetTitle())
+    #title = "#frac{%s - %s}{#sigma(%s)}" %(histA.GetTitle(),histB.GetTitle(),histA.GetTitle())
+    title = "#frac{%s - %s}{#sigma(%s)}" %(histA.GetTitle(),histB.GetTitle(),histB.GetTitle())
+
     pull.GetYaxis().SetTitle(title)
     pull.GetYaxis().CenterTitle()
     pull.GetYaxis().SetNdivisions(505)
@@ -262,11 +272,11 @@ def getPull(histA,histB):
     pull.GetXaxis().SetLabelSize(0.1)
 
     pull.SetLineColor(1)
+    #pull.SetMarkerColor(1)
     pull.SetFillColor(0)
     pull.SetFillStyle(0)
 
     return pull
-
 
 def getStack(histList):
 
@@ -322,8 +332,8 @@ def getCatLabel(name):
 
 def plotHists(cname, histList, ratio = None):
 
-    #canv = TCanvas(cname,cname,1400,600)
-    canv = TCanvas(cname,cname,800,600)
+    canv = TCanvas(cname,cname,1400,600)
+    #canv = TCanvas(cname,cname,800,600)
     #leg = doLegend(len(histList)+1)
     leg = doLegend()
 
@@ -350,8 +360,13 @@ def plotHists(cname, histList, ratio = None):
 
         # 1 - line
         #xmin = ratio.GetXaxis().
-        line = TLine(0,1,ratio.GetNbinsX(),1)
-        #line = TLine(0,0,ratio.GetNbinsX(),0)
+        if "pull" in ratio.GetName():
+            line = TLine(0,0,ratio.GetNbinsX(),0)
+        elif "ratio" in ratio.GetName():
+            line = TLine(0,1,ratio.GetNbinsX(),1)
+        else:
+            line = TLine(0,1,ratio.GetNbinsX(),1)
+
         line.SetLineWidth(1)
         line.Draw()
         SetOwnership(line,0)
@@ -408,7 +423,7 @@ def plotHists(cname, histList, ratio = None):
             leg.AddEntry(hist,hist.GetTitle(),"f")
         else:
             if len(histList) < 3:
-                hist.Draw(plotOpt+"pE5")
+                hist.Draw(plotOpt+"pE2")
             else:
                 hist.Draw(plotOpt+"pE5")
             leg.AddEntry(hist,hist.GetTitle(),"pf")
