@@ -695,9 +695,11 @@ class EventVars1L_base:
             #ret['METfilters'] = event.Flag_goodVertices and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter)
             #ret['METfilters'] = event.nVert > 0 and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter
             # add HCAL Iso Noise
-            ret['METfilters'] = event.nVert > 0 and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter and event.Flag_HBHENoiseFilter_fix and event.Flag_HBHENoiseIsoFilter
+            if hasattr(event,Flag_eeBadScFilter):
+                ret['METfilters'] = event.Flag_goodVertices > 0 and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter and event.Flag_HBHENoiseFilter_fix and event.Flag_HBHENoiseIsoFilter
+            else:
+                ret['METfilters'] = 1
         else:
-            #ret['passCSCFilterList'] = 1
             ret['METfilters'] = 1
 
 

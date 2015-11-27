@@ -368,6 +368,6 @@ if __name__ == "__main__":
     makeQCDsubtraction(fileList)
     makeKappaHists(fileList)
     makePredictHists(fileList)
-    makeClosureHists(fileList)
+    #makeClosureHists(fileList)
 
     print 'Finished'

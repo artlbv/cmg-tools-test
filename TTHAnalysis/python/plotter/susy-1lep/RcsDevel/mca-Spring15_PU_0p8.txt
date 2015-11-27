@@ -5,7 +5,7 @@
 #dileptonic
 TT        : TTJets_DiLepton         : xsec*puRatio*0.8 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} dilept"
 # wrote real xsec because mixed xsec in samples, semileptonic
-TT      : TTJets_SingleLeptonFromT        : 182.1754*puRatio*0.8 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} semilept"
+TT      : TTJets_SingleLeptonFromT       : 182.1754*puRatio*0.8 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} semilept"
 TT     : TTJets_SingleLeptonFromTbar     : 182.1754*puRatio*0.8 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} semilept"
 #full hadronic from inclusive sample
 TT 	 : TTJets_LO : xsec*puRatio*0.8 : ngenTau+ngenLep == 0 && lheHTIncoming <= 600 && HT < 1250; FillColor=ROOT.kBlue, Label="t\#bar{t}"
