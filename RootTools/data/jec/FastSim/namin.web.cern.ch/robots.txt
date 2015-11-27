@@ -1,0 +1,81 @@
+#
+# Robots.txt file for http://webafsNNN.cern.ch
+#
+# Same file for all servers
+
+User-agent: *
+Disallow: /
+
+User-agent: FAST Enterprise Crawler 6 used by CERN (project-search@cern.ch)
+Disallow:
+
+User-agent: FAST Enterprise Crawler for Sharepoint used by CERN (project-search@cern.ch)
+Disallow:
+
+# We allow websites that have requested it
+User-agent: *
+Allow: /fccr/ 
+
+User-agent: *
+Allow: /FCCr/
+
+User-agent: *
+Allow: /geant4/
+
+User-agent: *
+Allow: /mad/
+
+User-agent: *
+Allow: /cms-tracker/
+
+User-agent: *
+Allow: /droussea/
+
+User-agent: *
+Allow: /CLICr/
+
+User-agent: *
+Allow: /rtomas/
+
+User-agent: *
+Allow: /theofil/
+
+User-agent: *
+Allow: /siodmok/
+
+User-agent: *
+Allow: /gfasanel/
+
+User-agent: *
+Allow: /mig/
+
+User-agent: *
+Allow: /mcfayden/
+
+User-agent: *
+Allow: /sviel/
+
+User-agent: *
+Allow: /pmarino/
+
+User-agent: *
+Allow: /cnellist/
+
+User-agent: Googlebot
+Allow: /swedish/
+
+User-agent: Googlebot
+Allow: /grid-deployment/
+
+User-agent: *
+Allow: /davidc/
+
+User-agent: Googlebot
+Allow: /glite/
+
+
+# Disallow all other websites
+User-agent: *
+Disallow: /
+
+
