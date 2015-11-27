@@ -23,16 +23,19 @@ if __name__ == "__main__":
     mask = basename.replace("*","X_")
 
     # Category
-    cat = "CR_MB"
+    cat = "root"#CR_MB"
 
     ## Create Yield Storage
     ydsAnti = YieldStore("AntiEle")
     ydsAnti.addFromFiles(pattern,("ele","anti"))
 
+    ydsAnti.showStats()
+
     colorDict["QCD_Anti_"+cat] = kRed
 
     ydsSele = YieldStore("SeleEle")
     ydsSele.addFromFiles(pattern,("ele","sele"))
+    ydsSele.showStats()
 
     colorDict["QCD_Sele_"+cat] = kBlue
 
@@ -40,18 +43,20 @@ if __name__ == "__main__":
     hAnti.SetTitle("Anti-selected")
 
     hSele = makeSampHisto(ydsSele,"QCD",cat,"QCD_Sele_"+cat)
-    hSele.SetTitle("Selected")
+    hSele.SetTitle("QCD Selected")
 
-    #ratio = getRatio(hSele,hAnti)
-    ratio = getPull(hSele,hAnti)
-    ratio.GetYaxis().SetRangeUser(-0.45,0.45)
+    ratio = getRatio(hSele,hAnti)
+    ratio.GetYaxis().SetRangeUser(0,0.35)
 
     #canv = plotHists("Sele_Vs_HE_New_AntiEle_"+cat,[hAnti,hSele],ratio)
-    canv = plotHists("Sele_Vs_New_AntiEle_"+cat,[hAnti,hSele],ratio)
+    #canv = plotHists("Sele_Vs_New_AntiEle_"+cat,[hAnti,hSele],ratio)
+    #canv = plotHists("Sele_QCDvsMC_Ele_"+cat,[hAnti,hSele],ratio)
+
+    canv = plotHists("SeleVsAnti_Ele_",[hAnti,hSele],ratio)
 
     if not _batchMode: raw_input("Enter any key to exit")
 
     exts = [".pdf",".png"]
     for ext in exts:
-        canv.SaveAs("BinPlots/QCD/"+mask+canv.GetName()+ext)
+        canv.SaveAs("BinPlots/QCD/fRatios/"+mask+canv.GetName()+ext)
 
