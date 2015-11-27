@@ -69,14 +69,12 @@ class EventVars1L_signal:
             mLSP = 0
 
             # Gluino Mass
-            if hasattr(event,'GenSusyMGluino'):
-                ret['mGo'] = event.GenSusyMGluino
-                mGo = ret['mGo']
+            if hasattr(event,'GenSusyMGluino'): mGo = event.GenSusyMGluino
 
             # LSP Mass
-            if hasattr(event,'GenSusyMNeutralino'):
-                ret['mLSP'] = event.GenSusyMNeutralino
-                mLSP = ret['mLSP']
+            if hasattr(event,'GenSusyMNeutralino'): mLSP = event.GenSusyMNeutralino
+            # set LSP mass of 1 to zero
+            if mLSP == 1: mLSP = 0;
 
             # Fill for testing
             pseudoScan = False
@@ -88,7 +86,8 @@ class EventVars1L_signal:
                     mGo = random.randrange(500,1500,50)
                     mLSP = random.randrange(0,1500,50)
 
-                ret['mGo'] = mGo; ret['mLSP'] = mLSP
+            # save masses
+            ret['mGo'] = mGo; ret['mLSP'] = mLSP
 
             # SUSY Xsec
             if mGo in xsecGlu:
