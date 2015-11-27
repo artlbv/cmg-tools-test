@@ -14,12 +14,13 @@ from math import hypot
 #mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/MC/ele_CBID_PUave70mb"
 #dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_Spring15_25ns/Friends/Data/ele_CBID_1p2fb"
 
-Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2"
-mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_anyLepSkim"
-sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/MC/eleCBID_T1ttt_Scans"
+Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/"
+
+mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/MC/allSamps_pu69mb"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Signals/T1tttt_pu69mb_fixMLSP"
 
 # new data
-dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks_MiniAODv2/Friends/Data/ele_CBID_1p5fb"
+dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Data/trig_skim_2p1fb"
 
 def addOptions(options):
 
@@ -50,7 +51,7 @@ def addOptions(options):
         #options.bins = "34,-1700,1700,10,0,1500"
         options.bins = "161,-2012.5,2012.5,41,-25,2025.5"
 
-        options.friendTrees = [("sf/t",sigFTdir+"/evVarFriend_{cname}.root")]
+        options.friendTreesMC = [("sf/t",sigFTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
 
     elif options.grid:
@@ -285,12 +286,12 @@ if __name__ == "__main__":
         cDict.update(cutDictCR)
         cDict.update(cutDictSR)
 
-    doNjet9 = False
+    doNjet9 = True
     if doNjet9:
         cDict.update(cutDictSRf9)
         cDict.update(cutDictCRf9)
 
-    doNjet5 = False
+    doNjet5 = True
     if doNjet5:
         cDict.update(cutDictSRf5)
         cDict.update(cutDictCRf5)
