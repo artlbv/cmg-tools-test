@@ -53,7 +53,7 @@ def matchSB(bname):
         else:
             name = name.replace('NB2_','NB2i_')
             name = name.replace('NB3i','NB2i')
-            
+
     name = name[:-1]
 
     if options.verbose > 0:
@@ -136,6 +136,7 @@ def writeBins(ofname, srcdir, binnames):
 
     dirnames = ['SR_MB','CR_MB','SR_SB','CR_SB']
 
+
     for idx,dname in enumerate(dirnames):
 
         ofile.mkdir(dname)
@@ -146,11 +147,15 @@ def writeBins(ofname, srcdir, binnames):
             continue
 
         tfile = TFile(srcfname,"READ")
+        ofile.cd(dname)
+
+        # save bin name
+        name = TNamed("BinName",binnames[idx])
+        name.Write()
 
         for key in tfile.GetListOfKeys():
 
             obj = key.ReadObj()
-            ofile.cd(dname)
             obj.Write()
 
         tfile.Close()
