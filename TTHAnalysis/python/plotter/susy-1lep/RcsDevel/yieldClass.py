@@ -91,7 +91,7 @@ class YieldStore:
                         point = sample + "_mGo%i_mLSP%i" %(mGo,mLSP)
                         #point = (mGo,mLSP)
 
-                        yd = BinYield(yds[(mGo,mLSP)])
+                        yd = BinYield(point, category, yds[(mGo,mLSP)])
                         self.addYield(point,category,binName,yd)
 
         return 1
@@ -136,11 +136,12 @@ class YieldStore:
     ###########################
 
     def getBinYield(self,samp,cat,bin):
-
+        
         if samp in self.yields:
             if cat in self.yields[samp]:
                 if bin in self.yields[samp][cat]:
                     return self.yields[samp][cat][bin]
+            return BinYield(samp, cat, (0, 0))
         return 0
 
     def getSampDict(self,samp,cat):
@@ -210,8 +211,8 @@ class YieldStore:
         yds = self.getMixDict(samps)
         nSource = len(samps)
         nCol = nSource + 4
-        precision = 5
-        f.write('\multicolumn{' + str(nCol) + '}{|c|}{' +label +'} \\\ \\hline \n')
+        f.write('\multicolumn{' + str(nCol) + '}{|c|}{' +label +'} \\\ \n')
+        f.write('\multicolumn{' + str(nCol) + '}{|c|}{'  '} \\\ \\hline \n')
         f.write('$L_T$ & $H_T$ & nB & binName &' +  ' %s ' % ' & '.join(map(str, printSamps)) + ' \\\ \n')
         f.write(' $[$ GeV $]$  &   $[$GeV$]$ & &  '  + (nSource *'%(tab)s  ') % dict(tab = '&') + ' \\\ \\hline \n')
 
@@ -230,8 +231,16 @@ class YieldStore:
             elif LT == LT0 and HT == HT0:
                 f.write('  &  & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin)
 
+            print yds[bin]
             for yd in yds[bin]:
-                f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
+                precision = 2
+                if yd == 0:
+                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (0.0, 0.0))
+                else:
+                    if 'Rcs' in yd.cat or 'Kappa' in yd.cat:
+                        precision = 4
+                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
+
 
             f.write(' \\\ \n')
         f.write(' \\hline \n')

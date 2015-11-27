@@ -218,7 +218,7 @@ def getRatio(histA,histB):
     ratio.GetYaxis().SetTitleOffset(0.3)
 
     ratio.GetYaxis().SetLabelSize(0.1)
-    ratio.GetYaxis().SetRangeUser(0.05,1.95)
+    ratio.GetYaxis().SetRangeUser(0.05,2.1)
 
     ratio.GetXaxis().SetLabelSize(0.1)
 
@@ -306,16 +306,20 @@ def getCatLabel(name):
     cname = name
     cname = cname.replace("_"," ")
     cname = cname.replace("SB","N_{j} #in [4,5]")
+
     #cname = cname.replace("MB","N_{j} #in [6,8]")
     #cname = cname.replace("MB","N_{j} #geq 9")
-    cname = cname.replace("MB","N_{j} #geq 6")
+    cname = cname.replace("MB predict X NJ5X","N_{j} = 5")
+    cname = cname.replace("MB predict X NJ68X","N_{j} #in [6,8]")
+    cname = cname.replace("MB predict X NJ9X","N_{j} #geq 9")
     #cname = cname.replace("MB","N_{j} == 5")
 
     return cname
 
 def plotHists(cname, histList, ratio = None):
 
-    canv = TCanvas(cname,cname,1400,600)
+    #canv = TCanvas(cname,cname,1400,600)
+    canv = TCanvas(cname,cname,800,600)
     #leg = doLegend(len(histList)+1)
     leg = doLegend()
 
@@ -339,8 +343,8 @@ def plotHists(cname, histList, ratio = None):
 
         # 1 - line
         #xmin = ratio.GetXaxis().
-        #line = TLine(0,1,ratio.GetNbinsX(),1)
-        line = TLine(0,0,ratio.GetNbinsX(),0)
+        line = TLine(0,1,ratio.GetNbinsX(),1)
+        #line = TLine(0,0,ratio.GetNbinsX(),0)
         line.SetLineWidth(1)
         line.Draw()
         SetOwnership(line,0)
