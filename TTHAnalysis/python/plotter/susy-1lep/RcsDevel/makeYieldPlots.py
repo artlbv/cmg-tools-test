@@ -10,6 +10,7 @@ gStyle.SetOptStat(0)
 gStyle.SetPadTopMargin(0.075)
 gStyle.SetPadRightMargin(0.075)
 gStyle.SetPadBottomMargin(0.225)
+gStyle.SetLegendBorderSize(0)
 
 ## CMS LUMI
 import CMS_lumi
@@ -36,17 +37,19 @@ def doLegend(nEntr = None):
     if nEntr:
         leg = TLegend(0.4,0.875-(nEntr*0.2),0.6,0.875)
     else:
-        leg = TLegend(0.4,0.5,0.6,0.85)
+        #leg = TLegend(0.4,0.5,0.6,0.85)
+        leg = TLegend(0.3,0.5,0.45,0.85)
     leg.SetBorderSize(1)
     leg.SetTextFont(62)
     leg.SetTextSize(0.03321678)
     leg.SetLineColor(0)
-    #leg.SetLineStyle(1)
+    leg.SetLineStyle(0)
     #leg.SetLineWidth(1)
     if _batchMode == False: leg.SetFillColor(0)
     else: leg.SetFillColorAlpha(0,_alpha)
 
-    leg.SetFillStyle(1001)
+    #leg.SetFillStyle(1001)
+    leg.SetFillStyle(0)
 
     return leg
 
@@ -89,9 +92,8 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     #binList = sorted(ydict.keys())
     binList = []
     # sort bins by NJ
-    binList = [b for b in sorted(ydict.keys()) if 'NJ5' in b]
-    binList = [b for b in sorted(ydict.keys()) if 'NJ6' in b]
-    binList += [b for b in sorted(ydict.keys()) if 'NJ9' in b]
+    for njbin in ['NJ3','NJ4','NJ5','NJ6','NJ9']:
+        binList += [b for b in sorted(ydict.keys()) if njbin in b]
 
     nbins = len(binList)
 
@@ -109,6 +111,10 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     for ibin,bin in enumerate(binList):
 
         binLabel = bin
+        binLabel = binLabel.replace("LTi","")
+        binLabel = binLabel.replace("NB0","")
+        binLabel = binLabel.replace("NB2i","")
+
         #binLabel = binLabel.replace("_NJ68","")
         #binLabel = binLabel.replace("_NJ9i","")
         #binLabel = binLabel.replace("_",",")
@@ -126,11 +132,6 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
             newLabel = "#splitline{%s}{#splitline{%s}{#splitline{%s}{%s}}}" %(splitbins[0],splitbins[1],splitbins[2],splitbins[3])
         else:
             newLabel = binLabel
-        '''
-        for ch in binLabel.split("_")[:2]:
-            newLabel += "{%s}" % ch
-        print newLabel
-        '''
 
         hist.GetXaxis().SetBinLabel(ibin+1,newLabel)
 
@@ -167,6 +168,8 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     else:
         hist.GetYaxis().SetTitle("Events")
 
+    SetOwnership(hist, 0)
+    _histStore[hist.GetName()] = hist
     return hist
 
 def makeSampHists(yds,samps):
@@ -320,6 +323,9 @@ def plotHists(cname, histList, ratio = None):
     #leg = doLegend(len(histList)+1)
     leg = doLegend()
 
+    SetOwnership(canv, 0)
+    SetOwnership(leg, 0)
+
     head = getCatLabel(cname)
     leg.SetHeader(head)
 
@@ -393,11 +399,14 @@ def plotHists(cname, histList, ratio = None):
         elif "total" in hist.GetName():
             hist.Draw(plotOpt+"E2")
             leg.AddEntry(hist,"MC Uncertainty","f")
+        elif "Syst" in hist.GetName():
+            hist.Draw(plotOpt+"E2")
+            leg.AddEntry(hist,hist.GetTitle(),"f")
         else:
             if len(histList) < 3:
-                hist.Draw(plotOpt+"pE2")
+                hist.Draw(plotOpt+"pE5")
             else:
-                hist.Draw(plotOpt+"pE2")
+                hist.Draw(plotOpt+"pE5")
             leg.AddEntry(hist,hist.GetTitle(),"pf")
 
         # remove axis label with ratio
