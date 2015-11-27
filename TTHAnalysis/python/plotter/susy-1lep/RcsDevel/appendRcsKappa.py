@@ -139,9 +139,14 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
     if isMC: fRatios = readQCDratios("fRatios_MC_lumi2p1.txt")
     else: fRatios = readQCDratios("fRatios_Data_lumi2p1.txt")
 
+    # read bin name
+    binString = tfile.Get(band+"BinName")
+    if binString: binName = binString.GetTitle()
+    else: binName = tfile.GetName()
+
     # get bin from filename
     for key in fRatios:
-        if key in tfile.GetName():
+        if key in binName:
             (fRatio,fRatioErr) = fRatios[key]
             #print "Found matching ratios for key" , key
             break
@@ -149,7 +154,7 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
 
     # get QCD syst error pn F
     if applySyst == True:
-        systErr = getQCDsystError(tfile.GetName())
+        systErr = getQCDsystError(binName)
 
         #print "Fratio\t%f, old error\t%f, new error\t%f" %(fRatio,fRatioErr,hypot(fRatioErr,systErr*fRatio))
         fRatioErr = hypot(fRatioErr,systErr*fRatio)
