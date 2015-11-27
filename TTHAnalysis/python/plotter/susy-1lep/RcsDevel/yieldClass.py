@@ -14,10 +14,16 @@ class BinYield:
         self.cat = cat
         self.val = val
         self.err = err
+        self.label = sample
+        self.sbname = ""
+        self.mbname = ""
 
     # func that is called with print BinYield object
     def __repr__(self):
         return "%s : %s : %4.2f +- %4.2f" % (self.name, self.cat, self.val, self.err)
+
+    def printValue(self, prec = "4.2"):
+        return "%4.2f +- %4.2f" % (self.val, self.err), self.label, self.sbname, self.mbname
 
 class YieldStore:
 
@@ -76,8 +82,26 @@ class YieldStore:
             # get list of histograms
             histList = [histKey.ReadObj() for histKey in gDirectory.GetListOfKeys() if histKey.IsFolder() != 1]
 
+            binLabel = ""
+            sbname = ""; mbname = ""
+
+            ## Get Bin labels
+            for hist in histList:
+                # Save real bin name
+                if hist.ClassName() == "TNamed":
+                    if hist.GetName() == "SBname":
+                        sbname = hist.GetTitle()
+                    elif hist.GetName() == "MBname":
+                        mbname = hist.GetTitle()
+                    else:
+                        binLabel = hist.GetTitle()
+                    #print binLabel
+
+            #print binLabel, sbname, mbname
+
             ## Loop over hists and save to dicts
             for hist in histList:
+
                 if "TH" not in hist.ClassName(): continue
 
                 sample = hist.GetName()
@@ -85,6 +109,7 @@ class YieldStore:
                 if ('Scan' not in sample) and ('scan' not in sample):
                     # get normal sample yield
                     yd = BinYield(sample, category, getLepYield(hist, leptype))
+                    yd.label = binLabel; yd.sbname = sbname; yd.mbname = mbname
                     self.addYield(sample,category,binName,yd)
                 else:
                     # get yields from scan
@@ -96,6 +121,7 @@ class YieldStore:
                         #point = (mGo,mLSP)
 
                         yd = BinYield(point, category, yds[(mGo,mLSP)])
+                        yd.label = binLabel; yd.sbname = sbname; yd.mbname = mbname
                         self.addYield(point,category,binName,yd)
 
         tfile.Close()
@@ -193,7 +219,8 @@ class YieldStore:
         #print "Bin\tYield+-Error"
 
         for bin in sorted(yds.keys()):
-            print bin,"\t", yds[bin]
+            #print bin,"\t", yds[bin]
+            print bin,"\t", yds[bin].printValue()
         print 80*"-"
 
         return 1
@@ -275,6 +302,8 @@ if __name__ == "__main__":
     yds.showStats()
 
     #yds.printBins("QCD","CR_SB")
+    yds.printBins("EWK","Kappa")
+
     #yds.getSampsDict("QCD",["CR_SB","CR_MB"])
     #yds.printBins("QCD",["CR_SB","CR_MB"])
     #yds.printBins("data",yds.categories)
@@ -292,7 +321,6 @@ if __name__ == "__main__":
 
     #print yds.yields
 
-    '''
     cat = "SR_MB"
 
     samps = [
@@ -304,3 +332,4 @@ if __name__ == "__main__":
     yds.printMixBins(samps)
 
     print [s for s in yds.samples if "1500" in s]
+    '''

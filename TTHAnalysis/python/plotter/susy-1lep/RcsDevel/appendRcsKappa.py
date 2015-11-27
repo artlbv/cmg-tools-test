@@ -17,7 +17,8 @@ def getPnames(fname,tdir):
     for key in gDirectory.GetListOfKeys():
 
         obj = key.ReadObj()
-        pnames.append(obj.GetName())
+        if "TH" in obj.ClassName():
+            pnames.append(obj.GetName())
 
     tfile.Close()
 
@@ -238,6 +239,20 @@ def makeKappaHists(fileList):
             tfile.mkdir("Rcs_MB")
             tfile.mkdir("Rcs_SB")
             tfile.mkdir("Kappa")
+
+            # store SB/MB names
+            sbname = tfile.Get("SR_SB/BinName")
+            if sbname:
+                #print sbname
+                sbname.SetName("SBname")
+                tfile.cd("Kappa")
+                sbname.Write()
+
+            mbname = tfile.Get("SR_MB/BinName")
+            if mbname:
+                mbname.SetName("MBname")
+                tfile.cd("Kappa")
+                mbname.Write()
 
             for pname in pnames:
 
