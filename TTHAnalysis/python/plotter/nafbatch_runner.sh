@@ -8,7 +8,9 @@
 ## the cpu time for this job
 #$ -l h_rt=02:59:00
 ## the maximum memory usage of this job
-#$ -l h_vmem=1900M
+##$ -l h_vmem=3999M
+#$ -l h_vmem=7999M
+#$ -l h_fsize=4999M
 ## operating system
 #$ -l distro=sld6
 ## architecture
