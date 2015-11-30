@@ -580,7 +580,7 @@ if __name__ == "__main__":
         print 40*'\\/'
 
     # Write results to txt file
-    txtFname =suff+".txt"
+    txtFname = pureFname + suff +".txt"
 
     with open(plotDir+txtFname,"w") as ftxt:
 
