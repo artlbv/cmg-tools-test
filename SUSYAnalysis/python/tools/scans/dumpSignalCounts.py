@@ -88,7 +88,7 @@ def dumpTrees(fileList):
     # overwrite file
     cf = open(cname,"w"); cf.close()
 
-    for fname in fileList:
+    for i,fname in enumerate(fileList):
         mass = fname
 
         parts = fname.split("/")
@@ -96,7 +96,7 @@ def dumpTrees(fileList):
             if "mGo" in part and "mLSP" in part: mass = part
 
         #print "Counts for", os.path.basename(fname)
-        print "Counts for", mass
+        print "Counts for", mass, "[%i/%i]" %(i+1,len(fileList))
         dumpTree(fname,cname)
         print 80 *"-"
 
