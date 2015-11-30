@@ -62,7 +62,7 @@ with open(mcaF,"r") as mca:
 
         # replace MCA
         cmd[1] = tmpname
-        cmds = " ".join(str(arg) for arg in cmd)
+        cmds = " ".join(str(arg).replace("*","\*") for arg in cmd)
 
         jobList.write("python " + cmds + "\n")
         jobs.append(cmds)
