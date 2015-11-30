@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys
+import sys,os
 
 from math import *
 from ROOT import *
@@ -17,7 +17,7 @@ def dumpCounts(tree,cname = "counts.txt"):
 
     totalEvts = hCounts.GetEntries()
 
-    print hCounts, hWeights
+    #print hCounts, hWeights
 
     print 'Total produced events:', totalEvts
 
@@ -89,7 +89,16 @@ def dumpTrees(fileList):
     cf = open(cname,"w"); cf.close()
 
     for fname in fileList:
+        mass = fname
+
+        parts = fname.split("/")
+        for part in parts:
+            if "mGo" in part and "mLSP" in part: mass = part
+
+        #print "Counts for", os.path.basename(fname)
+        print "Counts for", mass
         dumpTree(fname,cname)
+        print 80 *"-"
 
 def dumpChain(fileList):
 
