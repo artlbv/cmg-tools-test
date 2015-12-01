@@ -33,8 +33,10 @@ doTransp = True
 
 def doLegend():
 
-    #leg = TLegend(0.65,0.7,0.85,0.9)
-    leg = TLegend(0.45,0.7,0.7,0.9)
+    #leg = TLegend(0.65,0.7,0.85,0.9) # right
+    #leg = TLegend(0.45,0.7,0.7,0.9) # middle
+    leg = TLegend(0.25,0.2,0.45,0.4) # BL
+
     leg.SetBorderSize(1)
     leg.SetTextFont(62)
     leg.SetTextSize(0.04)
@@ -54,6 +56,7 @@ def getBinLabel(binname):
     binname = binname.replace("NB3i","N_{b} #geq 3")
     binname = binname.replace("NB2i","N_{b} #geq 2")
     binname = binname.replace("NB1i","N_{b} #geq 1")
+    binname = binname.replace("NB0i","N_{b} #geq 0")
 
     binname = binname.replace("NB2","N_{b} = 2")
     binname = binname.replace("NB1","N_{b} = 1")
@@ -81,7 +84,7 @@ def getRatiosPlot(tfile):
                 binName = binName[binName.find("_")+1:]
 
                 # filter:
-                if binName in ['NB3i','NB2']:
+                if binName in ['NB3i','NB2','NB1i','NB0i']:
                     continue
 
                 print 'Found', binName
@@ -155,14 +158,16 @@ if __name__ == "__main__":
                 hist.SetBinError(ibin,0)
 
         if i == 0:
-            hist.GetYaxis().SetNdivisions(505)
-            hist.GetYaxis().SetRangeUser(0,0.45)
-            #hist.GetYaxis().SetRangeUser(0,0.05)
-            hist.GetYaxis().SetTitleOffset(1.2)
-            hist.GetYaxis().SetTitleSize(0.05)
+            #hist.GetYaxis().SetNdivisions(505)
+            hist.GetYaxis().SetRangeUser(0,1.45)
+            #hist.GetYaxis().SetRangeUser(0,0.45)
+            #hist.GetYaxis().SetRangeUser(0,0.12)
+            hist.GetYaxis().SetTitleOffset(1.4)
+            hist.GetYaxis().SetTitleSize(0.04)
             hist.GetYaxis().SetLabelSize(0.03)
-            hist.GetYaxis().SetTitle("F_{sel-to-anti}")
+            #hist.GetYaxis().SetTitle("F_{sel-to-anti}")
             #hist.GetYaxis().SetTitle("R_{CS}")
+            hist.GetYaxis().SetTitle("#frac{QCD}{QCD+EWK}")
 
         # make up hist
         hist.SetStats(0)
