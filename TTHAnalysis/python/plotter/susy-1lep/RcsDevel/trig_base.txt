@@ -12,5 +12,4 @@ nJetBase: nJets30Clean >= 3
 2.JetPt > 80: Jet2_pt > 80
 Filters: !isData || (isData && Flag_goodVertices && Flag_HBHENoiseFilter_fix && Flag_CSCTightHaloFilter && Flag_eeBadScFilter && Flag_HBHENoiseIsoFilter && passCSCFilterList )
 
-
 base: 1
