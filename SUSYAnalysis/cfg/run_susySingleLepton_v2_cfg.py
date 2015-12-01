@@ -190,10 +190,10 @@ triggerFlagsAna.triggerBits = {
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-sample = 'MC'
+#sample = 'MC'
 #sample = 'data'
-#sample = 'Signal'
-test = 1
+sample = 'Signal'
+test = 0
 
 if sample == "MC":
 
@@ -201,6 +201,9 @@ if sample == "MC":
 
 	isData = False
 	isSignal = False
+
+	# Set FastSim JEC
+	jetAna.mcGT = "FastSim_MCRUN2_74_V9"
 
 	# modify skim
 	anyLepSkim.minLeptons = 1
@@ -236,8 +239,9 @@ if sample == "MC":
 		# PRODUCTION
 		# run on everything
 
-		selectedComponents =  QCDHT #[ TTJets_LO ]
+		#selectedComponents =  [TTJets_LO , TTJets_LO_HT600to800, TTJets_LO_HT800to1200, TTJets_LO_HT1200to2500, TTJets_LO_HT2500toInf] + QCDHT + WJetsToLNuHT + SingleTop + DYJetsM50HT + TTV
 		#selectedComponents =  #SingleTop + DYJetsM50HT + TTV
+		selectedComponents = [TTJets_SingleLeptonFromTbar, TTJets_SingleLeptonFromTbar_ext, TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromT_ext, TTJets_DiLepton, TTJets_DiLepton_ext]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 1
@@ -267,12 +271,11 @@ elif sample == "Signal":
 	# Benchmarks
 	#selectedComponents = [ T1tttt_mGo_1475to1500_mLSP_1to1250, T1tttt_mGo_1500to1525_mLSP_50to1125, T1tttt_mGo_1200_mLSP_1to825, T1tttt_mGo_1900to1950_mLSP_0to1450 ]
 	# Rest
-	selectedComponents = [T1tttt_mGo_1100_mLSP_1to775, T1tttt_mGo_1100to1125_mLSP_700to900, T1tttt_mGo_1150_mLSP_1to800, T1tttt_mGo_1150to1175_mLSP_750to925, T1tttt_mGo_1175_mLSP_950, T1tttt_mGo_1200to1225_mLSP_800to1000, T1tttt_mGo_1275_mLSP_900to975, T1tttt_mGo_1300to1325_mLSP_700to1100, T1tttt_mGo_1350to1375_mLSP_50to1025, T1tttt_mGo_1400_mLSP_1to1175, T1tttt_mGo_1425to1450_mLSP_1to1200, T1tttt_mGo_1450to1475_mLSP_50to1075, T1tttt_mGo_1525to1550_mLSP_1to1300, T1tttt_mGo_1600to1650_mLSP_1to1350, T1tttt_mGo_1700to1750_mLSP_1to1450, T1tttt_mGo_1800to1850_mLSP_1to1450, T1tttt_mGo_1850to1900_mLSP_1to1450, T1tttt_mGo_1950_mLSP_700to950, T1tttt_mGo_625_mLSP_275to375, T1tttt_mGo_625to650_mLSP_200to400, T1tttt_mGo_650to675_mLSP_250to425, T1tttt_mGo_700_mLSP_1to450, T1tttt_mGo_700to750_mLSP_200to500, T1tttt_mGo_750to775_mLSP_350to525, T1tttt_mGo_775_mLSP_475to550, T1tttt_mGo_800to825_mLSP_1to575, T1tttt_mGo_825to850_mLSP_200to600, T1tttt_mGo_850to875_mLSP_450to625, T1tttt_mGo_875to900_mLSP_1to650, T1tttt_mGo_950to975_mLSP_350to725, T1tttt_mGo_975_mLSP_600to750]
+	selectedComponents = mcSamplesT1tttt
 
 	if test==1:
 		# test a single component, using a single thread.
-		#comp = T1tttt_mGo_1500to1525_mLSP_50to1125
-		comp = T1tttt_mGo_1200_mLSP_1to825
+		comp = T1tttt_mGo_1475to1500_mLSP_1to1250
 		comp.files = comp.files[:1]
 		selectedComponents = [comp]
 		comp.splitFactor = 1
@@ -307,7 +310,7 @@ elif sample == "data":
 	isSignal = False
 
 	# modify skim
-	anyLepSkim.minLeptons = 1
+	anyLepSkim.minLeptons = 0
 	ttHLepSkim.minLeptons = 0
 
 	# central samples
@@ -321,7 +324,7 @@ elif sample == "data":
 	# MiniAOD V2
 	#selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4]#, JetHT_Run2015D_05Oct,JetHT_Run2015D_Promptv4]
 	#selectedComponents = [ SingleMuon_Run2015D_05Oct, JetHT_Run2015D_05Oct, SingleElectron_Run2015D_Promptv4, SingleMuon_Run2015D_Promptv4, JetHT_Run2015D_Promptv4]
-	selectedComponents = [ SingleElectron_Run2015D_Promptv4 ]
+	selectedComponents = [ JetHT_Run2015D_05Oct,JetHT_Run2015D_Promptv4 ]
 
 	if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
 
