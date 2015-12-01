@@ -36,11 +36,12 @@ def matchSB(bname):
     elif 'NJ9' in name:
         # match for NJ9i
         name = name.replace('NJ9i','NJ45f9')
-        if 'LT2' in name and 'HT2i' in name:
+        if 'HT2i' in name:
             name = name.replace('NB1_','NB1i_')
             name = name.replace('NB2_','NB1i_')
             name = name.replace('NB3i_','NB1i_')
         else:
+            name = name.replace('NB21','NB1i_')
             name = name.replace('NB2_','NB2i_')
             name = name.replace('NB3i_','NB2i_')
     elif 'NJ5' in name:
