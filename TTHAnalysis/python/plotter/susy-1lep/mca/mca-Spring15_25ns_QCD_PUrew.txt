@@ -9,7 +9,7 @@ TT         : TTJets_LO_HT1200to2500 : xsec*puRatio*1.0 ; FillColor=ROOT.kBlue-4,
 TT         : TTJets_LO_HT2500toInf  : xsec*puRatio*1.0 ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
 
 # Single Top
-SingleT  :TToLeptons_tch_amcatnlo   : xsec*puRatio*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
+SingleT  :TToLeptons_tch_amcatnlo_full   : xsec*puRatio*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
 SingleT  :TToLeptons_sch   : xsec*puRatio*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
 SingleT  :TBar_tWch   	    : xsec*puRatio*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
 SingleT  :T_tWch      	    : xsec*puRatio*1.0 ; FillColor = ROOT.kViolet+5, Label= "t/\#bar{t}"
