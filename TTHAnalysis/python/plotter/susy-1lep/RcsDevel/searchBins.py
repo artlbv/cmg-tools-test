@@ -20,6 +20,7 @@ binsNB = {}
 binsNB['NB0'] = ('nBJet == 0','$=$ 0')
 binsNB['NB1'] = ('nBJet == 1','$=$ 1')
 binsNB['NB2'] = ('nBJet == 2','$=$ 2')
+binsNB['NB12'] = ('nBJet == 2','[1,2]')
 binsNB['NB0i'] = ('nBJet >= 0','$\geq$ 0')
 binsNB['NB1i'] = ('nBJet >= 1','$\geq$ 1')
 binsNB['NB2i'] = ('nBJet >= 2','$\geq$ 2')
@@ -162,8 +163,8 @@ for nj_bin in ['NJ45f6','NJ68']:#binsNJ.iteritems():
         if lt_bin in ['LT1']:
             htbins += ['HT0','HT1i']
         if lt_bin in ['LT2']:
-            htbins += ['HT0','HT1']
-        if lt_bin in ['LT2','LT3','LT4i']:
+            htbins += ['HT0','HT1i']
+        if lt_bin in ['LT3','LT4i']:
             htbins += ['HT2i']
         if lt_bin in ['LT3','LT4i']:
             htbins += ['HT01']
@@ -180,9 +181,9 @@ for nj_bin in ['NJ45f6','NJ68']:#binsNJ.iteritems():
             if nj_bin in ['NJ45f6'] and ht_bin in ['HT2i']:
                 nbbins += ['NB1i']
             if nj_bin in ['NJ68']:
-                if lt_bin in ['LT1','LT2','LT3']:
+                if lt_bin in ['LT1','LT2']:
                     nbbins += ['NB1','NB2','NB3i'] # NB1 present in all NJ,LT bins
-                if lt_bin in ['LT4i']:
+                if lt_bin in ['LT3','LT4i']:
                     nbbins += ['NB1','NB2i'] # NB2i present in all NJ,LT bins
 
             # Match NB bins
@@ -232,9 +233,9 @@ for nj_bin in ['NJ45f9','NJ9i']:#binsNJ.iteritems():
 
 
         ### FIXME
-        if lt_bin in ['LT1', 'LT2']:
+        if lt_bin in ['LT1']:
             htbins += ['HT0i','HT01','HT2i']
-        if lt_bin in ['LT3i']:
+        if lt_bin in ['LT2','LT3i']:
             htbins += ['HT0i']
             #htbins += ['HT0','HT1','HT2i']
 
@@ -246,16 +247,21 @@ for nj_bin in ['NJ45f9','NJ9i']:#binsNJ.iteritems():
 
             # Match NB bins
             if nj_bin in ['NJ9i']:
-                if lt_bin in ['LT1','LT2'] and not ht_bin in['HT0i']:
+                if lt_bin in ['LT1'] and not ht_bin in['HT0i']:
                     nbbins += ['NB1','NB2']
                     
-                if lt_bin in ['LT3i']:
-                    nbbins += ['NB1','NB2i']
-                if lt_bin in ['LT1','LT2'] and ht_bin in ['HT0i']:
+
+                if lt_bin in ['LT1'] and ht_bin in ['HT0i']:
                     nbbins += ['NB3i']
 
+                if lt_bin in ['LT2']:
+                    nbbins += ['NB1','NB2','NB3i']
+                if lt_bin in ['LT3i']:
+                    nbbins += ['NB1','NB2i']
+
+
             if nj_bin in ['NJ45f9']:
-                if lt_bin in['LT2'] and ht_bin in ['HT2i']:
+                if ht_bin in ['HT2i']:
                     nbbins += ['NB1i']
                 else:
                     nbbins += ['NB1','NB2i']
