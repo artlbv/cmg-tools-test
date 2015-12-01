@@ -5,6 +5,7 @@ import sys
 from yieldClass import *
 from ROOT import *
 def printDataCard(yds, ydsObs, ydsSysSig):
+    folder = 'datacards/'
     bins = sorted(yds.keys())
 
     sampNames = [x.name for x in yds[bins[0]]]
@@ -15,13 +16,14 @@ def printDataCard(yds, ydsObs, ydsSysSig):
     precision = 4
     
     try:                                                                                                                     
-        os.stat('datacards/' + signalName )                                                                                
+        os.stat(folder + signalName )                                                                                
     except:                                                                                                                  
-        os.mkdir('datacards/' + signalName )
-    iproc = { key: i for (i,key) in enumerate(sorted(reversed(sampNames)))}
-
+        os.mkdir(folder + signalName )
+    iproc = { key: i+1 for (i,key) in enumerate(sorted(reversed(sampNames)))}
+    iproc.update({signalName: 0})
+    
     for i,bin in enumerate(bins):
-        datacard = open('datacards/'+ signalName + '/' +bin + '.card.txt', 'w'); 
+        datacard = open(folder + signalName + '/' +bin + '.card.txt', 'w'); 
         datacard.write("## Datacard for binfile %s (signal %s)\n"%(bin,signalName))
         
             #datacard.write("shapes *        * ../common/%s.input.root x_$PROCESS x_$PROCESS_$SYSTEMATIC\n" % binName)
@@ -54,6 +56,7 @@ def printDataCard(yds, ydsObs, ydsSysSig):
 
 
 def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
+    folder = 'datacardsABCD/'
     bins = sorted(yds.keys())
 
     catNames = [x.cat for x in yds[bins[0]] ]
@@ -69,15 +72,15 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
     
     
     try:                                                                                                                     
-        os.stat('datacardsABCD/' + signalName )                                                                                
+        os.stat(folder + signalName )                                                                                
     except:                                                                                                                  
-        os.mkdir('datacardsABCD/' + signalName ) 
+        os.mkdir(folder + signalName ) 
 
     print sampUniqueNames
     iproc = { key: i for (i,key) in enumerate(sorted(reversed(sampUniqueNames)))}
     print iproc
     for i,bin in enumerate(bins):
-        datacard = open('datacardsABCD/'+ signalName+ '/' +bin + '.card.txt', 'w'); 
+        datacard = open(folder+ signalName+ '/' +bin + '.card.txt', 'w'); 
         datacard.write("## Datacard for bin %s (signal %s)\n"%(bin,signalName))
         datacard.write("imax 4  number of channels \n")
         datacard.write("jmax 1  number of processes -1 \n")
@@ -170,13 +173,14 @@ if __name__ == "__main__":
 
     yds6 = YieldStore("lepYields")
     yds9 = YieldStore("lepYields")
-    pattern = "Yields/MC/lumi3fb/full/*/merged/LT*NJ6*"
+    pattern = "Yields/all/lumi2p1fb_MC1_fix/full/*/merged/LT*NJ6*"
     yds6.addFromFiles(pattern,("lep","sele")) 
-    pattern = "Yields/MC/lumi3fb/full/*/merged/LT*NJ9*"
+    pattern = "Yields/all/lumi2p1fb_MC1_fix/full/*/merged/LT*NJ9*"
     yds9.addFromFiles(pattern,("lep","sele"))
     
 
-
+    yds6.showStats()
+    yds9.showStats()
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
 
     for mLSP in range(50,900,50):
