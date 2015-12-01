@@ -1,0 +1,18 @@
+#LepGood > 0: nLepGood > 0
+
+== 1 tight lep: nLep == 1 && Lep_pt > 25
+#1 Mu: nMu == 1
+selected: Selected == 1
+veto: nVeto == 0
+
+#HTskim > 350: HT > 350
+
+nJets30 >= 5: nJets30 >= 5
+nJets30Clean >= 5: nJets30Clean >= 5
+2.JetPt > 80: Jet2_pt > 80
+
+HT > 500: HT > 500
+LT > 250: LT > 250
+
+#Nb >= 1: nBJets40 >= 1
+Nb = 0: nBJets40 == 0

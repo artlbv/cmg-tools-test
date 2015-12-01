@@ -17,7 +17,8 @@ def getPnames(fname,tdir):
     for key in gDirectory.GetListOfKeys():
 
         obj = key.ReadObj()
-        pnames.append(obj.GetName())
+        if "TH" in obj.ClassName():
+            pnames.append(obj.GetName())
 
     tfile.Close()
 
@@ -51,6 +52,7 @@ def getPredHist(tfile, hname):
     if ('data' in hname) or ("background" in hname) or ("poisson" in hname):
         # use EWK template
         hKappa = tfile.Get("Kappa/EWK")
+        if not hKappa: hKappa = tfile.Get("Kappa/"+hname)
     else:
         hKappa = tfile.Get("Kappa/"+hname)
 
@@ -97,7 +99,34 @@ def getPoissonHist(tfile, pname = "background", band = "CR_MB"):
 
     return hist
 
-def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True, lep = "ele"):
+# Systematic error on F-ratio
+qcdSysts = {
+    ('NJ45','HT0') : 0.25,
+    ('NJ45','HT1') : 0.25,
+    ('NJ45','HT2i') : 0.5,
+    ('NJ68','HT0') : 0.25,
+    ('NJ68','HT1') : 0.25,
+    ('NJ68','HT2i') : 0.5,
+    ('NJ9','HT01') : 0.75,
+    ('NJ9','HT2i') : 0.75,
+#    ('NB2','NB2') : 1.0,
+#    ('NB3','NB3') : 1.0,
+}
+
+def getQCDsystError(binname):
+
+    # Set 100% syst if NB >= 2
+    for nbbin in ['NB2','NB3']:
+        if nbbin in binname:
+            return 1.00
+
+    for njbin,htbin in qcdSysts.keys():
+        if njbin in binname and htbin in binname:
+            #print binname, njbin, htbin, qcdSysts[(njbin,htbin)]
+            return qcdSysts[(njbin,htbin)]
+    return 0
+
+def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True, applySyst = True, lep = "ele"):
     ## returns two histograms:
     ## 1. QCD prediction from anti-leptons
     ## 2. Original histo - QCD from prediction
@@ -107,16 +136,30 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
 
     fRatios = {}
 
-    if isMC: fRatios = readQCDratios("lp_LTbins_NJ34_f-ratios_MC.txt")
-    else: fRatios = readQCDratios("lp_LTbins_NJ34_f-ratios_Data.txt")
+    if isMC: fRatios = readQCDratios("fRatios_MC_lumi2p1.txt")
+    else: fRatios = readQCDratios("fRatios_Data_lumi2p1.txt")
+
+    # read bin name
+    binString = tfile.Get(band+"BinName")
+    if binString: binName = binString.GetTitle()
+    else: binName = tfile.GetName()
 
     # get bin from filename
     for key in fRatios:
-        if key in tfile.GetName():
+        if key in binName:
             (fRatio,fRatioErr) = fRatios[key]
             #print "Found matching ratios for key" , key
             break
         #else: print "No corresp fRatio found! Using default."
+
+    # get QCD syst error pn F
+    if applySyst == True:
+        systErr = getQCDsystError(binName)
+
+        #print "Fratio\t%f, old error\t%f, new error\t%f" %(fRatio,fRatioErr,hypot(fRatioErr,systErr*fRatio))
+        fRatioErr = hypot(fRatioErr,systErr*fRatio)
+        # make sure error not bigger than value itself
+        fRatioErr = min(fRatioErr,fRatio)
 
     if lep == "ele" :
 
@@ -133,7 +176,9 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
 
         # apply f-ratio
         yQCDFromAnti = fRatio*yAnti
-        yQCDFromAntiErr = sqrt((yAntiErr*fRatio)**2 + (yAnti*fRatioErr)**2)
+        yQCDFromAntiErr = hypot(yAntiErr*fRatio,yAnti*fRatioErr)
+        # make sure error is not bigger than value
+        yQCDFromAntiErr = min(yQCDFromAntiErr, yQCDFromAnti)
 
         # set bin content for ele
         hQCDpred.SetBinContent(3,2,yQCDFromAnti)
@@ -166,6 +211,9 @@ def makeQCDsubtraction(fileList):
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
+    # Apply systematic error on F-ratio?
+    applySyst = True
+
     for fname in fileList:
         tfile = TFile(fname,"UPDATE")
 
@@ -176,7 +224,7 @@ def makeQCDsubtraction(fileList):
                 else: isMC = True
 
                 #hNew = getQCDsubtrHisto(tfile,pname,bindir+"/",isMC)
-                ret  = getQCDsubtrHistos(tfile,pname,bindir+"/",isMC)
+                ret  = getQCDsubtrHistos(tfile,pname,bindir+"/",isMC, applySyst)
 
                 if not ret:
                     print 'Could not create new histo for', pname, 'in bin', bindir
@@ -194,6 +242,7 @@ def makePoissonErrors(fileList):
 
     # define hists to make make poisson errors
     pnames = ["background","QCD","EWK"] # process name
+    #pnames = [] # process name
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
@@ -237,6 +286,20 @@ def makeKappaHists(fileList):
             tfile.mkdir("Rcs_SB")
             tfile.mkdir("Kappa")
 
+            # store SB/MB names
+            sbname = tfile.Get("SR_SB/BinName")
+            if sbname:
+                #print sbname
+                sbname.SetName("SBname")
+                tfile.cd("Kappa")
+                sbname.Write()
+
+            mbname = tfile.Get("SR_MB/BinName")
+            if mbname:
+                mbname.SetName("MBname")
+                tfile.cd("Kappa")
+                mbname.Write()
+
             for pname in pnames:
 
                 hRcsMB = getRcsHist(tfile, pname, 'MB')
@@ -279,7 +342,7 @@ def makePredictHists(fileList):
     # get process names from file
     pnames = getPnames(fileList[0],'SR_MB')
 
-    print 'Found these hists:', pnames
+    #print 'Found these hists:', pnames
 
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
@@ -361,6 +424,8 @@ if __name__ == "__main__":
 
     # find files matching pattern
     fileList = glob.glob(pattern+"*.root")
+
+    if len(fileList) < 1: exit(0)
 
     makePoissonErrors(fileList)
     makeQCDsubtraction(fileList)

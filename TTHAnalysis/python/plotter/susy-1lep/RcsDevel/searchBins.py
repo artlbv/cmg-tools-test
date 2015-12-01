@@ -1,5 +1,6 @@
 # LT bins
 binsLT = {}
+binsLT['LTi'] = ('250 < LT','$\geq$ 250')
 binsLT['LT1'] = ('250 < LT && LT < 350','[250, 350]')
 binsLT['LT2'] = ('350 < LT && LT < 450','[350, 450]')
 binsLT['LT3'] = ('450 < LT && LT < 600','[450, 600]')
@@ -29,6 +30,7 @@ binsNB['NB3i'] = ('nBJet >= 3','$\geq$ 3')
 binsNJ = {}
 binsNJ['NJ34'] = ('3 <= nJets30Clean && nJets30Clean <= 4','[3, 4]')
 binsNJ['NJ4i'] = ('4 <= nJets30Clean','$\geq$ 4')
+binsNJ['NJ45'] = ('4 <= nJets30Clean && nJets30Clean <= 5','[4, 5]')
 binsNJ['NJ45f9'] = ('4 <= nJets30Clean && nJets30Clean <= 5','[4, 5]')
 binsNJ['NJ45f6'] = ('4 <= nJets30Clean && nJets30Clean <= 5','[4, 5]')
 binsNJ['NJ68'] = ('6 <= nJets30Clean && nJets30Clean <= 8','[6, 8]')
@@ -65,6 +67,33 @@ for nj_bin in ['NJ34']:#,'NJ45']:
 
                 binname = "%s_%s_%s_%s" %(lt_bin,ht_bin,nb_bin,nj_bin)
                 cutQCD[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
+
+cutQCDsyst = {}
+
+for lt_bin in ['LTi']:
+    lt_cut = binsLT[lt_bin][0]
+
+    for nj_bin in ['NJ34','NJ45','NJ68','NJ9i']:
+        nj_cut = binsNJ[nj_bin][0]
+
+        htbins = []
+
+        if nj_bin in ['NJ34']:
+            htbins += ['HT0i']
+        elif nj_bin in ['NJ45','NJ68']:
+            htbins += ['HT0','HT1','HT2i']
+        elif nj_bin in ['NJ9i']:
+            htbins += ['HT01','HT2i']
+
+        for ht_bin in htbins:
+            ht_cut = binsHT[ht_bin][0]
+
+            for nb_bin in ['NB0i','NB0','NB1','NB2i']:
+                nb_cut = binsNB[nb_bin][0]
+
+                binname = "%s_%s_%s_%s" %(lt_bin,ht_bin,nb_bin,nj_bin)
+                cutQCDsyst[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
+
 
 ### Inclusive NB,NJ,HT
 cutIncl = {}
