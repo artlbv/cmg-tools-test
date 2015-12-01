@@ -144,7 +144,7 @@ def writeBins(ofname, srcdir, binnames):
 
         srcfname = srcdir+binnames[idx]+'.yields.root'
         if not os.path.exists(srcfname):
-            print 'Could not find src file', srcfname
+            print 'Could not find src file', os.path.basename(srcfname)
             continue
 
         tfile = TFile(srcfname,"READ")
@@ -211,11 +211,16 @@ if __name__ == "__main__":
         print parser.usage
         exit(0)
 
+    # append / if pattern is a dir
+    if os.path.isdir(pattern): pattern += "/"
+
     # find files matching pattern
     fileList = glob.glob(pattern+"*.root")
 
-    mergeBins(fileList,'NJ68')
-    mergeBins(fileList,'NJ9i')
-    mergeBins(fileList,'NJ5')
+    bins = ['NJ5','NJ68','NJ9i']
+
+    for bin in bins:
+        print "Merging bin:", bin
+        mergeBins(fileList,bin)
 
     print 'Finished'
