@@ -44,16 +44,14 @@ if __name__ == "__main__":
                 fout = ROOT.TFile("%s/%s/tree.root" % (myoutpath,options.tree), "RECREATE");
             else:
                 fout = ROOT.TFile("%s/%s/%s_tree.root" % (myoutpath,options.tree,options.tree), "RECREATE");
-            fout = ROOT.TFile("%s/%s/tree.root" % (myoutpath,options.tree), "RECREATE");
             # drop and keep branches
             for drop in options.drop: mytree.SetBranchStatus(drop,0)
             for keep in options.keep: mytree.SetBranchStatus(keep,1)
             out = mytree.CopyTree(mycut)
             friends = out.GetListOfFriends() or []
             for tf in friends:
-                    out.RemoveFriend(tf.GetTree())
+                out.RemoveFriend(tf.GetTree())
             fout.WriteTObject(out,options.tree if options.oldstyle else "tree")
-            fout.WriteTObject(out,"tree")
             if histo: histo.Write()
             fout.Close()
 
