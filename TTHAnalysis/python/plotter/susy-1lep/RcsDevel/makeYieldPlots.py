@@ -27,7 +27,7 @@ colorList = [2,4,7,9,8,3,6] + range(10,50)
 _histStore = {}
 _lines = []
 
-_batchMode = True
+_batchMode = True#False
 
 colorDict = {'TT': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-2,
 'QCD':kCyan-6,'SingleT':kViolet+5,'DY':kRed-6,'TTV':kOrange-3,'data':1,'background':2,'EWK':3}
@@ -112,7 +112,7 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
 
         #binLabel = bin
         binLabel = ydict[bin].label
-        if binLabel = "": binLabel = bin
+        if binLabel == "": binLabel = bin
         # standart replacements
         binLabel = binLabel.replace("_SR","")
         binLabel = binLabel.replace("_CR","")
@@ -225,7 +225,7 @@ def getRatio(histA,histB):
     ratio.GetYaxis().SetTitle(title)
     ratio.GetYaxis().CenterTitle()
     ratio.GetYaxis().SetNdivisions(505)
-    ratio.GetYaxis().SetTitleSize(0.1)
+    ratio.GetYaxis().SetTitleSize(0.08)
     ratio.GetYaxis().SetTitleOffset(0.3)
 
     ratio.GetYaxis().SetLabelSize(0.1)
