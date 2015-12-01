@@ -84,10 +84,16 @@ if __name__ == "__main__":
     hSyst.Reset()
     hSyst.SetTitle("Syst. Error")
 
-    sysErrs = [0,25,25,50,25,25,50,100,100]
+    # PUT SYST UNC HERE
+    #sysErrs = [0,25,25,50,25,25,50,100,100]
+    sysErrs = [0,25,25,50,25,25,50,75,75]
+
     for bin in range(1,10):
         hSyst.SetBinContent(bin,mean)
         hSyst.SetBinError(bin,mean*sysErrs[bin-1]/100.)
+
+        #print hSyst.GetXaxis().GetBinLabel(bin), sysErrs[bin-1]/100.
+
     hSyst.SetFillStyle(3013)
     #hSyst.SetFillColorAlpha(16,0.7)
     hSyst.SetFillColor(16)
