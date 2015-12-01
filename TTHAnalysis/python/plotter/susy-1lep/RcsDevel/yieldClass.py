@@ -23,7 +23,7 @@ class BinYield:
         return "%s : %s : %4.2f +- %4.2f" % (self.name, self.cat, self.val, self.err)
 
     def printValue(self, prec = "4.2"):
-        return "%4.2f +- %4.2f" % (self.val, self.err), self.label, self.sbname, self.mbname
+        return "%4.2f +- %4.2f" % (self.val, self.err)
 
 class YieldStore:
 
@@ -231,11 +231,11 @@ class YieldStore:
 
         print 80*"-"
         print "Contents for", samps
-        print "Bin\tYield+-Error"
+        #print "Bin\tYield+-Error"
 
         for bin in sorted(yds.keys()):
             print bin,"\t\t",
-            for yd in yds[bin]: print yd,"\t",
+            for yd in yds[bin]: print yd.printValue(),"\t",
             print
 
         return 1
@@ -297,20 +297,22 @@ if __name__ == "__main__":
         exit(0)
 
     yds = YieldStore("bla")
-    yds.addFromFiles(pattern)
+    yds.addFromFiles(pattern,("lep","sele"))
+    #yds.addFromFiles(pattern,("ele","anti"))
 
     yds.showStats()
 
     #yds.printBins("QCD","CR_SB")
-    yds.printBins("EWK","Kappa")
+    #yds.printBins("EWK","Kappa")
 
     #yds.getSampsDict("QCD",["CR_SB","CR_MB"])
     #yds.printBins("QCD",["CR_SB","CR_MB"])
     #yds.printBins("data",yds.categories)
 
-    '''
+
     #samps = {"EWK":"CR_MB","QCD":"CR_SB"}
     #samps = {"EWK":"CR_SB","background_QCDsubtr":"CR_SB","background_QCDsubtr":"Closure"}
+
     samps = [
         ("QCD","CR_SB"),
         ("QCD_QCDpred","CR_SB"),
@@ -318,7 +320,7 @@ if __name__ == "__main__":
         ]
     #print yds.getMixDict(samps)
     yds.printMixBins(samps)
-
+    '''
     #print yds.yields
 
     cat = "SR_MB"
