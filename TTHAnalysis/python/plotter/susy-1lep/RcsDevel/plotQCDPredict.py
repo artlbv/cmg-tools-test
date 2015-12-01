@@ -1,15 +1,18 @@
 import sys,os
 
+from makeYieldPlots import _batchMode as _batch
 from makeYieldPlots import *
 
-_batchMode = False
+#_batchMode = False
+_batch = False
 
 if __name__ == "__main__":
 
     ## remove '-b' option
     if '-b' in sys.argv:
         sys.argv.remove('-b')
-        _batchMode = True
+        #_batchMode = True
+        _batch = True
 
     if len(sys.argv) > 1:
         pattern = sys.argv[1]
@@ -31,7 +34,7 @@ if __name__ == "__main__":
     colorDict["QCD_pred"] = kBlue
     colorDict["QCD_exp"] = kRed
 
-    lumi = 3
+    lumi = 2.1
 
     CMS_lumi.lumi_13TeV = str(lumi) + " fb^{-1}"
     CMS_lumi.extraText = "Simulation"
@@ -42,18 +45,20 @@ if __name__ == "__main__":
 
     for cat in cats:
 
-        hQCDexp = makeSampHisto(yds,"QCD",cat,"QCD_exp"); hQCDexp.SetTitle("QCD (MC)")
-        hQCDpred = makeSampHisto(yds,"QCD_QCDpred",cat,"QCD_pred"); hQCDpred.SetTitle("QCD (Predicted)")
+        hQCDexp = makeSampHisto(yds,"QCD",cat,"QCD_exp"); hQCDexp.SetTitle("QCD_{MC}")
+        hQCDpred = makeSampHisto(yds,"QCD_QCDpred",cat,"QCD_pred"); hQCDpred.SetTitle("QCD_{Predicted}")
 
         ratio = getPull(hQCDexp,hQCDpred)
         #ratio.GetYaxis().SetRangeUser(0,5)
 
-        canv = plotHists("QCDcheck_"+cat,[hQCDexp,hQCDpred],ratio)
+        canv = plotHists("QCD_Closure_noSyst_"+cat,[hQCDexp,hQCDpred],ratio)
 
-        if not _batchMode:
+        #if not _batchMode:
+        if not _batch:
             if "q" in raw_input("Enter any key to exit (or 'q' to stop): "): exit(0)
 
-        exts = [".pdf",".png"]
+        #exts = [".pdf",".png"]
+        exts = [".png"]
         for ext in exts:
-            canv.SaveAs("BinPlots/QCD/"+mask+canv.GetName()+ext)
+            canv.SaveAs("BinPlots/QCD/Closure/lumi2p1/"+mask+canv.GetName()+ext)
 

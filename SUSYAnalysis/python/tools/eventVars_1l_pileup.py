@@ -35,9 +35,15 @@ def getPUdict(fname, puHistName = "puRatio"):
 #puFileName_up = "../python/tools/pileup/pu_ratio_84mb.root"
 #puFileName_down = "../python/tools/pileup/pu_ratio_76mb.root"
 
-puFileName_norm = "../python/tools/pileup/pu_ratio_74mb.root"
-puFileName_up = "../python/tools/pileup/pu_ratio_70mb.root"
+'''
+puFileName_up = "../python/tools/pileup/pu_ratio_74mb.root"
+puFileName_norm = "../python/tools/pileup/pu_ratio_70mb.root"
 puFileName_down = "../python/tools/pileup/pu_ratio_66mb.root"
+'''
+
+puFileName_up = "../python/tools/pileup/pu_ratio_72p45mb.root"
+puFileName_norm = "../python/tools/pileup/pu_ratio_69mb.root"
+puFileName_down = "../python/tools/pileup/pu_ratio_65p55mb.root"
 
 puNorm =  getPUdict(puFileName_norm)
 puUp =  getPUdict(puFileName_up)
