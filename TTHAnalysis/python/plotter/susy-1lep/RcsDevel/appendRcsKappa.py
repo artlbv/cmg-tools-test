@@ -7,22 +7,22 @@ from ROOT import *
 
 from readYields import getYield
 
-def getPnames(fname,tdir):
+def getSamples(fname,tdir):
 
     tfile = TFile(fname,"READ")
     tfile.cd(tdir)
 
-    pnames = []
+    samples = []
 
     for key in gDirectory.GetListOfKeys():
 
         obj = key.ReadObj()
         if "TH" in obj.ClassName():
-            pnames.append(obj.GetName())
+            samples.append(obj.GetName())
 
     tfile.Close()
 
-    return pnames
+    return samples
 
 def getRcsHist(tfile, hname, band = "SB", merge = True):
 
@@ -86,10 +86,10 @@ def readQCDratios(fname = "lp_LTbins_NJ34_f-ratios_MC.txt"):
 
     return fDict
 
-def getPoissonHist(tfile, pname = "background", band = "CR_MB"):
+def getPoissonHist(tfile, sample = "background", band = "CR_MB"):
     # sets all bin errors to sqrt(N)
 
-    hist = tfile.Get(band+"/"+pname).Clone(pname+"_poisson")
+    hist = tfile.Get(band+"/"+sample).Clone(sample+"_poisson")
 
     if "TH" not in hist.ClassName(): return 0
 
@@ -126,7 +126,7 @@ def getQCDsystError(binname):
             return qcdSysts[(njbin,htbin)]
     return 0
 
-def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True, applySyst = True, lep = "ele"):
+def getQCDsubtrHistos(tfile, sample = "background", band = "CR_MB/", isMC = True, applySyst = True, lep = "ele"):
     ## returns two histograms:
     ## 1. QCD prediction from anti-leptons
     ## 2. Original histo - QCD from prediction
@@ -163,12 +163,12 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
 
     if lep == "ele" :
 
-        hOrig = tfile.Get(band+pname) # original histogram
+        hOrig = tfile.Get(band+sample) # original histogram
         if not hOrig: return 0
 
         ############################
         ## 1. QCD prediction
-        hQCDpred = hOrig.Clone(pname+"_QCDpred")
+        hQCDpred = hOrig.Clone(sample+"_QCDpred")
         hQCDpred.Reset() # reset counts/errors
 
         # take anti-selected ele yields
@@ -190,7 +190,7 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
 
         ############################
         ## 2. histo with QCD subtracted
-        hQCDsubtr = hOrig.Clone(pname+"_QCDsubtr")
+        hQCDsubtr = hOrig.Clone(sample+"_QCDsubtr")
 
         # do QCD subtraction only in Control Region
         if 'CR' in band:
@@ -205,9 +205,9 @@ def getQCDsubtrHistos(tfile, pname = "background", band = "CR_MB/", isMC = True,
 def makeQCDsubtraction(fileList):
 
     # define hists to make QCD estimation
-    pnames = ["background","data","QCD"] # process name
-    #pnames = ["background","QCD"] # process name
-    pnames += ["background_poisson","QCD_poisson"] # process name
+    samples = ["background","data","QCD"] # process name
+    #samples = ["background","QCD"] # process name
+    samples += ["background_poisson","QCD_poisson"] # process name
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
@@ -217,17 +217,17 @@ def makeQCDsubtraction(fileList):
     for fname in fileList:
         tfile = TFile(fname,"UPDATE")
 
-        for pname in pnames:
+        for sample in samples:
             for bindir in bindirs:
 
-                if 'data' in pname: isMC = False
+                if 'data' in sample: isMC = False
                 else: isMC = True
 
-                #hNew = getQCDsubtrHisto(tfile,pname,bindir+"/",isMC)
-                ret  = getQCDsubtrHistos(tfile,pname,bindir+"/",isMC, applySyst)
+                #hNew = getQCDsubtrHisto(tfile,sample,bindir+"/",isMC)
+                ret  = getQCDsubtrHistos(tfile,sample,bindir+"/",isMC, applySyst)
 
                 if not ret:
-                    print 'Could not create new histo for', pname, 'in bin', bindir
+                    print 'Could not create new histo for', sample, 'in bin', bindir
                 else:
                     (hQCDpred,hQCDsubtr) = ret
                     tfile.cd(bindir)
@@ -241,18 +241,18 @@ def makeQCDsubtraction(fileList):
 def makePoissonErrors(fileList):
 
     # define hists to make make poisson errors
-    pnames = ["background","QCD","EWK"] # process name
-    #pnames = [] # process name
+    samples = ["background","QCD","EWK"] # process name
+    #samples = [] # process name
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
     for fname in fileList:
         tfile = TFile(fname,"UPDATE")
 
-        for pname in pnames:
+        for sample in samples:
             for bindir in bindirs:
 
-                hist = getPoissonHist(tfile,pname,bindir)
+                hist = getPoissonHist(tfile,sample,bindir)
 
                 if hist:
                     tfile.cd(bindir)
@@ -267,10 +267,10 @@ def makeKappaHists(fileList):
     # filter
     #fileList = [fname for fname in fileList if 'NB3' not in fname]
 
-    pnames = ["x_background","x_EWK"] # process name
-    pnames = getPnames(fileList[0],'SR_MB') # get process names from file
+    samples = ["x_background","x_EWK"] # process name
+    samples = getSamples(fileList[0],'SR_MB') # get process names from file
 
-    print 'Found these hists:', pnames
+    print 'Found these hists:', samples
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
     #print bindirs
@@ -300,10 +300,10 @@ def makeKappaHists(fileList):
                 tfile.cd("Kappa")
                 mbname.Write()
 
-            for pname in pnames:
+            for sample in samples:
 
-                hRcsMB = getRcsHist(tfile, pname, 'MB')
-                hRcsSB = getRcsHist(tfile, pname, 'SB')
+                hRcsMB = getRcsHist(tfile, sample, 'MB')
+                hRcsSB = getRcsHist(tfile, sample, 'SB')
 
                 # make kappa
                 hKappa = hRcsMB.Clone(hRcsMB.GetName().replace('Rcs','Kappa'))
@@ -326,9 +326,9 @@ def makeKappaHists(fileList):
 
             '''
             yList = []
-            print 'Yields for', pname
+            print 'Yields for', sample
             for bindir in bindirs:
-                yList.append(getYield(tfile,pname,bindir))
+                yList.append(getYield(tfile,sample,bindir))
 
             print yList
             '''
@@ -340,9 +340,9 @@ def makeKappaHists(fileList):
 def makePredictHists(fileList):
 
     # get process names from file
-    pnames = getPnames(fileList[0],'SR_MB')
+    samples = getSamples(fileList[0],'SR_MB')
 
-    #print 'Found these hists:', pnames
+    #print 'Found these hists:', samples
 
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
@@ -353,16 +353,16 @@ def makePredictHists(fileList):
         if not tfile.GetDirectory("SR_MB_predict"):
             tfile.mkdir("SR_MB_predict")
 
-            for pname in pnames:
+            for sample in samples:
 
-                hPredict = getPredHist(tfile,pname)
+                hPredict = getPredHist(tfile,sample)
 
                 if hPredict:
                     tfile.cd("SR_MB_predict")
                     hPredict.Write()
-                    #print "Wrote prediction of", pname
+                    #print "Wrote prediction of", sample
                 else:
-                    print "Failed to make prediction for", pname
+                    print "Failed to make prediction for", sample
         else:
             pass
 
@@ -372,8 +372,8 @@ def makePredictHists(fileList):
 
 def makeClosureHists(fileList):
 
-    pnames = getPnames(fileList[0],'SR_MB') # get process names from file
-    #print 'Found these hists:', pnames
+    samples = getSamples(fileList[0],'SR_MB') # get process names from file
+    #print 'Found these hists:', samples
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
@@ -384,10 +384,10 @@ def makeClosureHists(fileList):
         if not tfile.GetDirectory("Closure"):
             tfile.mkdir("Closure")
 
-        for pname in pnames:
+        for sample in samples:
 
-            hPred = tfile.Get("SR_MB_predict/"+pname)#+"_pred")
-            hObs = tfile.Get("SR_MB/"+pname)
+            hPred = tfile.Get("SR_MB_predict/"+sample)#+"_pred")
+            hObs = tfile.Get("SR_MB/"+sample)
 
             hDiff = hObs.Clone(hObs.GetName())#+"_diff")
             hDiff.Add(hPred,-1)
