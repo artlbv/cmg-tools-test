@@ -126,11 +126,12 @@ def getQCDsystError(binname):
             return qcdSysts[(njbin,htbin)]
     return 0
 
-def getQCDsubtrHistos(tfile, sample = "background", band = "CR_MB/", isMC = True, applySyst = True, lep = "ele"):
+def getQCDsubtrHistos(tfile, sample = "background", band = "CR_MB/", isMC = True, applySyst = True, lep = "mu"):
     ## returns two histograms:
     ## 1. QCD prediction from anti-leptons
     ## 2. Original histo - QCD from prediction
 
+    ## Get fRatios for electrons
     fRatio = 0.3 # default
     fRatioErr = 0.01 # default
 
@@ -161,16 +162,19 @@ def getQCDsubtrHistos(tfile, sample = "background", band = "CR_MB/", isMC = True
         # make sure error not bigger than value itself
         fRatioErr = min(fRatioErr,fRatio)
 
+    ## fRatios for muons
+    fRatioMu = 0.1; fRatioMuErr = 1.00 * fRatioMu
+
+    ############################
+    # Get original histo
+    hOrig = tfile.Get(band+sample) # original histogram
+    if not hOrig: return 0
+
+    ## 1. QCD prediction
+    hQCDpred = hOrig.Clone(sample+"_QCDpred")
+    hQCDpred.Reset() # reset counts/errors
+
     if lep == "ele" :
-
-        hOrig = tfile.Get(band+sample) # original histogram
-        if not hOrig: return 0
-
-        ############################
-        ## 1. QCD prediction
-        hQCDpred = hOrig.Clone(sample+"_QCDpred")
-        hQCDpred.Reset() # reset counts/errors
-
         # take anti-selected ele yields
         yAnti = hOrig.GetBinContent(3,1); yAntiErr = hOrig.GetBinError(3,1);
 
@@ -187,29 +191,81 @@ def getQCDsubtrHistos(tfile, sample = "background", band = "CR_MB/", isMC = True
         # set bin content for lep (=ele)
         hQCDpred.SetBinContent(2,2,yQCDFromAnti)
         hQCDpred.SetBinError(2,2,yQCDFromAntiErr)
+    elif lep == "lep":
 
-        ############################
-        ## 2. histo with QCD subtracted
-        hQCDsubtr = hOrig.Clone(sample+"_QCDsubtr")
+        ## Electrons
+        # take anti-selected ele yields
+        yAntiEle = hOrig.GetBinContent(3,1); yAntiEleErr = hOrig.GetBinError(3,1);
 
-        # do QCD subtraction only in Control Region
-        if 'CR' in band:
-            # subtract prediction from histo
-            hQCDsubtr.Add(hQCDpred,-1)
+        # apply f-ratio
+        yQCDFromAntiEle = fRatio*yAntiEle
+        yQCDFromAntiEleErr = hypot(yAntiEleErr*fRatio,yAntiEle*fRatioErr)
+        # make sure error is not bigger than value
+        yQCDFromAntiEleErr = min(yQCDFromAntiEleErr, yQCDFromAntiEle)
 
-        return (hQCDpred,hQCDsubtr)
+        # set bin content for ele
+        hQCDpred.SetBinContent(3,2,yQCDFromAntiEle)
+        hQCDpred.SetBinError(3,2,yQCDFromAntiEleErr)
+
+        ## Muons
+        # take anti-selected mu yields
+        yAntiMu = hOrig.GetBinContent(1,1); yAntiMuErr = hOrig.GetBinError(1,1);
+
+        # apply f-ratio
+        yQCDFromAntiMu = fRatioMu*yAntiMu
+        yQCDFromAntiMuErr = hypot(yAntiMuErr*fRatioMu,yAntiMu*fRatioMuErr)
+        # make sure error is not bigger than value
+        yQCDFromAntiMuErr = min(yQCDFromAntiMuErr, yQCDFromAntiMu)
+
+        # set bin content for mu
+        hQCDpred.SetBinContent(1,2,yQCDFromAntiMu)
+        hQCDpred.SetBinError(1,2,yQCDFromAntiMuErr)
+
+        # set bin content for lep (=mu+ele)
+        yQCDFromAntiLep = yQCDFromAntiEle + yQCDFromAntiMu
+        yQCDFromAntiLepErr = hypot(yQCDFromAntiEleErr,yQCDFromAntiMuErr)
+        yQCDFromAntiLepErr = min(yQCDFromAntiLepErr,yQCDFromAntiLep)
+
+        hQCDpred.SetBinContent(2,2,yQCDFromAntiLep)
+        hQCDpred.SetBinError(2,2,yQCDFromAntiLepErr)
+    elif lep == "mu":
+        ## Muons
+        # take anti-selected mu yields
+        yAntiMu = hOrig.GetBinContent(1,1); yAntiMuErr = hOrig.GetBinError(1,1);
+
+        # apply f-ratio
+        yQCDFromAntiMu = fRatioMu*yAntiMu
+        yQCDFromAntiMuErr = hypot(yAntiMuErr*fRatioMu,yAntiMu*fRatioMuErr)
+        # make sure error is not bigger than value
+        yQCDFromAntiMuErr = min(yQCDFromAntiMuErr, yQCDFromAntiMu)
+
+        # set bin content for mu
+        hQCDpred.SetBinContent(1,2,yQCDFromAntiMu)
+        hQCDpred.SetBinError(1,2,yQCDFromAntiMuErr)
+
+        # set bin content for lep (=ele)
+        hQCDpred.SetBinContent(2,2,yQCDFromAntiMu)
+        hQCDpred.SetBinError(2,2,yQCDFromAntiMuErr)
     else:
-        print "QCD estimate not yet implemented for muons"
+        print "QCD estimate not yet implemented for", lep
         return 0
 
-def makeQCDsubtraction(fileList):
+    ############################
+    ## 2. histo with QCD subtracted
+    hQCDsubtr = hOrig.Clone(sample+"_QCDsubtr")
 
-    # define hists to make QCD estimation
-    samples = ["background","data","QCD"] # process name
-    #samples = ["background","QCD"] # process name
-    samples += ["background_poisson","QCD_poisson"] # process name
+    # do QCD subtraction only in Control Region
+    if 'CR' in band:
+        # subtract prediction from histo
+        hQCDsubtr.Add(hQCDpred,-1)
 
+    return (hQCDpred,hQCDsubtr)
+
+def makeQCDsubtraction(fileList, samples):
+    # hists to make QCD estimation
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
+
+    print "Making QCD subtraction for", samples
 
     # Apply systematic error on F-ratio?
     applySyst = True
@@ -238,11 +294,9 @@ def makeQCDsubtraction(fileList):
 
         tfile.Close()
 
-def makePoissonErrors(fileList):
-
-    # define hists to make make poisson errors
-    samples = ["background","QCD","EWK"] # process name
-    #samples = [] # process name
+def makePoissonErrors(fileList, samples = ["background","QCD","EWK"]):
+    # hists to make make poisson errors
+    print "Making poisson hists for:", samples
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
@@ -262,15 +316,12 @@ def makePoissonErrors(fileList):
 
         tfile.Close()
 
-def makeKappaHists(fileList):
+def makeKappaHists(fileList, samples = []):
 
-    # filter
-    #fileList = [fname for fname in fileList if 'NB3' not in fname]
+    # get process names from file if not given
+    if samples == []: samples = getSamples(fileList[0],'SR_MB')
 
-    samples = ["x_background","x_EWK"] # process name
-    samples = getSamples(fileList[0],'SR_MB') # get process names from file
-
-    print 'Found these hists:', samples
+    print "Making Rcs and Kappa hists for:", samples
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
     #print bindirs
@@ -337,14 +388,12 @@ def makeKappaHists(fileList):
 
     return 1
 
-def makePredictHists(fileList):
+def makePredictHists(fileList, samples = []):
 
     # get process names from file
-    samples = getSamples(fileList[0],'SR_MB')
+    if samples == []: samples = getSamples(fileList[0],'SR_MB')
 
-    #print 'Found these hists:', samples
-
-    #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
+    print "Making predictions for", samples
 
     for fname in fileList:
         tfile = TFile(fname,"UPDATE")
@@ -370,10 +419,10 @@ def makePredictHists(fileList):
 
     return 1
 
-def makeClosureHists(fileList):
+def makeClosureHists(fileList, samples = []):
+    if samples == []: samples = getSamples(fileList[0],'SR_MB')
 
-    samples = getSamples(fileList[0],'SR_MB') # get process names from file
-    #print 'Found these hists:', samples
+    print "Making closure hists for", samples
 
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
 
@@ -423,14 +472,33 @@ if __name__ == "__main__":
     if os.path.isdir(pattern): pattern += "/"
 
     # find files matching pattern
-    fileList = glob.glob(pattern+"*.root")
+    fileList = glob.glob(pattern+"*merge.root")
 
-    if len(fileList) < 1: exit(0)
+    if len(fileList) < 1:
+        print "Empty file list"
+        exit(0)
 
-    makePoissonErrors(fileList)
-    makeQCDsubtraction(fileList)
-    makeKappaHists(fileList)
-    makePredictHists(fileList)
-    #makeClosureHists(fileList)
+    ##################
+    # Sample names
+    ##################
+    # all sample names
+    allSamps = getSamples(fileList[0],'SR_MB')
+    print 'Found these samples:', allSamps
+
+    # make poisson errors for
+    poisSamps = ["background","QCD","EWK"]
+    poisSamps = [s for s in poisSamps if s in allSamps]
+    # do qcd prediciton for:
+    qcdPredSamps =  ["background","data","QCD", "background_poisson","QCD_poisson"]
+    qcdPredSamps = [s for s in qcdPredSamps if s in allSamps]
+    # samples to make full prediciton
+    predSamps = allSamps
+    predSaps = [s for s in predSamps if s in allSamps]
+
+    makePoissonErrors(fileList, poisSamps)
+    makeQCDsubtraction(fileList, qcdPredSamps)
+    makeKappaHists(fileList, allSamps)
+    makePredictHists(fileList, predSamps)
+    #makeClosureHists(fileList, predSamps)
 
     print 'Finished'
