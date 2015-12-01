@@ -2,7 +2,6 @@
 from CMGTools.TTHAnalysis.plotter.mcAnalysis import *
 import sys, os, os.path
 
-#from searchBins import *
 from searchBins import *
 from math import hypot
 
