@@ -20,9 +20,8 @@ def readList(fname):
             evList.add((int(sline[0]),int(sline[1]),int(sline[2])))
     return evList
 
-#cscName = "../python/tools/lists/SingleLepton_csc2015_skim_Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt"
-#cscName = "../python/tools/lists/SingleLepton_csc2015.txt"
 cscName = "/afs/desy.de/user/l/lobanov/public/SUSY/Run2/METfilters/SingleLepton_csc2015.txt"
+#cscName = "/afs/desy.de/user/l/lobanov/public/SUSY/Run2/METfilters/JetHT_csc2015.txt"
 cscList = readList(cscName)
 
 print 80*"#"
@@ -56,7 +55,7 @@ class EventVars1L_filters:
                 ret['passCSCFilterList'] = True
 
             # check filters present in event (not FastSim)
-            if hasattr(event,Flag_eeBadScFilter):
+            if hasattr(event,"Flag_eeBadScFilter"):
                 ret['passFilters'] = event.Flag_goodVertices and event.Flag_eeBadScFilter and event.Flag_HBHENoiseFilter_fix and event.Flag_HBHENoiseIsoFilter  and event.Flag_CSCTightHaloFilter and ret['passCSCFilterList']
             else:
                 ret['passFilters'] = 1

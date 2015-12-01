@@ -257,8 +257,8 @@ class EventVars1L_base:
         ##############################
         if event.isData:
             ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 0
-            ret['PD_SingleMu'] = 1
+            ret['PD_SingleEle'] = 1
+            ret['PD_SingleMu'] = 0
         else:
             ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
@@ -695,7 +695,7 @@ class EventVars1L_base:
             #ret['METfilters'] = event.Flag_goodVertices and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter)
             #ret['METfilters'] = event.nVert > 0 and event.Flag_HBHENoiseFilter_fix and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter
             # add HCAL Iso Noise
-            if hasattr(event,Flag_eeBadScFilter):
+            if hasattr(event,"Flag_eeBadScFilter"):
                 ret['METfilters'] = event.Flag_goodVertices > 0 and event.Flag_CSCTightHaloFilter and event.Flag_eeBadScFilter and event.Flag_HBHENoiseFilter_fix and event.Flag_HBHENoiseIsoFilter
             else:
                 ret['METfilters'] = 1
