@@ -56,12 +56,12 @@ if __name__ == "__main__":
     yds9 = YieldStore("lepYields")
     yds5 = YieldStore("lepYields")
 
-    pattern = "Yields/all/lumi2p1fb_MC1/full/*/merged/LT*NJ6*"
+    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins/full/*/merged/LT*NJ6*"
     yds6.addFromFiles(pattern,("lep","sele"))
-    pattern = "Yields/all/lumi2p1fb_MC1/full/*/merged/LT*NJ9*"
+    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins/full/*/merged/LT*NJ9*"
     yds9.addFromFiles(pattern,("lep","sele"))
 
-    pattern = "Yields/all/lumi2p1fb_MC1/full/grid/merged/LT*NJ5*"
+    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins/full/grid/merged/LT*NJ5*"
     yds5.addFromFiles(pattern,("lep","sele")) 
     
 
