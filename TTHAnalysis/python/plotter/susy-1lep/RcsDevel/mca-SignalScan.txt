@@ -1,8 +1,19 @@
 #Cross sections need to be double-checked
 
 #Signal samples
-T1tttt_Scan+: T1tttt : 1 ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8"
+T1tttt_Scan+: T1tttt_mGo_1500to1525_mLSP_50to1125 : susyXsec*totalNgen/susyNgen*puRatio ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8"
+T1tttt_Scan+: T1tttt_mGo_1200_mLSP_1to825 : susyXsec*totalNgen/susyNgen*puRatio ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8"
+T1tttt_Scan+: T1tttt_mGo_1475to1500_mLSP_1to1250 : susyXsec*totalNgen/susyNgen*puRatio ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8"
 
 # for Systematics
-T1tttt_Scan_Xsec-Up+: T1tttt : 1*1.1 ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Up)"
-T1tttt_Scan_Xsec-Down+: T1tttt : 1*0.9 ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Down)"
+T1tttt_Scan_Xsec-Up+: T1tttt_mGo_1500to1525_mLSP_50to1125 : susyXsec*totalNgen/susyNgen*1.1*puRatio; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Up)"
+T1tttt_Scan_Xsec-Down+: T1tttt_mGo_1500to1525_mLSP_50to1125 : susyXsec*totalNgen/susyNgen*0.9*puRatio ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Down)"
+
+
+# for Systematics
+T1tttt_Scan_Xsec-Up+: T1tttt_mGo_1200_mLSP_1to825 : susyXsec*totalNgen/susyNgen*1.1*puRatio; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Up)"
+T1tttt_Scan_Xsec-Down+: T1tttt_mGo_1200_mLSP_1to825 : susyXsec*totalNgen/susyNgen*0.9*puRatio ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Down)"
+
+
+T1tttt_Scan_Xsec-Up+: T1tttt_mGo_1475to1500_mLSP_1to1250 : susyXsec*totalNgen/susyNgen*1.1*puRatio; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Up)"
+T1tttt_Scan_Xsec-Down+: T1tttt_mGo_1475to1500_mLSP_1to1250 : susyXsec*totalNgen/susyNgen*0.9*puRatio ; FillColor=ROOT.kBlack,   Label="T1t^{4} 1.2/0.8 (Xsec Down)"
