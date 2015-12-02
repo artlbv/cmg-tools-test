@@ -126,7 +126,7 @@ def getQCDsystError(binname):
             return qcdSysts[(njbin,htbin)]
     return 0
 
-def getQCDsubtrHistos(tfile, sample = "background", band = "CR_MB/", isMC = True, applySyst = True, lep = "mu"):
+def getQCDsubtrHistos(tfile, sample = "background", band = "CR_MB/", isMC = True, applySyst = True, lep = "ele"):
     ## returns two histograms:
     ## 1. QCD prediction from anti-leptons
     ## 2. Original histo - QCD from prediction
@@ -280,7 +280,7 @@ def makeQCDsubtraction(fileList, samples):
                 else: isMC = True
 
                 #hNew = getQCDsubtrHisto(tfile,sample,bindir+"/",isMC)
-                ret  = getQCDsubtrHistos(tfile,sample,bindir+"/",isMC, applySyst)
+                ret  = getQCDsubtrHistos(tfile,sample,bindir+"/",isMC, applySyst, "lep")
 
                 if not ret:
                     print 'Could not create new histo for', sample, 'in bin', bindir
@@ -490,15 +490,15 @@ if __name__ == "__main__":
     poisSamps = [s for s in poisSamps if s in allSamps]
     # do qcd prediciton for:
     qcdPredSamps =  ["background","data","QCD", "background_poisson","QCD_poisson"]
-    qcdPredSamps = [s for s in qcdPredSamps if s in allSamps]
+    #qcdPredSamps = [s for s in qcdPredSamps if s in allSamps]
     # samples to make full prediciton
-    predSamps = allSamps
-    predSaps = [s for s in predSamps if s in allSamps]
+    predSamps = allSamps + ["background_poisson","QCD_poisson"]
+    #predSaps = [s for s in predSamps if s in allSamps]
 
     makePoissonErrors(fileList, poisSamps)
     makeQCDsubtraction(fileList, qcdPredSamps)
-    makeKappaHists(fileList, allSamps)
-    makePredictHists(fileList, predSamps)
+    makeKappaHists(fileList)#, predSamps)
+    makePredictHists(fileList)#, predSamps)
     #makeClosureHists(fileList, predSamps)
 
     print 'Finished'
