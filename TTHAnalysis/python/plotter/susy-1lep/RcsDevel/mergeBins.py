@@ -95,6 +95,10 @@ def findMatchBins(binname):
         njSB = 'NJ45f9'
     elif 'NJ5' in binname:
         njSB = 'NJ4f5'
+    else:
+        print "No match found"
+        exit(0)
+
     SBname = matchSB(binname)# + '_NJ45'
     SBname = SBname[:SBname.find('_NJ')] + '_' + njSB
     SR_SBname = SBname + '_SR'
