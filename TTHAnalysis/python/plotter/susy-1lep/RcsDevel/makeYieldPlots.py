@@ -123,8 +123,8 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
         #binLabel = binLabel.replace("NB0","")
         #binLabel = binLabel.replace("NB2i","")
 
-        #binLabel = binLabel.replace("_NJ68","")
-        #binLabel = binLabel.replace("_NJ9i","")
+        binLabel = binLabel.replace("_NJ68","")
+        binLabel = binLabel.replace("_NJ9i","")
         #binLabel = binLabel.replace("_",",")
 
         newLabel = "#splitline"
@@ -150,10 +150,11 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     hist.GetXaxis().LabelsOption("h")
 
     # Style
-    if ("Kappa" not in cat) and ("Rcs" not in cat):
-        col = getSampColor(hist.GetName())
-    else:
-        col = colorList[ind]
+    col = getSampColor(hist.GetName())
+    #if ("Kappa" not in cat) and ("Rcs" not in cat):
+    #    col = getSampColor(hist.GetName())
+    #else:
+    #    col = colorList[ind]
     #print "color for %s  %i" %(hist.GetName(),col)
 
     if "data" not in hist.GetName():
@@ -168,10 +169,10 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     hist.SetMarkerStyle(20)
 
     if "Kappa" in cat:
-        hist.GetYaxis().SetRangeUser(0.05,1.95)
+        #hist.GetYaxis().SetRangeUser(0.05,1.95)
         hist.GetYaxis().SetTitle("Kappa")
     elif "Rcs" in cat:
-        hist.GetYaxis().SetRangeUser(0.005,0.35)
+        #hist.GetYaxis().SetRangeUser(0.005,0.35)
         hist.GetYaxis().SetTitle("R_{CS}")
     else:
         hist.GetYaxis().SetTitle("Events")
@@ -213,6 +214,25 @@ def getMarks(hist):
             marks.append(bin)
 
     return marks
+
+def prepRatio(hist):
+
+    hist.GetYaxis().CenterTitle()
+    hist.GetYaxis().SetNdivisions(505)
+    hist.GetYaxis().SetTitleSize(0.08)
+    hist.GetYaxis().SetTitleOffset(0.3)
+
+    hist.GetYaxis().SetLabelSize(0.1)
+    hist.GetYaxis().SetRangeUser(0.05,2.1)
+
+    hist.GetXaxis().SetLabelSize(0.1)
+
+    hist.SetLineColor(1)
+    hist.SetMarkerColor(1)
+    hist.SetFillColor(0)
+    hist.SetFillStyle(0)
+
+    return hist
 
 
 def getRatio(histA,histB):
