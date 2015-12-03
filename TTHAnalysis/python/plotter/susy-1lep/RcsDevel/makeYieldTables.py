@@ -112,3 +112,16 @@ if __name__ == "__main__":
     yds9.printLatexTable(samps, printSamps, label, f)
     printLatexFooter(f)
 
+
+
+    f =  open('RCS_mc.tex','w')
+    label = 'Rcs values from SB and MB and kappa'
+
+    printSamps = ['$R_{CS}$ [6,8] jets','$R_{CS}$ [4,5] jets','$\kappa$']
+    samps = [('EWK','Rcs_MB'),('EWK','Rcs_SB'),('EWK','Kappa')]
+    printLatexHeader(len(samps), f)
+    yds6.printLatexTable(samps, printSamps, label,f) 
+    printSamps = ['$R_{CS}$ $\geq$ 9 jets','$R_{CS}$ [4,5] jets','$\kappa$']
+    samps = [('EWK','Rcs_MB'),('EWK','Rcs_SB'),('EWK','Kappa')]
+    yds9.printLatexTable(samps, printSamps, label,f) 
+    printLatexFooter(f)
