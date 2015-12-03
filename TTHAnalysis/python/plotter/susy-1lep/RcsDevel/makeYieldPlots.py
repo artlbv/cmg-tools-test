@@ -18,7 +18,7 @@ import CMS_lumi
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
 iPos = 11
-if( iPos==0 ): CMS_lumi.relPosX = 0.1
+if( iPos==0 ): CMS_lumi.relPosX = 0.2
 
 
 ## Global vars
@@ -29,22 +29,27 @@ _lines = []
 
 _batchMode = True#False
 
-colorDict = {'TT': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-2,
+colorDict = {'TTj': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-2,
              'QCD':kCyan-6,'SingleT':kViolet+5,'DY':kRed-6,'TTV':kOrange-3,'data':1,'background':2,'EWK':3}
 
-def doLegend(nEntr = None):
+def doLegend(pos = "TM",nEntr = None):
 
-    if nEntr:
-        leg = TLegend(0.4,0.875-(nEntr*0.2),0.6,0.875)
-    else:
-        #leg = TLegend(0.4,0.5,0.6,0.85)
-        leg = TLegend(0.3,0.5,0.45,0.85)
-        leg.SetBorderSize(1)
-        leg.SetTextFont(62)
-        leg.SetTextSize(0.03321678)
-        leg.SetLineColor(0)
-        leg.SetLineStyle(0)
-        leg.SetLineWidth(0)
+    if pos == "TM":
+        if nEntr:
+            leg = TLegend(0.4,0.875-(nEntr*0.2),0.6,0.875)
+        else:
+            #leg = TLegend(0.4,0.5,0.6,0.85)
+            leg = TLegend(0.3,0.5,0.45,0.85)
+    elif pos == "Long":
+        leg = TLegend(0.3,0.75,0.85,0.85)
+
+    leg.SetBorderSize(1)
+    leg.SetTextFont(62)
+    leg.SetTextSize(0.03321678)
+    leg.SetLineColor(0)
+    leg.SetLineStyle(0)
+    leg.SetLineWidth(0)
+
     if _batchMode == False: leg.SetFillColor(0)
     else: leg.SetFillColorAlpha(0,_alpha)
 
@@ -150,7 +155,8 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     hist.GetXaxis().LabelsOption("h")
 
     # Style
-    col = getSampColor(hist.GetName())
+    #col = getSampColor(hist.GetName())
+    col = getSampColor(samp)
     #if ("Kappa" not in cat) and ("Rcs" not in cat):
     #    col = getSampColor(hist.GetName())
     #else:
@@ -354,12 +360,20 @@ def getCatLabel(name):
 
     return cname
 
-def plotHists(cname, histList, ratio = None):
+def plotHists(cname, histList, ratio = None, legPos = "TM"):
 
     canv = TCanvas(cname,cname,1400,600)
     #canv = TCanvas(cname,cname,800,600)
     #leg = doLegend(len(histList)+1)
-    leg = doLegend()
+    leg = doLegend(legPos)
+    if legPos == "Long":
+        nh = 1
+        for hist in histList:
+            if hist.ClassName() == "THStack":
+                nh += len(hist.GetHists())
+            else:
+                nh += 1
+        leg.SetNColumns(nh)
 
     SetOwnership(canv, 0)
     SetOwnership(leg, 0)
@@ -433,13 +447,25 @@ def plotHists(cname, histList, ratio = None):
     ymax = 1.3*max([h.GetMaximum() for h in histList])
     ymin = 0.8*min([h.GetMinimum() for h in histList])
 
-    ymax = 1
-    ymin = 0
+    # make dummy for stack
+    if histList[0].ClassName() == "THStack":
+        dummy = histList[0].GetHists()[0].Clone("dummy")
+        dummy.Reset()
+        # draw dymmy first
+        _histStore[dummy.GetName()] = dummy
+        histList = [dummy] + histList
 
     for i,hist in enumerate(histList):
 
-        if  hist.ClassName() == 'THStack':
-            hist.Draw("HIST")
+        # range
+        hist.SetMaximum(ymax)
+        hist.SetMinimum(ymin)
+
+        if "dummy" == hist.GetName():
+            hist.Draw()
+        elif  hist.ClassName() == 'THStack':
+            #continue
+            hist.Draw("HISTsame")
             hist.GetXaxis().LabelsOption("h")
             hist.GetYaxis().SetTitle("Events")
             hist.GetYaxis().SetTitleSize(0.06)
@@ -471,11 +497,6 @@ def plotHists(cname, histList, ratio = None):
             hist.GetXaxis().SetLabelOffset(1)
 
         if i == 0:
-
-            # range
-            hist.SetMaximum(ymax)
-            hist.SetMinimum(ymin)
-
             # do vertical lines
             marks = getMarks(hist)
             if len(marks) != 0:
@@ -496,7 +517,7 @@ def plotHists(cname, histList, ratio = None):
     leg.Draw()
     SetOwnership(leg,0)
 
-# draw CMS lumi
+    # draw CMS lumi
     if ratio != None:
         CMS_lumi.CMS_lumi(p1, 4, iPos)
     else:
@@ -538,24 +559,24 @@ if __name__ == "__main__":
     #hist = makeSampHisto(yd,"h")
 
     samps = [
-        ("background_QCDsubtr","CR_SB"),
-        ("EWK","CR_SB"),
-        ("data_QCDsubtr","CR_SB"),
-        ]
+    ("background_QCDsubtr","CR_SB"),
+    ("EWK","CR_SB"),
+    ("data_QCDsubtr","CR_SB"),
+    ]
 
     yds.printMixBins(samps)
 
     samps = [
-        ("background","CR_SB"),
-        ("background_QCDsubtr","CR_SB"),
-        ("EWK","CR_SB"),
-        #("data_QCDsubtr","CR_SB"),
-        ]
+    ("background","CR_SB"),
+    ("background_QCDsubtr","CR_SB"),
+    ("EWK","CR_SB"),
+    #("data_QCDsubtr","CR_SB"),
+    ]
 
     sampsRcs = [
-        ("EWK","Rcs_SB"),
-        ("EWK","Rcs_MB"),
-        ]
+    ("EWK","Rcs_SB"),
+    ("EWK","Rcs_MB"),
+    ]
 
     rcsHists = makeSampHists(yds,sampsRcs)
     hKappa = makeSampHists(yds,[("EWK","Kappa")])[0]
