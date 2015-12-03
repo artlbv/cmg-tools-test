@@ -32,47 +32,74 @@ if __name__ == "__main__":
     ydsMu = YieldStore("Mu")
     ydsMu.addFromFiles(pattern,("mu","sele"))
 
-    ydsMuAnti = YieldStore("MuAnti")
-    ydsMuAnti.addFromFiles(pattern,("mu","anti"))
+    #ydsMuAnti = YieldStore("MuAnti")
+    #ydsMuAnti.addFromFiles(pattern,("mu","anti"))
 
     # Category
-    #cats = ["CR_MB","CR_SB"]
-    cats = ["CR_SB"]
+    cats = ["CR_MB","CR_SB"]
+    #cats = ["CR_SB"]
+
+    canvs = []
 
     for cat in cats:
 
         # ele
         colorDict["QCD_Ele_"+cat] = kRed
-        hEle = makeSampHisto(ydsEle,"QCD",cat,"QCD_Ele_"+cat)
+        hEle = makeSampHisto(ydsEle,"QCD_poisson",cat,"QCD_Ele_"+cat)
         hEle.SetTitle("QCD (ele)")
 
         # muons
         colorDict["QCD_Mu_"+cat] = kBlue
-        hMu = makeSampHisto(ydsMu,"QCD",cat,"QCD_Mu_"+cat)
+        hMu = makeSampHisto(ydsMu,"QCD_poisson",cat,"QCD_Mu_"+cat)
         hMu.SetTitle("QCD (#mu)")
 
+        '''
         # muons
         colorDict["QCD_AntiMu_"+cat] = kCyan
         hMuAnti = makeSampHisto(ydsMuAnti,"QCD",cat,"QCD_AntiMu_"+cat)
         hMuAnti.SetTitle("QCD (anti-#mu) x0.1")
         hMuAnti.Scale(1/10.)
+        '''
 
         ## MC
         colorDict["MC_Ele_"+cat] = kOrange-3
-        hMCele = makeSampHisto(ydsEle,"background",cat,"MC_Ele_"+cat)
-        hMCele.SetTitle("MC (ele)")
+        hMCele = makeSampHisto(ydsEle,"background_poisson",cat,"MC_Ele_"+cat)
+        hMCele.SetTitle("QCD+EWK (ele)")
 
         colorDict["MC_Mu_"+cat] = kCyan
         hMCmu = makeSampHisto(ydsMu,"background_poisson",cat,"MC_Mu_"+cat)
-        hMCmu.SetTitle("MC (#mu)")
+        hMCmu.SetTitle("QCD+EWK (#mu)")
+
+        # ratios and plots
+        ratMu = getRatio(hMu,hMCmu)
+        ratMu.GetYaxis().SetRangeUser(0,0.105)
+
+        canv = plotHists("QCD_vs_MC_Mu_"+cat,[hMCmu,hMu],ratMu)
+        canv.SetName("Selected_poisson_QCD_vs_MC_Mu_"+cat)
+        canvs.append(canv)
+
+        ratEle = getRatio(hEle,hMCele)
+        ratEle.GetYaxis().SetRangeUser(0,0.35)
+
+        canv = plotHists("QCD_vs_MC_Ele_"+cat,[hMCele,hEle],ratEle)
+        canv.SetName("Selected_poisson_QCD_vs_MC_Ele_"+cat)
+        canvs.append(canv)
+
+        '''
+        # Mu/Ele
+        ratEM = getRatio(hMu,hEle)
+        ratEM.GetYaxis().SetRangeUser(0,0.35)
+
+        canv = plotHists("QCD_Ele_vs_Mu_"+cat,[hEle, hMu],ratEM)
+        canv.SetName("Selected_QCD_Ele_vs_Mu_"+cat)
+        canvs.append(canv)
+        '''
 
         #ratio = getRatio(hMu,hEle)
         #ratio = getPull(hSele,hEle)
         #ratio = getRatio(hEle,hMCele)
-        ratio = getRatio(hMu,hMCmu)
         #ratio = getRatio(hMu,hMuAnti)
         #ratio.GetYaxis().SetRangeUser(-0.45,0.45)
-        ratio.GetYaxis().SetRangeUser(0,0.105)
         #ratio.GetYaxis().SetRangeUser(0,1.5)
 
         #canv = plotHists("Sele_Vs_HE_New_EleMu_"+cat,[hEle,hSele],ratio)
@@ -81,14 +108,18 @@ if __name__ == "__main__":
         #canv = plotHists("Sele_QCD_EleVsMu_"+cat,[hEle,hMu],ratio)
 
         #canv = plotHists("Sele_QCDvsMC_Ele_"+cat,[hMCele,hEle],ratio)
-        canv = plotHists("Sele_QCD_vs_MCpois_Mu_"+cat,[hMCmu,hMu],ratio)
         #canv = plotHists("QCD_Mu_Sele_vs_Anti"+cat,[hMuAnti,hMu],ratio)
         #canv = plotHists("Sele_QCDvsMC_Lep_"+cat,[hMCele,hMCmu,hEle,hMu])
 
         if not _batchMode: raw_input("Enter any key to exit")
 
-        exts = [".pdf",".png"]
-        #exts = [".pdf"]
+    # Save canvases
+    exts = [".pdf",".png"]
+    #exts = [".pdf"]
+
+    odir = "BinPlots/QCD/lumi2p1fb/MCCompare/"
+
+    for canv in canvs:
         for ext in exts:
-            canv.SaveAs("BinPlots/QCD/lumi2p1/MCCompare/"+mask+canv.GetName()+ext)
+            canv.SaveAs(odir+mask+canv.GetName()+ext)
 
