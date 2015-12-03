@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     # Category
     #cat = "CR_MB"
-    cats = ["CR_MB","CR_SB"]
+    cats = ["CR_SB","CR_MB"]
 
     for cat in cats:
 
@@ -51,14 +51,14 @@ if __name__ == "__main__":
         ratio = getPull(hQCDexp,hQCDpred)
         #ratio.GetYaxis().SetRangeUser(0,5)
 
-        canv = plotHists("QCD_Closure_noSyst_"+cat,[hQCDexp,hQCDpred],ratio)
+        canv = plotHists("QCD_Closure_"+cat,[hQCDexp,hQCDpred],ratio)
 
         #if not _batchMode:
         if not _batch:
             if "q" in raw_input("Enter any key to exit (or 'q' to stop): "): exit(0)
 
         #exts = [".pdf",".png"]
-        exts = [".png"]
+        exts = [".pdf"]
         for ext in exts:
             canv.SaveAs("BinPlots/QCD/Closure/lumi2p1/"+mask+canv.GetName()+ext)
 
