@@ -5,7 +5,7 @@ import sys
 from yieldClass import *
 from ROOT import *
 def printDataCard(yds, ydsObs, ydsSysSig):
-    folder = 'datacards/'
+    folder = 'datacards_2p1bins/'
     bins = sorted(yds.keys())
 
     sampNames = [x.name for x in yds[bins[0]]]
@@ -56,7 +56,7 @@ def printDataCard(yds, ydsObs, ydsSysSig):
 
 
 def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
-    folder = 'datacardsABCD/'
+    folder = 'datacardsABCD_2p1bins/'
     bins = sorted(yds.keys())
 
     catNames = [x.cat for x in yds[bins[0]] ]
@@ -77,7 +77,8 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
         os.mkdir(folder + signalName ) 
 
     print sampUniqueNames
-    iproc = { key: i for (i,key) in enumerate(sorted(reversed(sampUniqueNames)))}
+    iproc = { key: i+1 for (i,key) in enumerate(sorted(reversed(sampUniqueNames)))}
+    iproc.update({signalName: 0})
     print iproc
     for i,bin in enumerate(bins):
         datacard = open(folder+ signalName+ '/' +bin + '.card.txt', 'w'); 
@@ -173,9 +174,9 @@ if __name__ == "__main__":
 
     yds6 = YieldStore("lepYields")
     yds9 = YieldStore("lepYields")
-    pattern = "Yields/all/lumi2p1fb_MC1_fix/full/*/merged/LT*NJ6*"
+    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins/full/*/merged/LT*NJ6*"
     yds6.addFromFiles(pattern,("lep","sele")) 
-    pattern = "Yields/all/lumi2p1fb_MC1_fix/full/*/merged/LT*NJ9*"
+    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins/full/*/merged/LT*NJ9*"
     yds9.addFromFiles(pattern,("lep","sele"))
     
 
@@ -183,37 +184,39 @@ if __name__ == "__main__":
     yds9.showStats()
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
 
-    for mLSP in range(50,900,50):
-        for ydIn in (yds6, yds9):
-            print "making datacards for 1500/"+str(mLSP)
-            signal = 'T1tttt_Scan_mGo1500_mLSP'+str(mLSP)
-            cat = 'SR_MB'
-            sampsObs = [('background',cat),]
-            ydsObs = ydIn.getMixDict(sampsObs)
-            sampsBkg = [('TTsemiLep',cat),('TTdiLep',cat),('TTV',cat), ('SingleT',cat), ('WJets',cat), ('DY',cat), ('QCD',cat),]
-            sampsSig = [(signal ,cat),]
-            sampsSys = [('T1tttt_Scan_Xsec_syst_mGo1500_mLSP'+str(mLSP),cat), ]
+    for mGo in (1200, 1500):
+        for mLSP in range(50,900,50):
+            for ydIn in (yds6, yds9):
+                print "making datacards for "+str(mGo)+ ' '+str(mLSP)
+                signal = 'T1tttt_Scan_mGo'+str(mGo)+'_mLSP'+str(mLSP)
+                cat = 'SR_MB'
+                sampsObs = [('background',cat),]
+                ydsObs = ydIn.getMixDict(sampsObs)
+                sampsBkg = [('TTsemiLep',cat),('TTdiLep',cat),('TTV',cat), ('SingleT',cat), ('WJets',cat), ('DY',cat), ('QCD',cat),]
+                sampsSig = [(signal ,cat),]
+                sampsSys = [('T1tttt_Scan_Xsec_syst_mGo'+str(mGo)+'_mLSP'+str(mLSP),cat), ]
     #signal still is scaled wrong double check
-            samps = sampsBkg + sampsSig
-            ydsSig = ydIn.getMixDict(sampsSig)
-            if type(ydsSig.values()[0][0]) == int:
-                print "signal not available will skip"
-                continue
-
-            yds = ydIn.getMixDict(samps)
-            ydsSigSys = ydIn.getMixDict(sampsSys)
-            
-            printDataCard(yds, ydsObs, ydsSigSys)
-
-            cats = ('SR_MB', 'CR_MB', 'SR_SB','CR_SB')
-            sampsABCDbkg = [('background',cat) for cat in cats]
-            sampsABCDsig = [('T1tttt_Scan_mGo1500_mLSP'+str(mLSP),cat) for cat in cats]
-            sampsABCDSigSys = [('T1tttt_Scan_Xsec_syst_mGo1500_mLSP'+str(mLSP),cat) for cat in cats ]
-            sampsABCD = sampsABCDbkg + sampsABCDsig
-            
-            ydsABCD = ydIn.getMixDict(sampsABCD)
-            ydsObsABCD = ydIn.getMixDict(sampsABCDbkg)
-            ydsKappa = ydIn.getMixDict([('EWK','Kappa'), ('QCD','CR_MB'), ('QCD','CR_SB') ])
-            ydsABCDSigSys = ydIn.getMixDict(sampsABCDSigSys)
-
-            printABCDCard(ydsABCD, ydsObsABCD, ydsKappa, ydsABCDSigSys)
+                samps = sampsBkg + sampsSig
+                ydsSig = ydIn.getMixDict(sampsSig)
+                if type(ydsSig.values()[0][0]) == int:
+                    print "signal not available will skip"
+                    continue
+                
+                yds = ydIn.getMixDict(samps)
+                ydsSigSys = ydIn.getMixDict(sampsSys)
+                
+                printDataCard(yds, ydsObs, ydsSigSys)
+                
+                cats = ('SR_MB', 'CR_MB', 'SR_SB','CR_SB')
+                sampsABCDbkg = [('background',cat) for cat in cats]
+                sampsABCDsig = [('T1tttt_Scan_mGo'+str(mGo)+'_mLSP'+str(mLSP),cat) for cat in cats]
+                sampsABCDSigSys = [('T1tttt_Scan_Xsec_syst_mGo'+str(mGo)+'_mLSP'+str(mLSP),cat) for cat in cats ]
+                sampsABCD = sampsABCDbkg + sampsABCDsig
+                
+                ydsABCD = ydIn.getMixDict(sampsABCD)
+                ydsObsABCD = ydIn.getMixDict(sampsABCDbkg)
+                ydsKappa = ydIn.getMixDict([('EWK','Kappa'), ('QCD','CR_MB'), ('QCD','CR_SB') ])
+                ydsABCDSigSys = ydIn.getMixDict(sampsABCDSigSys)
+                
+                printABCDCard(ydsABCD, ydsObsABCD, ydsKappa, ydsABCDSigSys)
+                
