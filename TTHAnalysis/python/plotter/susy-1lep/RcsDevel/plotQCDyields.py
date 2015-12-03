@@ -85,6 +85,10 @@ if __name__ == "__main__":
         canv.SetName("Selected_poisson_QCD_vs_MC_Ele_"+cat)
         canvs.append(canv)
 
+        canv = plotHists("QCD_vs_MC_"+cat,[hMCele,hMCmu,hEle,hMu],[ratEle,ratMu])
+        canv.SetName("Selected_poisson_QCD_vs_MC_"+cat)
+        canvs.append(canv)
+
         '''
         # Mu/Ele
         ratEM = getRatio(hMu,hEle)
@@ -114,12 +118,11 @@ if __name__ == "__main__":
         if not _batchMode: raw_input("Enter any key to exit")
 
     # Save canvases
-    exts = [".pdf",".png"]
-    #exts = [".pdf"]
+    #exts = [".pdf",".png"]
+    exts = [".C"]
 
     odir = "BinPlots/QCD/lumi2p1fb/MCCompare/"
 
     for canv in canvs:
         for ext in exts:
             canv.SaveAs(odir+mask+canv.GetName()+ext)
-
