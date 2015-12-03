@@ -9,7 +9,7 @@ gStyle.SetOptTitle(0)
 gStyle.SetOptStat(0)
 gStyle.SetPadTopMargin(0.075)
 gStyle.SetPadRightMargin(0.075)
-gStyle.SetPadBottomMargin(0.225)
+gStyle.SetPadBottomMargin(0.25)
 gStyle.SetLegendBorderSize(0)
 
 ## CMS LUMI
@@ -119,12 +119,12 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
         binLabel = binLabel.replace("f6","")
         binLabel = binLabel.replace("f9","")
 
-        #binLabel = binLabel.replace("LTi","")
+        binLabel = binLabel.replace("LTi","")
         #binLabel = binLabel.replace("NB0","")
         #binLabel = binLabel.replace("NB2i","")
 
-        binLabel = binLabel.replace("_NJ68","")
-        binLabel = binLabel.replace("_NJ9i","")
+        #binLabel = binLabel.replace("_NJ68","")
+        #binLabel = binLabel.replace("_NJ9i","")
         #binLabel = binLabel.replace("_",",")
 
         newLabel = "#splitline"
@@ -258,6 +258,7 @@ def getRatio(histA,histB):
     ratio.SetFillColor(0)
     ratio.SetFillStyle(0)
 
+    _histStore[ratio.GetName()] = ratio
     return ratio
 
 def getPull(histA,histB):
