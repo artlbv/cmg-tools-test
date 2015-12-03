@@ -30,7 +30,7 @@ _lines = []
 _batchMode = True#False
 
 colorDict = {'TT': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-2,
-'QCD':kCyan-6,'SingleT':kViolet+5,'DY':kRed-6,'TTV':kOrange-3,'data':1,'background':2,'EWK':3}
+             'QCD':kCyan-6,'SingleT':kViolet+5,'DY':kRed-6,'TTV':kOrange-3,'data':1,'background':2,'EWK':3}
 
 def doLegend(nEntr = None):
 
@@ -39,17 +39,17 @@ def doLegend(nEntr = None):
     else:
         #leg = TLegend(0.4,0.5,0.6,0.85)
         leg = TLegend(0.3,0.5,0.45,0.85)
-    leg.SetBorderSize(1)
-    leg.SetTextFont(62)
-    leg.SetTextSize(0.03321678)
-    leg.SetLineColor(0)
-    leg.SetLineStyle(0)
-    #leg.SetLineWidth(1)
+        leg.SetBorderSize(1)
+        leg.SetTextFont(62)
+        leg.SetTextSize(0.03321678)
+        leg.SetLineColor(0)
+        leg.SetLineStyle(0)
+        leg.SetLineWidth(0)
     if _batchMode == False: leg.SetFillColor(0)
     else: leg.SetFillColorAlpha(0,_alpha)
 
-    #leg.SetFillStyle(1001)
-    leg.SetFillStyle(0)
+    leg.SetFillStyle(1001)
+    #leg.SetFillStyle(0)
 
     return leg
 
@@ -177,7 +177,7 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     else:
         hist.GetYaxis().SetTitle("Events")
 
-    SetOwnership(hist, 0)
+    #SetOwnership(hist, 0)
     _histStore[hist.GetName()] = hist
     return hist
 
@@ -196,6 +196,9 @@ def makeSampHists(yds,samps):
     return histList
 
 def getMarks(hist):
+
+    if hist.ClassName() == "THStack":
+        hist = hist.GetHistogram()
 
     # line markers
     marks = []
@@ -365,6 +368,14 @@ def plotHists(cname, histList, ratio = None):
     leg.SetHeader(head)
 
     if ratio != None:
+
+        if type(ratio) == list:
+            ratios = ratio
+            ratio = ratios[0]
+            multRatio = True
+        else:
+            multRatio = False
+
         #canv.SetWindowSize(600 + (600 - canv.GetWw()), (750 + (750 - canv.GetWh())));
         p2 = TPad("pad2","pad2",0,0,1,0.31);
         p2.SetTopMargin(0);
@@ -408,6 +419,9 @@ def plotHists(cname, histList, ratio = None):
                 line.Draw("same")
                 _lines.append(line)
 
+        if multRatio:
+            for rat in ratios[1:]:
+                rat.Draw("pe1same")
 
         p1.cd();
     else:
@@ -418,6 +432,9 @@ def plotHists(cname, histList, ratio = None):
     # get Y-maximum/minimum
     ymax = 1.3*max([h.GetMaximum() for h in histList])
     ymin = 0.8*min([h.GetMinimum() for h in histList])
+
+    ymax = 1
+    ymin = 0
 
     for i,hist in enumerate(histList):
 
@@ -447,7 +464,7 @@ def plotHists(cname, histList, ratio = None):
                 hist.Draw(plotOpt+"pE2")
             else:
                 hist.Draw(plotOpt+"pE5")
-            leg.AddEntry(hist,hist.GetTitle(),"pf")
+                leg.AddEntry(hist,hist.GetTitle(),"pf")
 
         # remove axis label with ratio
         if i == 0 and ratio != None:
@@ -455,8 +472,12 @@ def plotHists(cname, histList, ratio = None):
 
         if i == 0:
 
-            marks = getMarks(hist)
+            # range
+            hist.SetMaximum(ymax)
+            hist.SetMinimum(ymin)
+
             # do vertical lines
+            marks = getMarks(hist)
             if len(marks) != 0:
                 #print marks
                 axis = hist.GetXaxis()
@@ -468,10 +489,6 @@ def plotHists(cname, histList, ratio = None):
                     if i == 3: line.SetLineStyle(2) # nj6 -> nj9
                     line.Draw("same")
                     _lines.append(line)
-
-            # range
-            hist.SetMaximum(ymax)
-            hist.SetMinimum(ymin)
 
         if "same" not in plotOpt: plotOpt += "same"
 
