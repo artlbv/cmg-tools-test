@@ -6,9 +6,11 @@ from searchBins import *
 from math import hypot
 
 # trees
-Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2"
+#Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2"
+Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/25ns/MiniAODv2/Signal/NoSkim/T1tttt_JECfFS/skims/HT500_1LepGood_noGenPartAll"
 mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/MC/allSamps_pu69mb"
-sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Signals/T1tttt_pu69mb_fixMLSP"
+#sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Signals/T1tttt_pu69mb_fixMLSP"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Signal/Friends/FullScanSkim"
 
 # new data
 dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Data/trig_skim_2p1fb"
@@ -145,11 +147,11 @@ def writeYields(options):
                 if 'QCD' not in p:
                     print 'adding for ewk', p
                     ewkMC.append(report[p])
-
+    if len(totalMC) > 0:
         report['x_background'] = mergePlots("x_background", totalMC)
-        if 'TT' in mca.listBackgrounds():
-            report['x_EWK'] = mergePlots("x_EWK", ewkMC)
-
+    if len(ewkMC) > 0:
+        report['x_EWK'] = mergePlots("x_EWK", ewkMC)
+        
     '''
     if options.asimov:
         tomerge = []
@@ -284,7 +286,7 @@ if __name__ == "__main__":
         cDict.update(cutDictSRf5)
         cDict.update(cutDictCRf5)
 
-    cDict = cutQCDsyst #QCD
+#    cDict = cutQCDsyst #QCD
     #cDict = cutIncl #Inclusive
     #print cDict.keys();
     ##rint sorted([k for k in cDict.keys() if "NB0i" in k])
