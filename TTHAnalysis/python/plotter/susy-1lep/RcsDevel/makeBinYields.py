@@ -151,7 +151,7 @@ def writeYields(options):
     if not options.pretend:
         totalMC = []; ewkMC = []
         for p in mca.listBackgrounds():
-            if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p and 'TTincl' not in p:
+            if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p and 'TTincl' not in p and 'T1ttt' not in p:
             #if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p:
                 print 'adding for background',p
                 totalMC.append(report[p])
@@ -159,8 +159,9 @@ def writeYields(options):
                     print 'adding for ewk', p
                     ewkMC.append(report[p])
 
-        report['x_background'] = mergePlots("x_background", totalMC)
-        if 'TT' in mca.listBackgrounds():
+        if len(totalMC) > 0:
+            report['x_background'] = mergePlots("x_background", totalMC)
+        if len(ewkMC) > 0:
             report['x_EWK'] = mergePlots("x_EWK", ewkMC)
 
     '''
