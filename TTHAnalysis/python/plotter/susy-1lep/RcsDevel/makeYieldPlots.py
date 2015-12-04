@@ -195,11 +195,12 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     hist.GetXaxis().LabelsOption("h")
 
     # Style
-    #col = getSampColor(hist.GetName())
-    col = getSampColor(samp)
-    #if ("Kappa" not in cat) and ("Rcs" not in cat):
+    if ("Kappa" not in cat) and ("Rcs" not in cat):
     #    col = getSampColor(hist.GetName())
-    #else:
+        col = getSampColor(hist.GetName())
+    else:
+        col = getSampColor(hist.GetName())
+    #    col = getSampColor(samp)
     #    col = colorList[ind]
     #print "color for %s  %i" %(hist.GetName(),col)
 
@@ -210,7 +211,8 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
             hist.SetFillColor(col)
             hist.SetFillStyle(3001)
 
-    hist.SetLineColor(col)
+    #hist.SetLineColor(col)
+    hist.SetLineColor(1)
     hist.SetMarkerColor(col)
     hist.SetMarkerStyle(20)
 
@@ -264,27 +266,28 @@ def getMarks(hist):
 
     return marks
 
-def prepRatio(hist):
+def prepRatio(hist, keepStyle = False):
 
     hist.GetYaxis().CenterTitle()
     hist.GetYaxis().SetNdivisions(505)
     hist.GetYaxis().SetTitleSize(0.08)
     hist.GetYaxis().SetTitleOffset(0.3)
-
     hist.GetYaxis().SetLabelSize(0.1)
     hist.GetYaxis().SetRangeUser(0.05,2.1)
 
     hist.GetXaxis().SetLabelSize(0.1)
 
-    hist.SetLineColor(1)
-    hist.SetMarkerColor(1)
     hist.SetFillColor(0)
     hist.SetFillStyle(0)
+
+    if not keepStyle:
+        hist.SetLineColor(1)
+        hist.SetMarkerColor(1)
 
     return hist
 
 
-def getRatio(histA,histB):
+def getRatio(histA,histB, keepStyle = False):
 
     ratio = histA.Clone("ratio_"+histA.GetName()+"_"+histB.GetName())
     ratio.Divide(histB)
@@ -296,14 +299,14 @@ def getRatio(histA,histB):
     ratio.GetYaxis().SetNdivisions(505)
     ratio.GetYaxis().SetTitleSize(0.08)
     ratio.GetYaxis().SetTitleOffset(0.3)
-
     ratio.GetYaxis().SetLabelSize(0.1)
     ratio.GetYaxis().SetRangeUser(0.05,2.1)
 
     ratio.GetXaxis().SetLabelSize(0.1)
 
-    ratio.SetLineColor(1)
-    ratio.SetMarkerColor(1)
+    if not keepStyle:
+        ratio.SetLineColor(1)
+        ratio.SetMarkerColor(1)
     ratio.SetFillColor(0)
     ratio.SetFillStyle(0)
 
@@ -488,7 +491,7 @@ def plotHists(cname, histList, ratio = None, legPos = "TM"):
     ymin = min([h.GetMinimum() for h in histList])
 
     # for fractions set min to 0
-    if ymax < 1.1: ymax == 1; ymin = 0
+    if ymax < 1.01 and ymax >= 1: ymax == 1; ymin = 0
     else: ymax *= 1.3; ymin *= 0.8
 
     # make dummy for stack
@@ -532,6 +535,7 @@ def plotHists(cname, histList, ratio = None, legPos = "TM"):
         else:
             if len(histList) < 3:
                 hist.Draw(plotOpt+"pE2")
+                leg.AddEntry(hist,hist.GetTitle(),"pf")
             else:
                 hist.Draw(plotOpt+"pE5")
                 leg.AddEntry(hist,hist.GetTitle(),"pf")
