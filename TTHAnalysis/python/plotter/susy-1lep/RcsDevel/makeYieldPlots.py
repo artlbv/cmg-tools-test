@@ -41,7 +41,8 @@ def doLegend(pos = "TM",nEntr = None):
             #leg = TLegend(0.4,0.5,0.6,0.85)
             leg = TLegend(0.3,0.5,0.45,0.85)
     elif pos == "Long":
-        leg = TLegend(0.2,0.75,0.85,0.85)
+        #leg = TLegend(0.2,0.75,0.85,0.85) # Top
+        leg = TLegend(0.2,0.35,0.85,0.45) # Bottom
 
     leg.SetBorderSize(1)
     leg.SetTextFont(62)
@@ -483,11 +484,12 @@ def plotHists(cname, histList, ratio = None, legPos = "TM"):
     plotOpt = ""
 
     # get Y-maximum/minimum
-    ymax = 1.3*max([h.GetMaximum() for h in histList])
-    ymin = 0.8*min([h.GetMinimum() for h in histList])
+    ymax = max([h.GetMaximum() for h in histList])
+    ymin = min([h.GetMinimum() for h in histList])
 
-    ymax = 1
-    ymin = 0
+    # for fractions set min to 0
+    if ymax < 1.1: ymax == 1; ymin = 0
+    else: ymax *= 1.3; ymin *= 0.8
 
     # make dummy for stack
     if histList[0].ClassName() == "THStack":
