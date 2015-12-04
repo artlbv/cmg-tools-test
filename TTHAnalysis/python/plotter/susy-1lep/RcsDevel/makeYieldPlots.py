@@ -41,7 +41,7 @@ def doLegend(pos = "TM",nEntr = None):
             #leg = TLegend(0.4,0.5,0.6,0.85)
             leg = TLegend(0.3,0.5,0.45,0.85)
     elif pos == "Long":
-        leg = TLegend(0.3,0.75,0.85,0.85)
+        leg = TLegend(0.2,0.75,0.85,0.85)
 
     leg.SetBorderSize(1)
     leg.SetTextFont(62)
@@ -84,6 +84,47 @@ def prepKappaHist(hist):
 
     hist.GetXaxis().SetLabelSize(0.1)
 
+def getUniqLabels(labels):
+
+    nbin = len(labels[0].split("_"))
+
+    # Dict that counts labels
+    binCnts = {n:set() for n in range(nbin)}
+
+    # Count appearance of bins
+    for lab in labels:
+        labs = lab.split("_")
+        for i in range(len(labs)):
+            binCnts[i].add(labs[i])
+
+    # Make labels with short names
+    newLabs = {}
+    for lab in labels:
+        labs = lab.split("_")
+        newlab = "_".join(bin for i,bin in enumerate(labs) if len(binCnts[i]) > 1)
+        newLabs[lab] = newlab
+
+    return newLabs
+
+def getCleanLabel(binLabel):
+
+    # standart replacements
+    binLabel = binLabel.replace("_SR","")
+    binLabel = binLabel.replace("_CR","")
+    binLabel = binLabel.replace("f6","")
+    binLabel = binLabel.replace("f9","")
+
+    binLabel = binLabel.replace("LTi","")
+    #binLabel = binLabel.replace("NB0","")
+    #binLabel = binLabel.replace("NB2i","")
+
+    #binLabel = binLabel.replace("_NJ68","")
+    #binLabel = binLabel.replace("_NJ9i","")
+    #binLabel = binLabel.replace("_",",")
+
+
+    return binLabel
+
 def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
 
     # yield dict
@@ -112,25 +153,23 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     #hist = TH1F(hname,hname,nbins,-0.5,nbins+0.5)
     hist = TH1F(hname,htitle,nbins,0,nbins)
 
+    # for bin labels
+    labels = []
+    for ibin,bin in enumerate(binList):
+        label = ydict[bin].label if ydict[bin].label != "" else bin
+        labels.append(getCleanLabel(label))
+    ulabs = getUniqLabels(labels)
+
     # fill histo
     for ibin,bin in enumerate(binList):
 
         #binLabel = bin
         binLabel = ydict[bin].label
         if binLabel == "": binLabel = bin
-        # standart replacements
-        binLabel = binLabel.replace("_SR","")
-        binLabel = binLabel.replace("_CR","")
-        binLabel = binLabel.replace("f6","")
-        binLabel = binLabel.replace("f9","")
 
-        binLabel = binLabel.replace("LTi","")
-        #binLabel = binLabel.replace("NB0","")
-        #binLabel = binLabel.replace("NB2i","")
+        binLabel = getCleanLabel(binLabel)
 
-        #binLabel = binLabel.replace("_NJ68","")
-        #binLabel = binLabel.replace("_NJ9i","")
-        #binLabel = binLabel.replace("_",",")
+        if binLabel in ulabs: binLabel = ulabs[binLabel]
 
         newLabel = "#splitline"
 
@@ -362,8 +401,8 @@ def getCatLabel(name):
 
 def plotHists(cname, histList, ratio = None, legPos = "TM"):
 
-    canv = TCanvas(cname,cname,1400,600)
-    #canv = TCanvas(cname,cname,800,600)
+    #canv = TCanvas(cname,cname,1400,600)
+    canv = TCanvas(cname,cname,800,600)
     #leg = doLegend(len(histList)+1)
     leg = doLegend(legPos)
     if legPos == "Long":
@@ -446,6 +485,9 @@ def plotHists(cname, histList, ratio = None, legPos = "TM"):
     # get Y-maximum/minimum
     ymax = 1.3*max([h.GetMaximum() for h in histList])
     ymin = 0.8*min([h.GetMinimum() for h in histList])
+
+    ymax = 1
+    ymin = 0
 
     # make dummy for stack
     if histList[0].ClassName() == "THStack":
