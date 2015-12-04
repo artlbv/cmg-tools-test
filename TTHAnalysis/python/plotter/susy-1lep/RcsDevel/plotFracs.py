@@ -6,10 +6,18 @@ yp._batchMode = False
 
 if __name__ == "__main__":
 
+    yp.CMS_lumi.lumi_13TeV = "MC"
+    yp.CMS_lumi.extraText = "Simulation"
+    yp.iPos = 0
+    if( yp.iPos==0 ): yp.CMS_lumi.relPosX = 0.1
+
+
     ## remove '-b' option
     if '-b' in sys.argv:
         sys.argv.remove('-b')
         yp._batchMode = True
+
+    yp._batchMode = False
 
     if len(sys.argv) > 1:
         pattern = sys.argv[1]
@@ -28,8 +36,8 @@ if __name__ == "__main__":
     yds.showStats()
 
     #mcSamps = ['DY','TTV','SingleT','WJets','TT','QCD']
-    mcSamps = ['DY','TTV','SingleT','WJets','TT']
-    #mcSamps = ['WJets','TT','QCD']
+    #mcSamps = ['DY','TTV','SingleT','WJets','TTdiLep','TTsemiLep']
+    mcSamps = ['TTdiLep','TTsemiLep','WJets','TTV','SingleT','DY']
 
     # Category
     #cat = "CR_MB"
@@ -39,29 +47,23 @@ if __name__ == "__main__":
         # MC samps
         samps = [(samp,cat) for samp in mcSamps]
 
-        # Totals
-        #tots = [("data",cat)]
-        tots = [("background",cat)]
-
         hists = yp.makeSampHists(yds,samps)
         total = yp.getTotal(hists)
 
         for hist in hists:
             hist.Divide(total)
-
+            hist.GetYaxis().SetTitle("Fraction")
         stack = yp.getStack(hists)
 
-        hTot = yp.makeSampHists(yds,tots)[0]
+        canv = yp.plotHists(cat,[stack],None,"Long")
 
-        #ratio = getRatio(hTot,total)
-        ratio = yp.getRatio(hists[2],total)
-        ratio.GetYaxis().SetRangeUser(0,1.25)
-
-        canv = yp.plotHists("Fracs_"+cat,[stack])
-
-        if not yp._batchMode:
+        if yp._batchMode:
             if "q" in raw_input("Enter any key to exit (or 'q' to stop): "): exit(0)
 
         exts = [".pdf",".png"]
+
+        odir = "BinPlots/MC/Fractions/"+mask+"/"
+        if not os.path.exists(odir): os.makedirs(odir)
+
         for ext in exts:
-            canv.SaveAs("BinPlots/MC/Fractions/"+mask+canv.GetName()+ext)
+            canv.SaveAs(odir+canv.GetName()+ext)
