@@ -22,6 +22,7 @@ eleEta = 2.4
 # Jets
 ###########
 
+#corrJEC = "central" # can be "central","up","down
 corrJEC = "central" # can be "central","up","down
 
 print
@@ -32,6 +33,9 @@ print 30*'#'
 def getRecalcMET(metp4, event, corrJEC = "central"):
     ## newMETp4 = oldMETp4 - (Sum(oldJetsP4) - Sum(newJetsP4))
 
+    # jet pT threshold for MET
+    minJpt = 15
+
     # don't du anything for data
     if event.isData: return metp4
 
@@ -39,27 +43,32 @@ def getRecalcMET(metp4, event, corrJEC = "central"):
     jetName = "JetForMET"
     if not hasattr(event,"n"+jetName): jetName = "Jet"
 
-    # jet pT threshold for MET
-    minJpt = 15
-
     # get original jets used for MET:
-    oldjets = [j for j in Collection(event,jetName,"n"+jetName) if j.pt > minJpt]
+    oldjets = [j for j in Collection(event,jetName,"n"+jetName)]
     # new jets will be old ones for now
-    newjets = oldjets
+    newjets = [j for j in Collection(event,jetName,"n"+jetName)]
+
+    # filter jets
+    oldjets = [j for j in oldjets if j.pt > minJpt]
+
+    # vectorial summ of jets for MET
+    deltaJetP4 = ROOT.TLorentzVector(0,0,0,0)
+    for jet in oldjets: deltaJetP4 += jet.p4()
 
     if corrJEC == "central":
-        pass # don't do anything
+        #pass # don't do anything
+        for jet in newjets: jet.pt = jet.rawPt * jet.corr
     elif corrJEC == "up":
-        for jet in newjets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECUp
+        for jet in newjets: jet.pt = jet.rawPt * jet.corr_JECUp
     elif corrJEC == "down":
-        for jet in newjets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECDown
+        for jet in newjets: jet.pt = jet.rawPt * jet.corr_JECDown
 
-    # vectorial summ of jets
-    deltaJetP4 = ROOT.TLorentzVector(0,0,0,0)
+    # filter jets
+    newjets = [j for j in newjets if j.pt > minJpt]
 
-    for jet in oldjets: deltaJetP4 += jet.p4()
     for jet in newjets: deltaJetP4 -= jet.p4()
 
+    #print "MET diff = ", deltaJetP4.Pt()
     return (metp4 - deltaJetP4)
 
 ## B tag Working points
@@ -561,10 +570,13 @@ class EventVars1L_base:
         if event.isData == False:
             if corrJEC == "central":
                 pass # don't do anything
+                #for jet in jets: jet.pt = jet.rawPt * jet.corr
             elif corrJEC == "up":
-                for jet in jets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECUp
+                for jet in jets: jet.pt = jet.rawPt * jet.corr_JECUp
             elif corrJEC == "down":
-                for jet in jets: jet.pt = jet.rawPt * jet.corr*jet.corr_JECDown
+                for jet in jets: jet.pt = jet.rawPt * jet.corr_JECDown
+            else:
+                pass
 
         centralJet30 = []; centralJet30idx = []
         centralJet40 = []
@@ -668,8 +680,8 @@ class EventVars1L_base:
         metp4.SetPtEtaPhiM(event.met_pt,event.met_eta,event.met_phi,event.met_mass)
 
         # recalc MET
-        if corrJEC != "central":
-            ## get original jet collection
+        if corrJEC != "none":
+        # get original jet collection
             metp4 = getRecalcMET(metp4,event,corrJEC)
 
         ret["MET"] = metp4.Pt()
