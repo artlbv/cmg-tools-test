@@ -5,7 +5,7 @@ import sys
 from yieldClass import *
 from ROOT import *
 def printDataCard(yds, ydsObs, ydsSysSig):
-    folder = 'datacards_2p1bins/'
+    folder = 'datacards_2p1bins_fullscan/'
     bins = sorted(yds.keys())
 
     sampNames = [x.name for x in yds[bins[0]]]
@@ -56,7 +56,7 @@ def printDataCard(yds, ydsObs, ydsSysSig):
 
 
 def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
-    folder = 'datacardsABCD_2p1bins/'
+    folder = 'datacardsABCD_2p1bins_fullscan/'
     bins = sorted(yds.keys())
 
     catNames = [x.cat for x in yds[bins[0]] ]
@@ -76,10 +76,10 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
     except:                                                                                                                  
         os.mkdir(folder + signalName ) 
 
-    print sampUniqueNames
+    #print sampUniqueNames
     iproc = { key: i+1 for (i,key) in enumerate(sorted(reversed(sampUniqueNames)))}
     iproc.update({signalName: 0})
-    print iproc
+    #print iproc
     for i,bin in enumerate(bins):
         datacard = open(folder+ signalName+ '/' +bin + '.card.txt', 'w'); 
         datacard.write("## Datacard for bin %s (signal %s)\n"%(bin,signalName))
@@ -180,12 +180,12 @@ if __name__ == "__main__":
     yds9.addFromFiles(pattern,("lep","sele"))
     
 
-    yds6.showStats()
-    yds9.showStats()
+#    yds6.showStats()
+#    yds9.showStats()
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
 
-    for mGo in (1200, 1500):
-        for mLSP in range(50,900,50):
+    for mGo in range(25, 1500, 25):
+        for mLSP in range(25,1200,25):
             for ydIn in (yds6, yds9):
                 print "making datacards for "+str(mGo)+ ' '+str(mLSP)
                 signal = 'T1tttt_Scan_mGo'+str(mGo)+'_mLSP'+str(mLSP)
