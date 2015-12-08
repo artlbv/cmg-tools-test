@@ -32,11 +32,12 @@ def addOptions(options):
     if options.lumi > 19:
         options.lumi = 2.1
 
-    # set tree options
-    options.path = Tdir
-    #options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
-    options.friendTreesMC = [("sf/t",mcFTdir+"/evVarFriend_{cname}.root")]
-    options.friendTreesData = [("sf/t",dataFTdir+"/evVarFriend_{cname}.root")]
+    # set tree options -- set only if not set in cmd line
+    if options.path == "./":
+        options.path = Tdir
+        #options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
+        options.friendTreesMC = [("sf/t",mcFTdir+"/evVarFriend_{cname}.root")]
+        options.friendTreesData = [("sf/t",dataFTdir+"/evVarFriend_{cname}.root")]
     options.tree = "treeProducerSusySingleLepton"
 
     # extra options
@@ -148,7 +149,7 @@ def writeYields(options):
         report = mca.getPlotsRaw("x", options.var, options.bins, cuts.allCuts(), nodata=options.asimov)
 
     # add sum MC entry
-    if not options.pretend:
+    if not options.pretend and not options.systs:
         totalMC = []; ewkMC = []
         for p in mca.listBackgrounds():
             if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p and 'TTincl' not in p and 'T1ttt' not in p:
@@ -259,6 +260,7 @@ if __name__ == "__main__":
     # running options
     parser.add_option("-v","--verbose",  dest="verbose",  default=0,  type="int",    help="Verbosity level (0 = quiet, 1 = verbose, 2+ = more)")
     parser.add_option("--pretend", dest="pretend",default=False, action="store_true",help="pretend to do it")
+    parser.add_option("--systs", dest="systs",default=False, action="store_true",help="run for systs")
 
     # batch options
     parser.add_option("-c","--chunk", dest="chunk",type="int",default=None,help="Number of chunk")
@@ -293,7 +295,7 @@ if __name__ == "__main__":
         cDict.update(cutDictSRf9)
         cDict.update(cutDictCRf9)
 
-    doNjet5 = True
+    doNjet5 = False#True
     if doNjet5:
         cDict.update(cutDictSRf5)
         cDict.update(cutDictCRf5)
