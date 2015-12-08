@@ -29,18 +29,6 @@ print 30*'#'
 print 'Going to use', corrJEC , 'JEC!'
 print 30*'#'
 
-def recalcMET(metp4, oldjets, newjets):
-
-    deltaJetP4 = ROOT.TLorentzVector(0,0,0,0)
-
-    for ind,jet in enumerate(oldjets):
-        deltaJetP4 += jet.p4()
-
-    for ind,jet in enumerate(newjets):
-        deltaJetP4 -= jet.p4()
-
-    return (metp4 - deltaJetP4)
-
 def getRecalcMET(metp4, event, corrJEC = "central"):
     ## newMETp4 = oldMETp4 - (Sum(oldJetsP4) - Sum(newJetsP4))
 
@@ -51,8 +39,11 @@ def getRecalcMET(metp4, event, corrJEC = "central"):
     jetName = "JetForMET"
     if not hasattr(event,"n"+jetName): jetName = "Jet"
 
+    # jet pT threshold for MET
+    minJpt = 15
+
     # get original jets used for MET:
-    oldjets = [j for j in Collection(event,jetName,"n"+jetName)]
+    oldjets = [j for j in Collection(event,jetName,"n"+jetName) if j.pt > minJpt]
     # new jets will be old ones for now
     newjets = oldjets
 
@@ -257,8 +248,8 @@ class EventVars1L_base:
         ##############################
         if event.isData:
             ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 1
-            ret['PD_SingleMu'] = 0
+            ret['PD_SingleEle'] = 0
+            ret['PD_SingleMu'] = 1
         else:
             ret['PD_JetHT'] = 0
             ret['PD_SingleEle'] = 0
@@ -679,8 +670,6 @@ class EventVars1L_base:
         # recalc MET
         if corrJEC != "central":
             ## get original jet collection
-            # oldjets = [j for j in Collection(event,"Jet","nJet")]
-            # metp4 = recalcMET(metp4,oldjets,jets)
             metp4 = getRecalcMET(metp4,event,corrJEC)
 
         ret["MET"] = metp4.Pt()
