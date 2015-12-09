@@ -107,6 +107,8 @@ if len(options.chunks) != 0 and len(options.datasets) != 1:
 if not os.path.isdir(args[1]): os.makedirs(args[1])
 
 jobs = []
+#frpref = "evVarFriend_"
+frpref = ""
 
 for D in glob(args[0]+"/*"):
     treename = options.tree
@@ -129,7 +131,7 @@ for D in glob(args[0]+"/*"):
         entries = t.GetEntries()
         f.Close()
         if options.newOnly:
-            fout = "%s/evVarFriend_%s.root" % (args[1],short)
+            fout = "%s/" % (args[1]) + frpref + "%s.root"%(short)
             if os.path.exists(fout):
                 #f = ROOT.TFile.Open(fname);
                 #t = f.Get(treename)
@@ -144,7 +146,7 @@ for D in glob(args[0]+"/*"):
         chunk = options.chunkSize
         if entries < chunk:
             print "  ",os.path.basename(D),("  DATA" if data else "  MC")," single chunk"
-            jobs.append((short,fname,"%s/evVarFriend_%s.root" % (args[1],short),data,xrange(entries),-1))
+            jobs.append((short,fname,"%s/"  % (args[1]) + frpref + "%s.root" %(short),data,xrange(entries),-1))
         else:
             nchunk = int(ceil(entries/float(chunk)))
             print "  ",os.path.basename(D),("  DATA" if data else "  MC")," %d chunks" % nchunk
@@ -152,7 +154,7 @@ for D in glob(args[0]+"/*"):
                 if options.chunks != []:
                     if i not in options.chunks: continue
                 r = xrange(int(i*chunk),min(int((i+1)*chunk),entries))
-                jobs.append((short,fname,"%s/evVarFriend_%s.chunk%05d.root" % (args[1],short,i),data,r,i))
+                jobs.append((short,fname,"%s/"% (args[1]) + frpref + "%s.chunk%05d.root" %(short,i),data,r,i))
 print "\n"
 
 if len(jobs) != 0:
