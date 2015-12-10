@@ -202,9 +202,6 @@ if sample == "MC":
 	isData = False
 	isSignal = False
 
-	# Set FastSim JEC
-	jetAna.mcGT = "FastSim_MCRUN2_74_V9"
-
 	# modify skim
 	anyLepSkim.minLeptons = 1
 	ttHLepSkim.minLeptons = 0
@@ -253,6 +250,9 @@ elif sample == "Signal":
 
 	isData = False
 	isSignal = True
+
+	# Set FastSim JEC
+	jetAna.mcGT = "FastSim_MCRUN2_74_V9"
 
 	# modify skim
 	anyLepSkim.minLeptons = 0
