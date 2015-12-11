@@ -13,9 +13,13 @@ if __name__ == "__main__":
 
 
     ## remove '-b' option
+    doAll = False
     if '-b' in sys.argv:
         sys.argv.remove('-b')
         yp._batchMode = True
+    if '-all' in sys.argv:
+        sys.argv.remove('-all')
+        doAll = True
 
     yp._batchMode = False
 
@@ -27,43 +31,48 @@ if __name__ == "__main__":
         exit(0)
 
     #BinMask LTX_HTX_NBX_NJX for canvas names
+
+    nBs = ["NB1","NB2","NB3"]
+    nJs = ["NJ68","NJ9i"]
+
     basename = os.path.basename(pattern)
-    mask = basename.replace("*","X_")
+    print basename
+    if basename == 'LT':
+        for nB in nBs:
+            for nJ in nJs:
+                patternnew = pattern + "*" + nB + "*" + nJ
+                basenamenew = os.path.basename(patternnew)
+                mask = basenamenew.replace("*","X_")    
 
-    ## Create Yield Storage
-    yds = yp.YieldStore("lepYields")
-    yds.addFromFiles(pattern,("ele","anti"))
-    yds.showStats()
 
-    #mcSamps = ['DY','TTV','SingleT','WJets','TT','QCD']
-    #mcSamps = ['DY','TTV','SingleT','WJets','TTdiLep','TTsemiLep']
-    mcSamps = ['TTdiLep','TTsemiLep','WJets','TTV','SingleT','DY']
+                yds = yp.YieldStore("lepYields")
+                yds.addFromFiles(patternnew,("lep","sele"))
+                yds.showStats()
 
-    # Category
-    #cat = "CR_MB"
-    cats = ["CR_SB","SR_SB","CR_MB","SR_MB"]
+                mcSamps = ['TTdiLep','TTsemiLep','WJets','TTV','SingleT','DY']
 
-    for cat in cats:
-        # MC samps
-        samps = [(samp,cat) for samp in mcSamps]
+                cats = ["CR_MB","CR_SB"]
 
-        hists = yp.makeSampHists(yds,samps)
-        total = yp.getTotal(hists)
 
-        for hist in hists:
-            hist.Divide(total)
-            hist.GetYaxis().SetTitle("Fraction")
-        stack = yp.getStack(hists)
+                for cat in cats:
+                    # MC samps
+                    samps = [(samp,cat) for samp in mcSamps]
 
-        canv = yp.plotHists(cat,[stack],None,"Long")
+                    hists = yp.makeSampHists(yds,samps)
+                    total = yp.getTotal(hists)
+                    for i,hist in enumerate(hists):
+                        hist.Divide(total)
+                        hist.GetYaxis().SetTitle("Fraction")
+                    stack = yp.getStack(hists)
+            
+                    canv = yp.plotHists(cat,[stack],None,"Long")
+                    if yp._batchMode:
+                        if "q" in raw_input("Enter any key to exit (or 'q' to stop): "): exit(0)
 
-        if yp._batchMode:
-            if "q" in raw_input("Enter any key to exit (or 'q' to stop): "): exit(0)
+                    exts = [".pdf",".png",".root"]
+            
+                    odir = "BinPlots/MC/Fractions/"+mask+""
+                    if not os.path.exists(odir): os.makedirs(odir)
 
-        exts = [".pdf",".png"]
-
-        odir = "BinPlots/MC/Fractions/"+mask+"/"
-        if not os.path.exists(odir): os.makedirs(odir)
-
-        for ext in exts:
-            canv.SaveAs(odir+canv.GetName()+ext)
+                    for ext in exts:
+                        canv.SaveAs(odir+canv.GetName()+ext)
