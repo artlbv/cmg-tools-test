@@ -99,6 +99,7 @@ def getPoissonHist(tfile, sample = "background", band = "CR_MB"):
 
     return hist
 
+
 # Systematic error on F-ratio
 qcdSysts = {
     ('NJ45','HT0') : 0.25,
@@ -260,6 +261,39 @@ def getQCDsubtrHistos(tfile, sample = "background", band = "CR_MB/", isMC = True
         hQCDsubtr.Add(hQCDpred,-1)
 
     return (hQCDpred,hQCDsubtr)
+
+def replaceEmptyDataBinsWithMC(fileList):
+    # hists to make QCD estimation
+    bindirs =  ['CR_MB','SR_SB','CR_SB']
+    print ''
+    print "Replacing empty data bins with MC for CR_MB, SR_SB, CR_SB, 100% error"
+    for fname in fileList:
+        tfile = TFile(fname,"UPDATE")
+        if 1==1:
+            for bindir in bindirs:
+                histData = tfile.Get(bindir+"/data").Clone()
+                histBkg = tfile.Get(bindir+"/background").Clone()
+                
+                #if "TH" not in histData.ClassName() or 'TH' in histBkg.ClassName(): return 0
+
+                ix = 2
+                iy = 2
+                if histData.GetBinContent(ix, iy) == 0:
+                    print '!!! ATTENTION: replacing', fname, bindir, "bin number", ix, iy, "data", histData.GetBinContent(ix, iy), "with MC", histBkg.GetBinContent(ix,iy), 'alsp replacing sorrounding bins e, mu sel !!!'
+                    histData.SetBinContent(ix, iy, histBkg.GetBinContent(ix,iy))
+                    histData.SetBinError(ix, iy, histBkg.GetBinContent(ix,iy))
+                    histData.SetBinContent(ix+1, iy, histBkg.GetBinContent(ix+1,iy))
+                    histData.SetBinError(ix+1, iy, histBkg.GetBinContent(ix+1,iy))
+                    histData.SetBinContent(ix-1, iy, histBkg.GetBinContent(ix-1,iy))
+                    histData.SetBinError(ix-1, iy, histBkg.GetBinContent(ix-1,iy))
+
+                if histData:
+                    tfile.cd(bindir)
+                    # overwrite old hist
+                    histData.Write()#"",TObject.kOverwrite)
+                tfile.cd()
+        tfile.Close()
+    print ''
 
 def makeQCDsubtraction(fileList, samples):
     # hists to make QCD estimation
@@ -494,6 +528,8 @@ if __name__ == "__main__":
     # samples to make full prediciton
     predSamps = allSamps + ["background_poisson","QCD_poisson"]
     #predSaps = [s for s in predSamps if s in allSamps]
+
+    replaceEmptyDataBinsWithMC(fileList)
 
     makePoissonErrors(fileList, poisSamps)
     makeQCDsubtraction(fileList, qcdPredSamps)
