@@ -159,6 +159,7 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     for ibin,bin in enumerate(binList):
         label = ydict[bin].label if ydict[bin].label != "" else bin
         labels.append(getCleanLabel(label))
+
     ulabs = getUniqLabels(labels)
 
     # fill histo
@@ -170,7 +171,7 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
 
         binLabel = getCleanLabel(binLabel)
 
-        if binLabel in ulabs: binLabel = ulabs[binLabel]
+       # if binLabel in ulabs: binLabel = ulabs[binLabel]
 
         newLabel = "#splitline"
 
@@ -403,10 +404,10 @@ def getCatLabel(name):
 
     return cname
 
-def plotHists(cname, histList, ratio = None, legPos = "TM"):
+def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height = 600):
 
     #canv = TCanvas(cname,cname,1400,600)
-    canv = TCanvas(cname,cname,800,600)
+    canv = TCanvas(cname,cname,width,height)
     #leg = doLegend(len(histList)+1)
     leg = doLegend(legPos)
     if legPos == "Long":
