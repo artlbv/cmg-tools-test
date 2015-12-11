@@ -193,7 +193,7 @@ isData = True # default, but will be overwritten below
 #sample = 'MC'
 #sample = 'data'
 sample = 'Signal'
-test = 0
+test = 1
 
 if sample == "MC":
 
@@ -252,7 +252,9 @@ elif sample == "Signal":
 	isSignal = True
 
 	# Set FastSim JEC
-	jetAna.mcGT = "FastSim_MCRUN2_74_V9"
+	#jetAna.mcGT = "FastSim_MCRUN2_74_V9"
+	#jetAna.mcGT = "MCRUN2_74_V9"
+	jetAna.mcGT = "FastSim_Summer15_25nsV6_MC"
 
 	# modify skim
 	anyLepSkim.minLeptons = 0
