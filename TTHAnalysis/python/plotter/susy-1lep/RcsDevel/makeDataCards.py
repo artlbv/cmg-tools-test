@@ -1,11 +1,12 @@
 
 #!/usr/bin/env python
 import sys
-
+out = ''
 from yieldClass import *
 from ROOT import *
 def printDataCard(yds, ydsObs, ydsSysSig):
-    folder = 'datacards_2p1bins_fullscan/'
+    folder = 'datacards_'+ out +'/'
+    if not os.path.exists(folder): os.makedirs(folder) 
     bins = sorted(yds.keys())
 
     sampNames = [x.name for x in yds[bins[0]]]
@@ -56,7 +57,8 @@ def printDataCard(yds, ydsObs, ydsSysSig):
 
 
 def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
-    folder = 'datacardsABCD_2p1bins_fullscan/'
+    folder = 'datacardsABCD_' + out + '/'
+    if not os.path.exists(folder): os.makedirs(folder) 
     bins = sorted(yds.keys())
 
     catNames = [x.cat for x in yds[bins[0]] ]
@@ -94,7 +96,7 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
         #observation
 
         datacard.write('bin'+ ( ' ' * 32) +(" ".join([kpatt % (cat)     for cat in catUniqueNames]))+"\n")
-        datacard.write('observation'+ ( ' ' * 32) +(" ".join([fpatt % yd.val  for yd in ydsObs[bin]]))+"\n")
+        datacard.write('observation'+ ( ' ' * 32) +(" ".join([kpatt % round(yd.val)  for yd in ydsObs[bin]]))+"\n")
         datacard.write('##----------------------------------\n')
         datacard.write('##----------------------------------\n')
         datacard.write('bin'+ ( ' ' * 32) +(" ".join(([kpatt % (cat)     for cat in catNames])))+"\n")
@@ -112,38 +114,56 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
     
         params = ('kappa','beta','delta')
         addParam = ''
+        betaQCDname= ''
+        deltaQCDname= ''
         for yd,p in zip(ydsKappa[bin], params):
             Val = yd.val
             Err = yd.err
-            name = p+'_'+ bin 
-            if 'QCD' in yd.name: name = p+yd.name +'_'+ bin 
+            SB = yd.sbname
+            MB = yd.mbname
+            Label = yd.label
+
+            if 'QCD' in yd.name: name = p+yd.name +'_'+ Label 
             if Val > 0.01 and p == 'beta':
                 addParam = addParam+p
+                betaQCDname = Label
                 datacard.write(name + ' param ' + numToBar(Val) +' ' + numToBar(Err) + '\n')
             elif Val > 0.01 and p == 'delta':
                 addParam = addParam + p
+                deltaQCDname = Label
                 datacard.write(name + ' param ' + numToBar(Val) +' ' + numToBar(Err) + '\n')
             elif p == 'kappa':
-                datacard.write(name + ' param ' + numToBar(Val) +' ' + numToBar(Err) + '\n')
+                name = p+'_'+ bin
+                datacard.write(name + ' param ' + numToBar(Val) +' ' + numToBar(Val) + '\n')
+
+        betaName = ''; gammaName = ''; deltaName = '';
+        params = ('alpha','beta','gamma','delta')
+        for yd,p in zip(ydsObs[bin], params):
+            if p == 'beta': betaName = yd.label
+            if p == 'gamma': gammaName = yd.label
+            if p == 'delta': deltaName = yd.label
+
+
+
         formula = '(@0*@1/@2*@3)'
-        paramIn = 'beta_' + bin + ',gamma_' + bin + ',delta_' + bin + ',kappa_' + bin
+        paramIn = 'beta_' + betaName + ',gamma_' + gammaName + ',delta_' + deltaName + ',kappa_' + bin
         if 'beta' in addParam and 'delta' in addParam: 
             formula = formula.replace('@0','(@0-@4)').replace('@2','(@2-@5)')
-            paramIn = paramIn +',betaQCD_' + bin + ',deltaQCD_' + bin
+            paramIn = paramIn +',betaQCD_' + betaQCDname + ',deltaQCD_' + deltaQCDname
         elif addParam == 'beta':
             formula = formula.replace('@0','(@0-@4)')
-            paramIn = paramIn +',betaQCD_' + bin
+            paramIn = paramIn +',betaQCD_' + betaQCDname
         elif addParam == 'delta': 
             formula = formula.replace('@2','(@2-@4)')
-            paramIn = paramIn +',deltaQCD_' + bin
+            paramIn = paramIn +',deltaQCD_' + deltaQCDname
+
             
-        params = ('alpha','beta','gamma','delta')
         for yd,p in zip(ydsObs[bin], params):
             postFix = bin + '_' + yd.cat
             if p == 'alpha':
-                datacard.write(p + '_' + bin + ' rateParam ' +yd.cat + ' ' + yd.name + ' ' + formula + ' ' + paramIn + '\n')
+                datacard.write(p + '_' + yd.label + ' rateParam ' +yd.cat + ' ' + yd.name + ' ' + formula + ' ' + paramIn + '\n')
             else:
-                datacard.write(p + '_' + bin + ' rateParam ' +yd.cat + ' ' + yd.name + ' ' + numToBar(yd.val) + ' \n')
+                datacard.write(p + '_' + yd.label + ' rateParam ' +yd.cat + ' ' + yd.name + ' ' + str(round(yd.val)) + ' \n')
 
         
                 
@@ -163,9 +183,11 @@ if __name__ == "__main__":
         sys.argv.remove('-b')
         _batchMode = True
 
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         pattern = sys.argv[1]
+        out = sys.argv[2]
         print '# pattern is', pattern
+        print '# out is', out
     else:
         print "No pattern given!"
         exit(0)
@@ -184,8 +206,10 @@ if __name__ == "__main__":
 #    yds9.showStats()
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
 
-    for mGo in range(25, 1500, 25):
-        for mLSP in range(25,1200,25):
+#    for mGo in range(900, 1700, 100):
+#        for mLSP in range(50,1200,50):
+    for mGo in range(1500, 1600, 50):
+        for mLSP in range(100,200,50):
             for ydIn in (yds6, yds9):
                 print "making datacards for "+str(mGo)+ ' '+str(mLSP)
                 signal = 'T1tttt_Scan_mGo'+str(mGo)+'_mLSP'+str(mLSP)
