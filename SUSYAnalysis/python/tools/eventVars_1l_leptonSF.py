@@ -4,9 +4,9 @@ import itertools
 import PhysicsTools.Heppy.loadlibs
 
 ### SF ROOT files
-eleSFname = "../python/tools/leptonSFs/eleSF.root"
+eleSFname = "../python/tools/SFs/eleSF.root"
 eleHname = "CutBasedTight"
-muSFname = "../python/tools/leptonSFs/muonSF.root"
+muSFname = "../python/tools/SFs/muonSF.root"
 muHname = "pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_tag_IsoMu20_pass"
 
 hEleSF = 0
