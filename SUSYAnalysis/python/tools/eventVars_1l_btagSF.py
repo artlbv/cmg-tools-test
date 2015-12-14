@@ -2,6 +2,11 @@ from CMGTools.TTHAnalysis.treeReAnalyzer import *
 import ROOT
 import itertools
 import PhysicsTools.Heppy.loadlibs
+import pickle
+
+# Directory for SFs
+sfdir = "../python/tools/SFs/"
+
 
 # Basing on macro from Vienna
 # https://github.com/HephySusySW/Workspace/blob/74X-master/RA4Analysis/cmgPostProcessing/btagEfficiency.py
@@ -30,7 +35,7 @@ def partonName (parton):
     return 'other'
 
 ### SF ROOT file
-sfFname = "SFs/btagSF.root"
+sfFname = sfdir+"btagSF_CSVv2.csv"
 
 # load SFs from csv file
 calib = ROOT.BTagCalibration("csvv2", sfFname)
@@ -59,12 +64,15 @@ def getSF2015(parton, pt, eta):
     return {"SF":sf, "SF_down":sf_d,"SF_up":sf_u}
 
 # MC eff  -- precomputed
-bTagEffFile = "SFs/btagMCeff.pck"
+bTagEffFile = sfdir+"btagMCeff.pck"
 try:
   mcEffDict = pickle.load(file(bTagEffFile))
 except IOError:
   print 'Unable to load MC efficiency file!'
   mcEffDict = False
+
+print 80*"#"
+print "Loaded btag mcEffDict with keys:", mcEffDict.keys()
 
 def getMCEff(parton, pt, eta, mcEff, year = 2015):
     for ptBin in ptBins:
@@ -79,15 +87,19 @@ def getMCEff(parton, pt, eta, mcEff, year = 2015):
                     return res
     return {} #empty if not found
 
-# friend tree style
+############ METHOD 1b ##################
+## https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1b_Event_reweighting_using_scale
+
 # get MC efficiencies and scale factors for all jets of one event, uses getMCEff
 def getMCEfficiencyForBTagSF(event, mcEff, onlyLightJetSystem = False, isFastSim = False):
 
     # jets from event collection
     cjets = [j for j in Collection(event,"Jet","nJet")]
+    cjets30 = [j for j in Collection(event,"Jet","nJet") if (j.pt > minJpt and abs(j.eta) < maxJeta and j.id)]
+
     jets = [] # list of jets for bTagSF
 
-    for jet in cjets:
+    for jet in cjets30:
        jPt     = jet.pt
        jEta    = jet.eta
        jParton = jet.mcFlavour
@@ -111,7 +123,7 @@ def getMCEfficiencyForBTagSF(event, mcEff, onlyLightJetSystem = False, isFastSim
         r = getMCEff(jParton, jPt, jEta, mcEff, 2015) #getEfficiencyAndMistagRate(jPt, jEta, jParton )
         jet.append(r)
 
-    if len(jets) != len(cjets):
+    if len(jets) != len(cjets30):
         print "!! Different number of jets:", len(jets), 'vs', len(cjets)
         return 0
 
@@ -152,27 +164,109 @@ def getMCEfficiencyForBTagSF(event, mcEff, onlyLightJetSystem = False, isFastSim
     return {"mceffs":mceffs, "mceffs_SF":mceffs_SF, "mceffs_SF_b_Up":mceffs_SF_b_Up, "mceffs_SF_b_Down":mceffs_SF_b_Down, "mceffs_SF_light_Up":mceffs_SF_light_Up, "mceffs_SF_light_Down":mceffs_SF_light_Down}
     #return mcEffs
 
+# get the tag weights for the efficiencies calculated with getMCEfficiencyForBTagSF
+def getTagWeightDict(effs, maxConsideredBTagWeight):
+    zeroTagWeight = 1.
+    for e in effs:
+        zeroTagWeight*=(1-e)
+    tagWeight={}
+    for i in range(min(len(effs), maxConsideredBTagWeight)+1):
+        tagWeight[i]=zeroTagWeight
+        twfSum = 0.
+        for tagged in itertools.combinations(effs, i):
+            twf=1.
+            for fac in [x/(1-x) for x in tagged]:
+                twf*=fac
+            twfSum+=twf
+#            print "tagged",tagged,"twf",twf,"twfSum now",twfSum
+        tagWeight[i]*=twfSum
+#    print "tagWeight",tagWeight,"\n"
+    for i in range(maxConsideredBTagWeight+1):
+        if not tagWeight.has_key(i):
+            tagWeight[i] = 0.
+    return tagWeight
+
+############ METHOD 1a ##################
+## https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
+
+# To be implemented
+
+
 # Flags
-isFastSim = False
+isFastSim = False # calc FastSim SFs
+maxConsideredBTagWeight = 2 # Max nBJet-1 to calculate the b-tag weight for
+
+effNames = ['','_SF','_SF_b_Up','_SF_b_Down','_SF_light_Up','_SF_light_Down']
+#effNames = ['_SF']
+
+# AutoDefine branches
+branches = []
+for name in effNames:
+    for i in range(1, maxConsideredBTagWeight+2):
+        branches.append('btagW_'+str(i)+'p'+name)
+    for i in range(maxConsideredBTagWeight+1):
+        branches.append('btagW_'+str(i)+name)
+
+print "Branches to save for bTag SF"
+print branches
+
+def getSampKey(name):
+
+    if "TTJets" in name: return "TTJets"
+    elif "WJets" in name: return "WJets"
+    else: return "none"
 
 class EventVars1L_btagSF:
     def __init__(self):
-        self.branches = [ "btagSF" ]
+        self.branches = branches #+ [ "btagSF" ]
+        self.sample = "none" #default sample for mcEff
 
     def listBranches(self):
         return self.branches[:]
 
     def __call__(self,event,base):
 
+        sample = getSampKey(self.sample)
+
         # output dict:
         ret = {}
 
-        zeroTagWeight = 1.
+        # get nJets w pt > 30 and eta < 2.4
+        cjets30 = [j for j in Collection(event,"Jet","nJet") if (j.pt > minJpt and abs(j.eta) < maxJeta and j.id)]
 
         # Get MC efficiencies for this event
-        mceff = getMCEfficiencyForBTagSF(t, mcEffDict[sampleKey], isFastSim)
+        if sample in mcEffDict:
+            mceff = getMCEfficiencyForBTagSF(event, mcEffDict[sample], isFastSim = isFastSim)
+        else: return ret
+        if not mceff: return ret
 
-        print mceff["mceffs"]
+        # Fill weights into dict
+        mcEffWs = {}
+        for name in effNames:
+            #if name != "": effname = "mceffs_" + name
+            #else: effname = "mceffs"
+            effname = "mceffs"+name
+
+            # get weights for config
+            #mcEffWs[effname] = getTagWeightDict(mceff[effname], maxConsideredBTagWeight)
+            mcEffW = getTagWeightDict(mceff[effname], maxConsideredBTagWeight)
+
+            bW = 1
+            # for inclusive Nb weights
+            for i in range(1, maxConsideredBTagWeight+2):
+                ret['btagW_'+str(i)+'p'+name] = bW
+            # weights for exclusive Nb
+            for i in range(maxConsideredBTagWeight+1):
+                ret['btagW_'+str(i)+name] = bW*mcEffW[i]
+                # weights for inclusive Nb
+                for j in range(i+1, maxConsideredBTagWeight+2):
+                    ret['btagW_'+str(j)+'p'+name] -= bW*mcEffW[i] #prob. for >=j b-tagged jets
+
+            # set W to 0 if nJets < maxConsBTW
+            for i in range (len(cjets30)+1, maxConsideredBTagWeight+1):
+                ret['btagW_'+str(i)+name] = 0
+
+        #print ret
 
         # return branches
         return ret
