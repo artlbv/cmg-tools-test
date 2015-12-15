@@ -259,14 +259,14 @@ class EventVars1L_base:
         # DATASET FLAG
         # -- needs to be adjusted manually
         ##############################
-        if event.isData:
-            ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 1
-            ret['PD_SingleMu'] = 0
-        else:
-            ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 0
-            ret['PD_SingleMu'] = 0
+        ret['PD_JetHT'] = 0
+        ret['PD_SingleEle'] = 0
+        ret['PD_SingleMu'] = 0
+
+        if event.isData and hasattr(self,"sample"):
+            if "SingleEle" in self.sample: ret['PD_SingleEle'] = 1
+            elif "SingleMu" in self.sample: ret['PD_SingleMu'] = 1
+            elif "JetHT" in self.sample: ret['PD_JetHT'] = 1
         ##############################
 
         # copy basic event info:
