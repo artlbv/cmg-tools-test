@@ -98,8 +98,10 @@ def makeSystHists(fileList):
 
     #systNames = ["Xsec"]
     #systNames = ["PU"]
+    systNames = ["topPt"]
     #systNames = ["Wxsec"]
-    systNames = ["JEC"]
+    #systNames = ["JEC"]
+    #systNames = ["btagHF","btagLF"]
 
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB','Kappa','Rcs_MB','Rcs_SB']
