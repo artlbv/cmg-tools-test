@@ -405,8 +405,8 @@ def getCatLabel(name):
 
 def plotHists(cname, histList, ratio = None, legPos = "TM"):
 
-    #canv = TCanvas(cname,cname,1400,600)
-    canv = TCanvas(cname,cname,800,600)
+    canv = TCanvas(cname,cname,1400,600)
+    #canv = TCanvas(cname,cname,800,600)
     #leg = doLegend(len(histList)+1)
     leg = doLegend(legPos)
     if legPos == "Long":
@@ -488,7 +488,7 @@ def plotHists(cname, histList, ratio = None, legPos = "TM"):
 
     # get Y-maximum/minimum
     ymax = max([h.GetMaximum() for h in histList])
-    ymin = min([h.GetMinimum() for h in histList])
+    ymin = min([h.GetMinimum() for h in histList]); ymin = max(0.01,ymin)
 
     # for fractions set min to 0
     if ymax < 1.01 and ymax >= 1: ymax == 1; ymin = 0
