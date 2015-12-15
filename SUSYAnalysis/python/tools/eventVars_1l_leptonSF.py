@@ -5,9 +5,9 @@ import PhysicsTools.Heppy.loadlibs
 
 ### SF ROOT files
 eleSFname = "../python/tools/SFs/eleSF.root"
-eleHname = "CutBasedTight"
+eleHname = "CBTight_MiniIso0p1_ACDV"
 muSFname = "../python/tools/SFs/muonSF.root"
-muHname = "pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_tag_IsoMu20_pass"
+muHname = "MediumID_MiniIso0p2_IP3D_ACDV"
 
 hEleSF = 0
 hMuSF = 0
