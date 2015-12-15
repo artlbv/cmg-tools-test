@@ -54,7 +54,7 @@ def addOptions(options):
         options.var =  "mLSP:mGo*(nEl-nMu)"
         #options.bins = "60,-1500,1500,30,0,1500"
         #options.bins = "34,-1700,1700,10,0,1500"
-        options.bins = "161,-2012.5,2012.5,41,-25,2025.5"
+        options.bins = "161,-2012.5,2012.5,81,-12.5,2012.5"
 
         options.friendTreesMC = [("sf/t",sigFTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
