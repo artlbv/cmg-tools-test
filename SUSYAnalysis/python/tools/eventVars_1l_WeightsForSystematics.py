@@ -4,13 +4,15 @@ import ROOT
 
 class EventVars1LWeightsForSystematics:
     def __init__(self):
-        self.branches = ["GenTopPt", "GenAntiTopPt", "TopPtWeight", "GenTTBarPt", "GenTTBarWeight" 
+        self.branches = ["GenTopPt", "GenAntiTopPt", "TopPtWeight", "GenTTBarPt", "GenTTBarWeight"
                          ]
 
     def listBranches(self):
         return self.branches[:]
 
     def __call__(self,event,keyvals):
+
+        if event.isData: return {}
         #
         genParts = [l for l in Collection(event,"GenPart","nGenPart")]
 
@@ -24,10 +26,10 @@ class EventVars1LWeightsForSystematics:
 
         nGenTops = 0
         for i_part, genPart in enumerate(genParts):
-            if genPart.pdgId ==  6:     
+            if genPart.pdgId ==  6:
                 GenTopPt = genPart.pt
                 GenTopIdx = i_part
-            if genPart.pdgId == -6: 
+            if genPart.pdgId == -6:
                 GenAntiTopPt = genPart.pt
                 GenAntiTopIdx = i_part
             if abs(genPart.pdgId) ==  6: nGenTops+=1
@@ -37,7 +39,7 @@ class EventVars1LWeightsForSystematics:
             SFAntiTop = exp(0.156    -0.00137*GenAntiTopPt)
             TopPtWeight = sqrt(SFTop*SFAntiTop)
             if TopPtWeight<0.5: TopPtWeight=0.5
-            
+
             if GenAntiTopIdx!=-999 and GenTopIdx!=-999:
                 GenTTBarp4 = genParts[GenTopIdx].p4()+ genParts[GenAntiTopIdx].p4()
                 GenTTBarPt = GenTTBarp4.Pt()
@@ -45,7 +47,7 @@ class EventVars1LWeightsForSystematics:
                 if GenTTBarPt>150: GenTTBarWeight= 0.90
                 if GenTTBarPt>250: GenTTBarWeight= 0.80
                 if GenTTBarPt>400: GenTTBarWeight= 0.70
-            
+
         ret    =  { 'GenTopPt'   : GenTopPt } #initialize the dictionary with a first entry
         ret['GenAntiTopPt'] = GenAntiTopPt
         ret['TopPtWeight']  = TopPtWeight
