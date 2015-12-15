@@ -60,7 +60,7 @@ if __name__ == "__main__":
         #ratio.GetYaxis().SetRangeUser(0,5)
 
         #canv = plotHists("DataNJ45_"+cat,[stack,hMCpred,hDataPred,hData,total],ratio)
-        canv = plotHists("DataNJ45_2p1fb_"+cat+'_'+mask,[stack,total,hDataPred,hData],ratio)
+        canv = plotHists("DataNJ45_2p1fb_"+cat+'_'+mask,[stack,total,hDataPred,hData],ratio,'TM', 1200, 600)
         print canv.GetName()
         for hist in [stack,total,hDataPred,hData]:
             hist.GetYaxis().SetRangeUser(0,15)
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         if not _batchMode:
             if "q" in raw_input("Enter any key to exit (or 'q' to stop): "): exit(0)
 
-        exts = [".pdf",".png"]
+        exts = [".pdf",".png",".root"]
         for ext in exts:
             canv.SaveAs("BinPlots/Data/stacks/"+canv.GetName()+ext)
 

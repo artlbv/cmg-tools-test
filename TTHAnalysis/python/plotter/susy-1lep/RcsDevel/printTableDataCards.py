@@ -32,7 +32,10 @@ def getYieldDict(cardFnames, region, sig = "", lep = "lep"):
             sourceYield = {}
 
             for k1 in dirList:
+                print k1, k1.ReadObj().GetName()
+                if 'Name' in k1.ReadObj().GetName() or 'name' in k1.ReadObj().GetName(): continue
                 h1 = k1.ReadObj().GetName()
+                
                 (yd, yerr)  = getYield(tfile, h1, region, (lep,'sele'))
                 if 'dummy' in sig:
                     sourceYield[h1] = (0.3, 0)
@@ -101,6 +104,7 @@ def getSystDict(cardFnames, region, sig = "", lep = "lep", uncert = "default"):
 
             for k1 in dirList:
                 h1 = k1.ReadObj().GetName()
+                
                 (yd, yerr)  = getYield(tfile, h1, region, (lep,'sele'))
                 if type(uncert) == float:
                     sourceYield[h1] = (uncert , 0)
