@@ -27,9 +27,9 @@ MODULES.append( ('1l_LeptonSF', EventVars1L_leptonSF()) )
 # for BtagSF
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_btagSF import EventVars1L_btagSF
 MODULES.append( ('1l_LeptonSF', EventVars1L_btagSF()) )
-
-#from CMGTools.SUSYAnalysis.tools.eventVars_1l_WeightsForSystematics import EventVars1LWeightsForSystematics
-#MODULES.append( ('1l_SysWeights', EventVars1LWeightsForSystematics()) )
+# Top pt reweighting
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_WeightsForSystematics import EventVars1LWeightsForSystematics
+MODULES.append( ('1l_SysWeights', EventVars1LWeightsForSystematics()) )
 
 '''
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_bkgDilep import EventVars1L_bkgDilep
