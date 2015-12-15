@@ -5,12 +5,15 @@ import sys, os, os.path
 from searchBins import *
 from math import hypot
 
+
 '''
 ## Trees
 Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2"
 # MC
+>>>>>>> cmg-desy/DESY-CMGTools-from-CMSSW_7_4_12
 mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/MC/allSamps_pu69mb"
-sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Signals/T1tttt_pu69mb_fixMLSP"
+#sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Signals/T1tttt_pu69mb_fixMLSP"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Signal/Friends/FullScanSkim"
 
 # new data
 dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Data/trig_skim_2p1fb"
@@ -52,7 +55,7 @@ def addOptions(options):
         options.var =  "mLSP:mGo*(nEl-nMu)"
         #options.bins = "60,-1500,1500,30,0,1500"
         #options.bins = "34,-1700,1700,10,0,1500"
-        options.bins = "161,-2012.5,2012.5,41,-25,2025.5"
+        options.bins = "161,-2012.5,2012.5,81,-12.5,2012.5"
 
         options.friendTreesMC = [("sf/t",sigFTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
@@ -160,11 +163,11 @@ def writeYields(options):
                     print 'adding for ewk', p
                     ewkMC.append(report[p])
 
-        if len(totalMC) > 0:
-            report['x_background'] = mergePlots("x_background", totalMC)
-        if len(ewkMC) > 0:
-            report['x_EWK'] = mergePlots("x_EWK", ewkMC)
-
+    if len(totalMC) > 0:
+        report['x_background'] = mergePlots("x_background", totalMC)
+    if len(ewkMC) > 0:
+        report['x_EWK'] = mergePlots("x_EWK", ewkMC)
+        
     '''
     if options.asimov:
         tomerge = []
@@ -301,6 +304,7 @@ if __name__ == "__main__":
         cDict.update(cutDictCRf5)
 
     #cDict = cutQCDsyst #QCD
+
     #cDict = cutIncl #Inclusive
     ##rint sorted([k for k in cDict.keys() if "NB0i" in k])
     #print sorted([k for k in cDict.keys() if "NB1" in k])
