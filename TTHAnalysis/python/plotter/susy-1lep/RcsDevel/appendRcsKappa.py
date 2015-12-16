@@ -290,7 +290,7 @@ def replaceEmptyDataBinsWithMC(fileList):
                 if histData:
                     tfile.cd(bindir)
                     # overwrite old hist
-                    histData.Write()#"",TObject.kOverwrite)
+                    histData.Write("",TObject.kOverwrite)
                 tfile.cd()
         tfile.Close()
     print ''
@@ -435,7 +435,12 @@ def makePredictHists(fileList, samples = []):
         # create Rcs/Kappa dir struct
         if not tfile.GetDirectory("SR_MB_predict"):
             tfile.mkdir("SR_MB_predict")
-
+            binString = tfile.Get("SR_MB/BinName").Clone()
+            if binString: binName = binString.GetTitle()
+            else: binName = tfile.GetName()
+            print binString
+            tfile.cd("SR_MB_predict")
+            binString.Write()
             for sample in samples:
 
                 hPredict = getPredHist(tfile,sample)
@@ -444,6 +449,7 @@ def makePredictHists(fileList, samples = []):
                     tfile.cd("SR_MB_predict")
                     hPredict.Write()
                     #print "Wrote prediction of", sample
+                    
                 else:
                     print "Failed to make prediction for", sample
         else:
