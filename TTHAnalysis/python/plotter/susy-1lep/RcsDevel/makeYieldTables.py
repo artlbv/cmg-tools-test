@@ -27,6 +27,11 @@ def printLatexHeader(nCol, f, sideways = 0):
         f.write('\\tiny \n')
         f.write('\\caption{Background prediction based on the [4,5] jet side band in the [6,8] and $\geq$ 9 jet signal regions. The oberseved events in the SR, MB are still blinded.} \n')
 
+    elif sideways == 4:
+        f.write('\\begin{sidewaystable}[ht] \n ')
+        f.write('\\tiny \n')
+        f.write('\\caption{Input values for limit calculation. The 3 regions with data counts are given, as well as the QCD estimate for the control regions in the side and mainband and $\kappa$ derived from simulation. The last two columns represent pseudo data based based on the epxected data prediction or MC simulation.} \n')
+
     else:
 
         f.write('\\begin{table}[ht] \n ')
@@ -88,7 +93,6 @@ if __name__ == "__main__":
             samps = [('TTsemiLep',cat),('TTdiLep',cat),('TTV',cat), ('SingleT',cat), ('WJets',cat), ('DY',cat), ('QCD',cat), ('background',cat),
                      ('T1tttt_Scan_mGo1500_mLSP100',cat),('T1tttt_Scan_mGo1200_mLSP800',cat)]
             printLatexHeader(len(samps), f, 1)
-            yds6.showStats()
             srcr = cat.replace('_MB','').replace('_SB','')
             sbmb = cat.replace('SR_','').replace('CR_','')
             label = 'Expected events in '+srcr+' for 2.1 fb$^{-1}$ for '+sbmb.replace('MB','$n_{jet}$ 6,8 ').replace('SB','$n_{jet}$ 4,5 for 6,8')
@@ -116,7 +120,7 @@ if __name__ == "__main__":
     f =  open('4to68_4to9j_prediction.tex','w')
 
     printLatexHeader(len(samps), f, 3)
-    yds6.showStats()
+
     label = 'SB, MB, and predictions for 2.1 fb$^{-1}$ for $n_{jet}$ 6,8 '
     printSamps = ['data 45j, SR','(data-QCD) 4j5, CR','data 4j5, Rcs$^{EWK}$','$\\kappa^{EWK}$, MC','(data-QCD) 68j, CR', 'data 68j, pred', 'data 68j, SR', 'MC 68j,SR']
     yds6.printLatexTable(samps, printSamps, label,f) 
@@ -138,4 +142,19 @@ if __name__ == "__main__":
     samps = [('EWK','Rcs_MB'),('EWK','Rcs_SB'),('EWK','Kappa')]
     yds9.printLatexTable(samps, printSamps, label,f) 
     printLatexFooter(f)
+    f.close()
+
+
+    f =  open('tabelforLimits.tex','w')
+    label = 'SB, MB, and predictions for 2.1 fb$^{-1}$ for $n_{jet}$ 6,8 '
+    samps = [('data','SR_SB'),('data','CR_SB'),('QCD_QCDpred','CR_SB'),('data_QCDsubtr','Rcs_SB'),('data','CR_MB'),('QCD_QCDpred','CR_MB'),('EWK','Kappa'),('data_QCDsubtr','SR_MB_predict'), ('data','SR_MB_predict'), ('background','SR_MB')]
+
+    printSamps = ['data 45j, SR','data 45j, CR','QCD 45j, CR','data 4j5, Rcs$^{EWK}$','data 68j, CR', 'QCD 68j, CR','$\\kappa$ MC','data 68j, SRpred','Pseudo Obs$_{Pred}$ 68j, SR', 'Pseudo Obs$_{MC}$ 68j, SR']
+
+    printLatexHeader(len(samps), f, 4)
+    yds6.printLatexTable(samps, printSamps, label,f) 
+    label = 'SB, MB, and predictions for 2.1 fb$^{-1}$ for njet $\\geq 9$'
+    printSamps = ['data 45j, SR','data 45j, CR','QCD 45j, CR','data 4j5, Rcs$^{EWK}$','data 9j, CR', 'QCD 9j, CR','$\\kappa$ MC','data 9j, SRpred','Pseudo Obs$_{Pred}$ 9j, SR', 'Pseudo Obs$_{MC}$ 9j, SR']
+    yds9.printLatexTable(samps, printSamps, label, f)
+    printLatexFooter(f, 4)
     f.close()
