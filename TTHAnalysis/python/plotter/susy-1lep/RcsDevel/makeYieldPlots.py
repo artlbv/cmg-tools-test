@@ -489,7 +489,7 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
 
     # get Y-maximum/minimum
     ymax = max([h.GetMaximum() for h in histList])
-    ymin = min([h.GetMinimum() for h in histList])
+    ymin = min([h.GetMinimum() for h in histList]); ymin = max(0.01,ymin)
 
     # for fractions set min to 0
     if ymax < 1.01 and ymax >= 1: ymax == 1; ymin = 0

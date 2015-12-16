@@ -23,6 +23,7 @@ eleEta = 2.4
 ###########
 
 corrJEC = "central" # can be "central","up","down
+#corrJEC = "down" # can be "central","up","down
 
 print
 print 30*'#'
@@ -209,7 +210,10 @@ class EventVars1L_base:
             'nLep', 'nVeto',
             'nEl','nMu',
             ## selected == tight leps
-            'nTightLeps', 'nTightEl','nTightMu',
+            #'nTightLeps',
+            'nTightEl','nTightMu',
+            # for indx
+            ("nTightLeps","I"),("tightLepsIdx","I",10,"nTightLeps"),
             #("tightLeps_DescFlag","I",10,"nTightLeps"),
             'Lep_pdgId','Lep_pt','Lep_eta','Lep_phi','Lep_Idx','Lep_relIso','Lep_miniIso','Lep_hOverE',
             'Selected', # selected (tight) or anti-selected lepton
@@ -255,14 +259,14 @@ class EventVars1L_base:
         # DATASET FLAG
         # -- needs to be adjusted manually
         ##############################
-        if event.isData:
-            ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 1
-            ret['PD_SingleMu'] = 0
-        else:
-            ret['PD_JetHT'] = 0
-            ret['PD_SingleEle'] = 0
-            ret['PD_SingleMu'] = 0
+        ret['PD_JetHT'] = 0
+        ret['PD_SingleEle'] = 0
+        ret['PD_SingleMu'] = 0
+
+        if event.isData and hasattr(self,"sample"):
+            if "SingleEle" in self.sample: ret['PD_SingleEle'] = 1
+            elif "SingleMu" in self.sample: ret['PD_SingleMu'] = 1
+            elif "JetHT" in self.sample: ret['PD_JetHT'] = 1
         ##############################
 
         # copy basic event info:
@@ -496,6 +500,8 @@ class EventVars1L_base:
             ret['nTightMu'] = sum([ abs(lep.pdgId) == 13 for lep in tightLeps])
             ret['nTightEl'] = sum([ abs(lep.pdgId) == 11 for lep in tightLeps])
 
+            ret['tightLepsIdx'] = tightLepsIdx
+
             ret['Selected'] = 1
 
         elif len(antiTightLeps) > 0:
@@ -508,6 +514,8 @@ class EventVars1L_base:
             ret['nTightMu'] = 0
             ret['nTightEl'] = 0
 
+            ret['tightLepsIdx'] = []
+
             ret['Selected'] = -1
 
         else:
@@ -519,6 +527,8 @@ class EventVars1L_base:
             ret['nTightLeps'] = 0
             ret['nTightMu'] = 0
             ret['nTightEl'] = 0
+
+            ret['tightLepsIdx'] = []
 
             ret['Selected'] = 0
 
