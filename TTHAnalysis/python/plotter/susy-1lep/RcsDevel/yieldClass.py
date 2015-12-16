@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, glob, sys
+import os, glob, sys, math
 
 from ROOT import *
 from searchBins import *
@@ -270,9 +270,18 @@ class YieldStore:
                 if yd == 0:
                     f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (0.0, 0.0))
                 else:
+                    val = yd.val
+                    err = yd.err
                     if 'Rcs' in yd.cat or 'Kappa' in yd.cat:
                         precision = 4
-                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
+                    elif 'data_QCDsubtr' in yd.name:
+                        precision = 2
+                    elif '_predict' in yd.cat or 'background' in yd.name:
+                        precision = 0
+                        val = round(yd.val)
+                        err = math.sqrt(round(yd.val))
+
+                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (val, err))
 
 
             f.write(' \\\ \n')
