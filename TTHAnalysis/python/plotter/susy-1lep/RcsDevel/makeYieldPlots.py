@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys
+import sys, math
 
 from yieldClass import *
 from ROOT import *
@@ -371,6 +371,36 @@ def getStack(histList):
 
     return stack
 
+def getSquaredSum(histList):
+
+    sqHist = histList[0].Clone()
+
+    for i,hist in enumerate(histList):
+        if i > 0:
+            for bin in range(1,hist.GetNbinsX()+1):
+                x = sqHist.GetBinContent(bin)
+                new = x*x + hist.GetBinContent(bin)*hist.GetBinContent(bin)
+                sqHist.SetBinContent(bin, math.sqrt(new))
+    sqHist.SetMarkerStyle(31)
+    sqHist.SetMarkerColor(kRed)
+    sqHist.SetTitle("sqSum")
+    sqHist.SetName("sqSum")
+    return sqHist
+
+def getHistWithError(hCentral, sqHist):
+    histWithError = hCentral.Clone()
+
+    for bin in range(1,hCentral.GetNbinsX()+1):
+        sys = hCentral.GetBinContent(bin)*sqHist.GetBinContent(bin)
+        err = math.sqrt(hCentral.GetBinError(bin)*hCentral.GetBinError(bin) + sys*sys)
+        histWithError.SetBinError(bin, err)
+
+    histWithError.SetFillColor(kBlue)
+    histWithError.SetFillStyle(3002)  
+    return  histWithError
+
+
+
 def getTotal(histList):
     # to be used only for ratio and error band
 
@@ -479,7 +509,7 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
 
         if multRatio:
             for rat in ratios[1:]:
-                rat.Draw("pe1same")
+                rat.Draw("pe2same")
 
         p1.cd();
     else:
@@ -494,7 +524,7 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
     # for fractions set min to 0
     if ymax < 1.01 and ymax >= 1: ymax == 1; ymin = 0
     else: ymax *= 1.3; ymin *= 0.8
-
+    ymin = 0
     # make dummy for stack
     if histList[0].ClassName() == "THStack":
         dummy = histList[0].GetHists()[0].Clone("dummy")
@@ -508,7 +538,7 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
         # range
         hist.SetMaximum(ymax)
         hist.SetMinimum(ymin)
-
+        print hist.GetName()
         if "dummy" == hist.GetName():
             hist.Draw()
         elif  hist.ClassName() == 'THStack':
@@ -533,6 +563,9 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
         elif "Syst" in hist.GetName():
             hist.Draw(plotOpt+"E2")
             leg.AddEntry(hist,hist.GetTitle(),"f")
+        elif "sqSum" in hist.GetName():
+            hist.Draw(plotOpt+"p")
+            leg.AddEntry(hist,"Sum squared uncertainties","p")
         else:
             if len(histList) < 3:
                 hist.Draw(plotOpt+"pE2")
