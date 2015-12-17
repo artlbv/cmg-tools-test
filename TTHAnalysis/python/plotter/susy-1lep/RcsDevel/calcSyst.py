@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #import re, sys, os, os.path
 
-import glob, os, sys
+import glob, os, sys, math
 from math import hypot
 from ROOT import *
 
@@ -69,16 +69,17 @@ def getSystHist(tfile, hname, syst = "Xsec"):
             maxErr = 0
 
             # fill maximum deviation
-            if abs(hPlus.GetBinContent(xbin,ybin)) > abs(hMinus.GetBinContent(xbin,ybin)):
-                maxDev = abs(hPlus.GetBinContent(xbin,ybin))
-                #maxErr = abs(hPlus.GetBinError(xbin,ybin))
-            else:
-                maxDev = abs(hMinus.GetBinContent(xbin,ybin))
-                #maxErr = abs(hMinus.GetBinError(xbin,ybin))
-
+#            if abs(hPlus.GetBinContent(xbin,ybin)) > abs(hMinus.GetBinContent(xbin,ybin)):
+#                maxDev = abs(hPlus.GetBinContent(xbin,ybin))
+#            else:
+#                maxDev = abs(hMinus.GetBinContent(xbin,ybin))
+                
+            #fill with average deviation
+            maxDev = (math.fabs(hPlus.GetBinContent(xbin,ybin))+math.fabs(hMinus.GetBinContent(xbin,ybin)))/2
             if hNorm.GetBinContent(xbin,ybin) > 0:
                 maxDev /= hNorm.GetBinContent(xbin,ybin)
                 #maxErr = hypot(maxErr,hNorm.GetBinError(xbin,ybin))
+            
 
             hSyst.SetBinContent(xbin,ybin,maxDev)
             hSyst.SetBinError(xbin,ybin,maxErr)
@@ -98,9 +99,11 @@ def makeSystHists(fileList):
 
     #systNames = ["Xsec"]
     #systNames = ["PU"]
-    systNames = ["topPt"]
+    #systNames = ["topPt"]
     #systNames = ["Wxsec"]
     #systNames = ["JEC"]
+    #systNames = ["DLSlope"]
+    systNames = ["DLConst"]
     #systNames = ["btagHF","btagLF"]
 
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
@@ -129,7 +132,7 @@ def makeSystHists(fileList):
                         tfile.cd(bindir)
                         #sfile.mkdir(bindir)
                         #sfile.cd(bindir)
-                        hSyst.Write()
+                        hSyst.Write("",TObject.kOverwrite)
 
             '''
             # create Syst folder structure
