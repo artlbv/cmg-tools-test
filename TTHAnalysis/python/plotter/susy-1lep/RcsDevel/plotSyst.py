@@ -35,17 +35,22 @@ if __name__ == "__main__":
     paths = []
 
     # Add files
-    btagPath = "Yields/systs/btag/EWK/allflavour/full/merged/"; paths.append(btagPath)
-    puPath = "Yields/systs/PU/test2/merged/"; paths.append(puPath)
+    btagPath = "Yields/systs/btag/test/merged/"; paths.append(btagPath)
+    puPath = "Yields/systs/PU/test/merged/"; paths.append(puPath)
     wxsecPath = "Yields/systs/wXsec/test/merged/"; paths.append(wxsecPath)
-    tptPath = "Yields/systs/topPt/EWK/full/merged"; paths.append(tptPath)
+    tptPath = "Yields/systs/topPt/test/merged"; paths.append(tptPath)
+    dlConstPath = "Yields/systs/dilepConst/test/merged"; paths.append(dlConstPath)
+    dlSlopePath = "Yields/systs/dilepSlope/test/merged"; paths.append(dlSlopePath)
+
     #jecPath = "Yields/systs/JEC/EWK/full/merged/"; paths.append(jecPath)
 
     for path in paths:
         yds.addFromFiles(path,("lep","sele"))
 
     # Sys types
-    systs = ["btagHF","btagLF","Wxsec","PU","topPt"]#,"JEC"]
+#    systs = ["btagHF","btagLF","Wxsec","PU","topPt"]#,"JEC"]
+    systs = ["btagHF","Wxsec","topPt","PU","DLSlope","DLConst"]#,"JEC"]
+#    systs = ["topPt"]#,"JEC"]
     sysCols = [1,2,4,7,8,3,9,6] + range(10,50)#[1,2,3] + range(4,10)
 
     # Sample and variable
@@ -83,14 +88,16 @@ if __name__ == "__main__":
     # make stack/total syst hists
     #total = yp.getTotal(hists)
     stack = yp.getStack(hists)
+    sqHist = yp.getSquaredSum(hists)
 
-    canv = yp.plotHists(var+"_"+samp+"_Syst",[stack],hCentral)
+    hCentralUncert = yp.getHistWithError(hCentral, sqHist)
+    canv = yp.plotHists(var+"_"+samp+"_Syst",[stack,sqHist],[hCentral,hCentralUncert],"TM", 1200, 600)
+#    canv = yp.plotHists(var+"_"+samp+"_Stat",[stack,sqHist],hCentral,"TM", 1200, 600)
     canvs.append(canv)
-
     if not yp._batchMode: raw_input("Enter any key to exit")
 
     # Save canvases
-    exts = [".pdf",".png"]
+    exts = [".pdf",".png",".root"]
     #exts = [".pdf"]
 
     odir = "BinPlots/Syst/test/"
