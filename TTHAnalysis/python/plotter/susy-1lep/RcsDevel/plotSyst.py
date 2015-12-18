@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
         hist = yp.makeSampHisto(yds,sname,var,syst+"_syst")
         hist.SetTitle(syst)
-        hist.GetYaxis().SetTitle("Syst. Err (%)")
+        hist.GetYaxis().SetTitle("Relative uncertainty")
 
         #yp.prepKappaHist(hist)
         #yp.prepRatio(hist)
