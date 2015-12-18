@@ -5,6 +5,7 @@ from yieldClass import *
 from ROOT import *
 
 def printLatexHeader(nCol, f, sideways = 0):
+    print type(sideways)
     nCol = nCol + 4
     print f.name
     name = f.name.replace('yields','').replace('.tex','').replace('_','')
@@ -17,26 +18,37 @@ def printLatexHeader(nCol, f, sideways = 0):
         f.write('\\begin{sidewaystable}[ht] \n ')
         f.write('\\tiny \n')
         f.write('\\caption{ Expected event yields in ' + name + ' for the multi-b analysis in the search bins as defined in Table~\\ref{tab:1b_sigreg_3fb}. The \\DF is adjusted for each \\LT bin. The contribution of dileptonic \\ttbar events is shown separately, where leptons can be either electrons, muons, or taus.} \n')
+        f.write('\\begin{center} \n')
 
     elif sideways == 2:
         f.write('\\begin{sidewaystable}[ht] \n ')
         f.write('\\tiny \n')
         f.write('\\caption{ Test of the background prediction method using the exclusive 4 jet category as a side band to predict the expected number of events in the signal regin of an exclusive 5 jet main band.} \n')
+        f.write('\\begin{center} \n')
     elif sideways == 3:
         f.write('\\begin{sidewaystable}[ht] \n ')
         f.write('\\tiny \n')
         f.write('\\caption{Background prediction based on the [4,5] jet side band in the [6,8] and $\geq$ 9 jet signal regions. The oberseved events in the SR, MB are still blinded.} \n')
+        f.write('\\begin{center} \n')
 
     elif sideways == 4:
         f.write('\\begin{sidewaystable}[ht] \n ')
         f.write('\\tiny \n')
         f.write('\\caption{Input values for limit calculation. The 3 regions with data counts are given, as well as the QCD estimate for the control regions in the side and mainband and $\kappa$ derived from simulation. The last two columns represent pseudo data based based on the epxected data prediction or MC simulation.} \n')
+        f.write('\\begin{center} \n')
+
+    elif type(sideways) == str:
+        f.write('\\begin{table}[ht] \n ')
+        f.write('\\tiny \n')
+        f.write('\\caption{'+sideways+'} \n')
+        f.write('\\begin{center} \n')
 
     else:
 
         f.write('\\begin{table}[ht] \n ')
         f.write('\\footnotesize \n')
         f.write('\\caption{'+name+'} \n')
+        f.write('\\begin{center} \n')
 
     
     f.write('\\label{tab:'+f.name.replace('.tex','')+'} \n')
@@ -47,6 +59,7 @@ def printLatexHeader(nCol, f, sideways = 0):
 def printLatexFooter(f, sideways = 0):
     f.write('\\hline \n')
     f.write('\\end{tabular} \n')
+    f.write('\\end{center} \n')
     if sideways > 0:
         f.write('\\end{sidewaystable} \n ')
     else:
