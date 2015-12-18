@@ -242,6 +242,8 @@ class YieldStore:
 
     def printLatexTable(self, samps, printSamps, label, f):
         yds = self.getMixDict(samps)
+        ydsNorm = self.getMixDict([('EWK', 'Kappa'),])
+
         nSource = len(samps)
         nCol = nSource + 4
         f.write('\multicolumn{' + str(nCol) + '}{|c|}{' +label +'} \\\ \n')
@@ -264,7 +266,7 @@ class YieldStore:
             elif LT == LT0 and HT == HT0:
                 f.write('  &  & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin)
 
-            print yds[bin]
+
             for yd in yds[bin]:
                 precision = 2
                 if yd == 0:
@@ -281,7 +283,12 @@ class YieldStore:
                         val = round(yd.val)
                         err = math.sqrt(round(yd.val))
 
-                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (val, err))
+                    if 'syst' in yd.name:
+                        precision = 2
+                        print val, ydsNorm[bin][0].val
+                        f.write((' & %.'+str(precision)+'f' ) % (val/ydsNorm[bin][0].val*100))
+                    else:
+                        f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (val, err))
 
 
             f.write(' \\\ \n')
