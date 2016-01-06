@@ -624,7 +624,7 @@ if __name__ == "__main__":
 
     basecuts = 'passFilters && nLep == 1 &&'
     #basecuts = 'METfilters && nLep == 1 && nVeto == 0 &&'
-    basecuts += 'Selected == -1 &&'
+    basecuts += 'Selected == 1 &&'
 
     doFit = True
 
@@ -779,9 +779,9 @@ if __name__ == "__main__":
 
 
         ### Reference trigger
-        #refTrig = 'HLT_HT800'
+        refTrig = 'HLT_HT800'
         #refTrig = 'HLT_HT350MET100'
-        refTrig = 'JetHT-Anti'#-eleCBID'
+        #refTrig = 'JetHT'#-eleCBID'
         #refTrig = 'HLT_MET170'
 
         ## LT
@@ -793,32 +793,6 @@ if __name__ == "__main__":
         cuts = basecuts + 'nEl == 1 && Lep_pt > 25 && HT > 500'
         testTrig = ['EleHT350']#,'Ele105||EleHT350MET50']
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        '''
-        varList = ['LTNoHF']
-
-        testTrig = ['Mu50||MuHT350MET50||Ele105||EleHT350MET50']
-        cuts = basecuts + 'nLep == 1 && nVeto == 0 && Lep_pt > 25 && HT > 400'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        cuts = basecuts + 'nMu == 1 && Lep_pt > 25 && HT > 500'
-        testTrig = ['Mu50||MuHT350MET50']
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        cuts = basecuts + 'nEl == 1 && Lep_pt > 25 && HT > 500 && abs(Lep_eta) < 1.5'
-        testTrig = ['Ele105||EleHT350MET50']
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        varList = ['LT']
-
-        cuts = basecuts + 'nMu == 1 && Lep_pt > 25 && HT > 500'
-        testTrig = ['Mu50||MuHT350MET50']
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-
-        cuts = basecuts + 'nEl == 1 && Lep_pt > 25 && HT > 500'
-        testTrig = ['Ele105||EleHT350MET50']
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-        '''
 
 
         #### LEPTON LEG
@@ -859,20 +833,22 @@ if __name__ == "__main__":
         testTrig = ['EleHT350']
         cuts = basecuts + 'nEl == 1 && Lep_pt > 5 && HT > 500'
         #cuts = basecuts + 'nEl == 1 && Lep_pt > 5 && HT > 500 && MET > 50 && nJet > 2 && nBJet > 0'
-        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
         testTrig = ['Ele105','EleHT350']
+        #testTrig = ['Ele105','EleHT350','IsoEle23']
         #testTrig = ['EleHT350MET50||Ele105']
 
         cuts = basecuts + 'nEl == 1 && Lep_pt > 5 && HT > 500'
-        #makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
+        makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
-        #testTrig = ['Mu50','MuHT350']
-        testTrig = ['MuHT350']
+        testTrig = ['Mu50','MuHT350']
+        #testTrig = ['Mu50','MuHT350','IsoMu20']
+        #testTrig = ['MuHT350']
         cuts = basecuts + 'nMu == 1 && Lep_pt > 5 && HT > 500'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
 
-
+        '''
         ## more triggers
         varList = ['Lep_eta']
         testTrig = ['Ele105','EleHT350']
@@ -884,7 +860,7 @@ if __name__ == "__main__":
         testTrig = ['Mu50','MuHT350']
         cuts = basecuts + 'nMu == 1 && Lep_pt > 55 && HT > 500'
         makeEffPlots(tree, lumi, maxEntries, doFit, varList, refTrig, testTrig, cuts)
-        '''
+
         refTrig = 'HLT_HT350MET100'
 
         testTrig = ['EleHT350MET50','Ele105']
