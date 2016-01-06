@@ -5,13 +5,30 @@ import sys, os, os.path
 from searchBins import *
 from math import hypot
 
-# trees
+
+'''
+## Trees
 Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2"
+# MC
+>>>>>>> cmg-desy/DESY-CMGTools-from-CMSSW_7_4_12
 mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/MC/allSamps_pu69mb"
-sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Signals/T1tttt_pu69mb_fixMLSP"
+#sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Signals/T1tttt_pu69mb_fixMLSP"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Signal/Friends/FullScanSkim"
 
 # new data
 dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2/Friends/Data/trig_skim_2p1fb"
+'''
+
+## Trees -- skimmed with trig_base
+#Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed"
+Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Signal/FullScanSkim/"
+# MC
+mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Friends/MC/pu_69mb"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Signal/FullScanSkim/Friends"
+
+# new data
+dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Friends/Data/trig_base_skim_2p1fb"
+
 
 def addOptions(options):
 
@@ -19,11 +36,12 @@ def addOptions(options):
     if options.lumi > 19:
         options.lumi = 2.1
 
-    # set tree options
-    options.path = Tdir
-    #options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
-    options.friendTreesMC = [("sf/t",mcFTdir+"/evVarFriend_{cname}.root")]
-    options.friendTreesData = [("sf/t",dataFTdir+"/evVarFriend_{cname}.root")]
+    # set tree options -- set only if not set in cmd line
+    if options.path == "./":
+        options.path = Tdir
+        #options.friendTrees = [("sf/t",FTdir+"/evVarFriend_{cname}.root")]
+        options.friendTreesMC = [("sf/t",mcFTdir+"/evVarFriend_{cname}.root")]
+        options.friendTreesData = [("sf/t",dataFTdir+"/evVarFriend_{cname}.root")]
     options.tree = "treeProducerSusySingleLepton"
 
     # extra options
@@ -38,7 +56,7 @@ def addOptions(options):
         options.var =  "mLSP:mGo*(nEl-nMu)"
         #options.bins = "60,-1500,1500,30,0,1500"
         #options.bins = "34,-1700,1700,10,0,1500"
-        options.bins = "161,-2012.5,2012.5,41,-25,2025.5"
+        options.bins = "161,-2012.5,2012.5,81,-12.5,2012.5"
 
         options.friendTreesMC = [("sf/t",sigFTdir+"/evVarFriend_{cname}.root")]
         options.cutsToAdd += [("base","Selected","Selected == 1")] # make always selected for signal
@@ -135,10 +153,10 @@ def writeYields(options):
         report = mca.getPlotsRaw("x", options.var, options.bins, cuts.allCuts(), nodata=options.asimov)
 
     # add sum MC entry
-    if not options.pretend:
+    if not options.pretend and not options.systs:
         totalMC = []; ewkMC = []
         for p in mca.listBackgrounds():
-            if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p and 'TTincl' not in p:
+            if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p and 'TTincl' not in p and 'T1ttt' not in p:
             #if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p:
                 print 'adding for background',p
                 totalMC.append(report[p])
@@ -146,10 +164,11 @@ def writeYields(options):
                     print 'adding for ewk', p
                     ewkMC.append(report[p])
 
+    if len(totalMC) > 0:
         report['x_background'] = mergePlots("x_background", totalMC)
-        if 'TT' in mca.listBackgrounds():
-            report['x_EWK'] = mergePlots("x_EWK", ewkMC)
-
+    if len(ewkMC) > 0:
+        report['x_EWK'] = mergePlots("x_EWK", ewkMC)
+        
     '''
     if options.asimov:
         tomerge = []
@@ -245,6 +264,7 @@ if __name__ == "__main__":
     # running options
     parser.add_option("-v","--verbose",  dest="verbose",  default=0,  type="int",    help="Verbosity level (0 = quiet, 1 = verbose, 2+ = more)")
     parser.add_option("--pretend", dest="pretend",default=False, action="store_true",help="pretend to do it")
+    parser.add_option("--systs", dest="systs",default=False, action="store_true",help="run for systs")
 
     # batch options
     parser.add_option("-c","--chunk", dest="chunk",type="int",default=None,help="Number of chunk")
@@ -279,14 +299,14 @@ if __name__ == "__main__":
         cDict.update(cutDictSRf9)
         cDict.update(cutDictCRf9)
 
-    doNjet5 = True
+    doNjet5 = False#True
     if doNjet5:
         cDict.update(cutDictSRf5)
         cDict.update(cutDictCRf5)
 
-    cDict = cutQCDsyst #QCD
+    #cDict = cutQCDsyst #QCD
+
     #cDict = cutIncl #Inclusive
-    #print cDict.keys();
     ##rint sorted([k for k in cDict.keys() if "NB0i" in k])
     #print sorted([k for k in cDict.keys() if "NB1" in k])
     #exit(0)
@@ -294,6 +314,8 @@ if __name__ == "__main__":
     # for LT/HT plots
     #cDict = cutLTbinsSR
     #cDict.update(cutLTbinsCR)
+
+    #print cDict.keys(); exit(0)
 
     binList = sorted(cDict.keys())
 

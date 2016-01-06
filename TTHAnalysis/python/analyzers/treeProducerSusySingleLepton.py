@@ -22,8 +22,8 @@ susySingleLepton_globalVariables = susyCore_globalVariables + [
     ##--------------------------------------------------
     ## MET filter information (temporary)
     ##--------------------------------------------------
-    NTupleVariable("Flag_HBHENoiseFilter_fix", lambda ev: ev.hbheFilterNew, help="HBEHE baseline temporary filter decision"),
-    NTupleVariable("Flag_HBHEIsoNoiseFilter_fix", lambda ev: ev.hbheFilterIso, help="HBEHE isolation temporary filter decision"),
+    NTupleVariable("Flag_HBHENoiseFilter_fix", lambda ev: ev.hbheFilterNew if hasattr(ev,'hbheFilterNew') else  0, help="HBEHE baseline temporary filter decision"),
+    NTupleVariable("Flag_HBHEIsoNoiseFilter_fix", lambda ev: ev.hbheFilterIso if hasattr(ev,'hbheFilterIso') else  0, help="HBEHE isolation temporary filter decision"),
 
     # ----------------------- HT from LHE event (requires LHE analyzer to have run)  --------------------------------------------------------- #
     NTupleVariable("lheHT", lambda ev : ev.lheHT, mcOnly=True, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer"),

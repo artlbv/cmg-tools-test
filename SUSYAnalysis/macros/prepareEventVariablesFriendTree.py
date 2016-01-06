@@ -7,21 +7,29 @@ MODULES = []
 
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_base import EventVars1L_base
 MODULES.append( ('1l_Basics', EventVars1L_base()) )
+# triggers
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_triggers import EventVars1L_triggers
 MODULES.append( ('1l_Triggers', EventVars1L_triggers()) )
-# for pileup
-from CMGTools.SUSYAnalysis.tools.eventVars_1l_pileup import EventVars1L_pileup
-MODULES.append( ('1l_Pileup', EventVars1L_pileup()) )
+## DATA only
 # for Filters
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_filters import EventVars1L_filters
 MODULES.append( ('1l_Filters', EventVars1L_filters()) )
+### MC only
+# for pileup
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_pileup import EventVars1L_pileup
+MODULES.append( ('1l_Pileup', EventVars1L_pileup()) )
 # for signal masses
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_signal import EventVars1L_signal
 MODULES.append( ('1l_Signal', EventVars1L_signal()) )
-#
-
-#from CMGTools.SUSYAnalysis.tools.eventVars_1l_WeightsForSystematics import EventVars1LWeightsForSystematics
-#MODULES.append( ('1l_SysWeights', EventVars1LWeightsForSystematics()) )
+# for LeptonSF
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_leptonSF import EventVars1L_leptonSF
+MODULES.append( ('1l_LeptonSF', EventVars1L_leptonSF()) )
+# for BtagSF
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_btagSF import EventVars1L_btagSF
+MODULES.append( ('1l_LeptonSF', EventVars1L_btagSF()) )
+# Top pt reweighting
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_WeightsForSystematics import EventVars1LWeightsForSystematics
+MODULES.append( ('1l_SysWeights', EventVars1LWeightsForSystematics()) )
 
 '''
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_bkgDilep import EventVars1L_bkgDilep
@@ -232,6 +240,12 @@ if options.naf:
     jobList.close()
     exit()
 
+def getSampName(name, tname):
+    if "/tree.root" in name:
+        samp = name.replace("/"+tname+"/tree.root","")
+        samp = os.path.basename(samp)
+        return samp
+    else: return name
 
 maintimer = ROOT.TStopwatch()
 def _runIt(myargs):
@@ -264,6 +278,10 @@ def _runIt(myargs):
         print "removing filters module"
         modulesToRun.remove( ('1l_Filters', EventVars1L_filters()) )
     '''
+    # Save sample name in module
+    for m,v in MODULES:
+        v.sample = getSampName(fin,options.tree)
+
     if options.modules != []:
         toRun = {}
         for m,v in MODULES:
