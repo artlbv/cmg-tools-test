@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, glob, sys
+import os, glob, sys, math
 
 from ROOT import *
 from searchBins import *
@@ -242,6 +242,8 @@ class YieldStore:
 
     def printLatexTable(self, samps, printSamps, label, f):
         yds = self.getMixDict(samps)
+        ydsNorm = self.getMixDict([('EWK', 'Kappa'),])
+
         nSource = len(samps)
         nCol = nSource + 4
         f.write('\multicolumn{' + str(nCol) + '}{|c|}{' +label +'} \\\ \n')
@@ -264,15 +266,29 @@ class YieldStore:
             elif LT == LT0 and HT == HT0:
                 f.write('  &  & ' + B + '&' + LTbin +', ' + HTbin + ', ' + Bbin)
 
-            print yds[bin]
+
             for yd in yds[bin]:
                 precision = 2
                 if yd == 0:
                     f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (0.0, 0.0))
                 else:
+                    val = yd.val
+                    err = yd.err
                     if 'Rcs' in yd.cat or 'Kappa' in yd.cat:
                         precision = 4
-                    f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (yd.val, yd.err))
+                    elif 'data_QCDsubtr' in yd.name:
+                        precision = 2
+                    elif '_predict' in yd.cat or 'background' in yd.name:
+                        precision = 0
+                        val = round(yd.val)
+                        err = math.sqrt(round(yd.val))
+
+                    if 'syst' in yd.name:
+                        precision = 2
+                        print val, ydsNorm[bin][0].val
+                        f.write((' & %.'+str(precision)+'f' ) % (val/ydsNorm[bin][0].val*100))
+                    else:
+                        f.write((' & %.'+str(precision)+'f $\pm$ %.'+str(precision)+'f') % (val, err))
 
 
             f.write(' \\\ \n')
