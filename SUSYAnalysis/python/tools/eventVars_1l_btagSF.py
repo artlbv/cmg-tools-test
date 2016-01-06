@@ -41,26 +41,40 @@ sfFname = sfdir+"btagSF_CSVv2.csv"
 calib = ROOT.BTagCalibration("csvv2", sfFname)
 
 # SF readers (from CMSSW)
-readerCombUp      = ROOT.BTagCalibrationReader(calib, 1, "comb", "up")
-readerCombCentral = ROOT.BTagCalibrationReader(calib, 1, "comb", "central")
-readerCombDown    = ROOT.BTagCalibrationReader(calib, 1, "comb", "down")
-readerMuUp        = ROOT.BTagCalibrationReader(calib, 1, "mujets", "up")
-readerMuCentral   = ROOT.BTagCalibrationReader(calib, 1, "mujets", "central")
-readerMuDown      = ROOT.BTagCalibrationReader(calib, 1, "mujets", "down")
+sfReaders = { "Comb" : {}, "Mu" : {} }
+
+sfReaders["Comb"]["Up"]      = ROOT.BTagCalibrationReader(calib, 1, "comb", "up")
+sfReaders["Comb"]["Central"] = ROOT.BTagCalibrationReader(calib, 1, "comb", "central")
+sfReaders["Comb"]["Down"]    = ROOT.BTagCalibrationReader(calib, 1, "comb", "down")
+sfReaders["Mu"]["Up"]        = ROOT.BTagCalibrationReader(calib, 1, "mujets", "up")
+sfReaders["Mu"]["Central"]   = ROOT.BTagCalibrationReader(calib, 1, "mujets", "central")
+sfReaders["Mu"]["Down"]      = ROOT.BTagCalibrationReader(calib, 1, "mujets", "down")
+
 
 def getSF2015(parton, pt, eta):
+
+    flav = 2 # flavour for reader
+    ptlim = 1000 # limit of pt range
+    sftype = "Comb" # meas type of SF
+
     if abs(parton)==5: #SF for b
-        sf   = readerMuCentral.eval(0, eta, pt)
-        sf_d = readerMuDown.eval(0, eta, pt)
-        sf_u = readerMuUp.eval(0, eta, pt)
+        flav = 0; ptlim = 669.9; sftype = "Mu"
     elif abs(parton)==4: #SF for c
-        sf   = readerMuCentral.eval(1, eta, pt)
-        sf_d = readerMuDown.eval(1, eta, pt)
-        sf_u = readerMuUp.eval(1, eta, pt)
-    else: #SF for light flavours
-        sf   = readerCombCentral.eval(2, eta, pt)
-        sf_d = readerCombDown.eval(2, eta, pt)
-        sf_u = readerCombUp.eval(2, eta, pt)
+        flav = 1; ptlim = 669.9; sftype = "Mu"
+    else: # SF for light flavours
+        flav = 2; ptlim = 999.9; sftype = "Comb"
+
+    # read SFs
+    sf   = sfReaders[sftype]["Central"].eval(flav, eta, min(pt,ptlim))
+    sf_d = sfReaders[sftype]["Down"].eval(flav, eta, min(pt,ptlim))
+    sf_u = sfReaders[sftype]["Up"].eval(flav, eta, min(pt,ptlim))
+
+    # double uncertainty for out-of-range pt
+    if pt > ptlim:
+        # derived from c + 2*(d-c) = 2*d - c = d + (d-c)
+        sf_d += sf_d - sf
+        sf_u += sf_u - sf
+
     return {"SF":sf, "SF_down":sf_d,"SF_up":sf_u}
 
 # MC eff  -- precomputed
