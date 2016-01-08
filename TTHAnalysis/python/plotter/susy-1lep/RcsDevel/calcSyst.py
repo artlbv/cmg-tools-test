@@ -1,11 +1,21 @@
 #!/usr/bin/env python
 #import re, sys, os, os.path
 
-import glob, os, sys
+import glob, os, sys, math
 from math import hypot
 from ROOT import *
 
 from readYields import getYield
+
+def getDirNames(fname):
+
+    tfile = TFile(fname,"READ")
+
+    dirList = [dirKey.ReadObj().GetName() for dirKey in gDirectory.GetListOfKeys() if dirKey.IsFolder() == 1]
+
+    tfile.Close()
+
+    return dirList
 
 def getHnames(fname,tdir):
 
@@ -36,7 +46,8 @@ def getSystHist(tfile, hname, syst = "Xsec"):
 
     if not hUp or not hDown:
         print 'No systematics found!'
-        return 1
+        print tfile, hname, upName, dnName
+        return 0
 
     hSyst = hNorm.Clone(hNorm.GetName() + '_' + syst + '_syst')
 
@@ -58,16 +69,17 @@ def getSystHist(tfile, hname, syst = "Xsec"):
             maxErr = 0
 
             # fill maximum deviation
-            if abs(hPlus.GetBinContent(xbin,ybin)) > abs(hMinus.GetBinContent(xbin,ybin)):
-                maxDev = abs(hPlus.GetBinContent(xbin,ybin))
-                #maxErr = abs(hPlus.GetBinError(xbin,ybin))
-            else:
-                maxDev = abs(hMinus.GetBinContent(xbin,ybin))
-                #maxErr = abs(hMinus.GetBinError(xbin,ybin))
-
+#            if abs(hPlus.GetBinContent(xbin,ybin)) > abs(hMinus.GetBinContent(xbin,ybin)):
+#                maxDev = abs(hPlus.GetBinContent(xbin,ybin))
+#            else:
+#                maxDev = abs(hMinus.GetBinContent(xbin,ybin))
+                
+            #fill with average deviation
+            maxDev = (math.fabs(hPlus.GetBinContent(xbin,ybin))+math.fabs(hMinus.GetBinContent(xbin,ybin)))/2
             if hNorm.GetBinContent(xbin,ybin) > 0:
                 maxDev /= hNorm.GetBinContent(xbin,ybin)
                 #maxErr = hypot(maxErr,hNorm.GetBinError(xbin,ybin))
+            
 
             hSyst.SetBinContent(xbin,ybin,maxDev)
             hSyst.SetBinError(xbin,ybin,maxErr)
@@ -80,16 +92,34 @@ def makeSystHists(fileList):
     # filter
     #fileList = [fname for fname in fileList if 'NB3' not in fname]
 
-    hnames = ["T1tttt_Scan"] # process name
+    #hnames = ["T1tttt_Scan"] # process name
+    hnames = ["EWK"] # process name
     #hnames = getHnames(fileList[0],'SR_MB') # get process names from file
     #print 'Found these hists:', hnames
 
-    systNames = ["Xsec"]
+    #systNames = ["Xsec"]
+    #systNames = ["PU"]
+    #systNames = ["topPt"]
+    #systNames = ["Wxsec"]
+    #systNames = ["JEC"]
+    #systNames = ["DLSlope"]
+    systNames = ["DLConst"]
+    #systNames = ["btagHF","btagLF"]
 
-    bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
+    #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
+    #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB','Kappa','Rcs_MB','Rcs_SB']
+    bindirs = getDirNames(fileList[0])
+    print "Found those dirs:", bindirs
+
+    # dir to store
+    sysdir = os.path.dirname(fileList[0]) + "/syst/"
+    if not os.path.exists(sysdir): os.makedirs(sysdir)
 
     for fname in fileList:
         tfile = TFile(fname,"UPDATE")
+        #tfile = TFile(fname,"READ")
+        #sysname = sysdir + os.path.basename(fname)
+        #sfile = TFile(sysname,"RECREATE")
 
         for bindir in bindirs:
 
@@ -98,8 +128,11 @@ def makeSystHists(fileList):
 
                     hSyst = getSystHist(tfile, bindir+'/'+ hname, syst)
 
-                    tfile.cd(bindir)
-                    hSyst.Write()
+                    if hSyst:
+                        tfile.cd(bindir)
+                        #sfile.mkdir(bindir)
+                        #sfile.cd(bindir)
+                        hSyst.Write("",TObject.kOverwrite)
 
             '''
             # create Syst folder structure
@@ -117,6 +150,7 @@ def makeSystHists(fileList):
             '''
 
         tfile.Close()
+        #sfile.Close()
 
     return 1
 
@@ -136,6 +170,9 @@ if __name__ == "__main__":
     else:
         print "No pattern given!"
         exit(0)
+
+    # append / if pattern is a dir
+    if os.path.isdir(pattern): pattern += "/"
 
     # find files matching pattern
     fileList = glob.glob(pattern+"*.root")
