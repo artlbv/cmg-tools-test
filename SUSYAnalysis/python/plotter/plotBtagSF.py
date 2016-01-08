@@ -30,9 +30,20 @@ if __name__ == "__main__":
         print 'No file name is given'
         exit()
 
+    '''
     tfile  = TFile(infile, "READ")
-
     tree = tfile.Get("sf/t")
+    '''
+    tree = TChain("sf/t")
+    tree.Add(infile)
+
+    # get sample name
+    samp = infile[infile.find("evVarFriend_"):]
+    #samp = samp[infile.find("d_")+1:]
+    samp = samp.replace(".root","")
+    samp = samp.replace("evVarFriend_","")
+    samp = samp[:samp.find("*")]
+    print "Sample", samp
 
     print tree.GetEntries()
 
@@ -64,13 +75,16 @@ if __name__ == "__main__":
 
     # set up hist
     hists[0].GetXaxis().SetTitle("N_{b-tag}")
+    hists[0].GetXaxis().SetNdivisions(505)
 
     # show relative variations
     doRel = True
 
     if doRel:
-        hists[0].GetYaxis().SetRangeUser(0.81,1.19)
+        #hists[0].GetYaxis().SetRangeUser(0.81,1.19)
+        hists[0].GetYaxis().SetRangeUser(0.51,1.49)
         hists[0].GetYaxis().SetTitle("Variation")
+        hists[0].GetYaxis().SetTitleOffset(1.2)
         for hist in reversed(hists): hist.Divide(hists[0])
     else:
         for hist in reversed(hists): hist.Scale(1/hists[0].Integral())
@@ -82,8 +96,18 @@ if __name__ == "__main__":
         if i == 0: hist.Draw("histe1")
         else: hist.Draw("histsame")
 
-    canv.BuildLegend()
+    leg = canv.BuildLegend()
+    leg.SetHeader(samp)
 
-    raw_input("Exit")
+    if not batchMode:
+        raw_input("Exit")
 
-    tfile.Close()
+    if doRel:
+        cname = "plots/btagVar_relative_" + samp
+    else:
+        cname = "plots/btagVar_norm_" + samp
+
+    for ext in [".pdf",".png"]:
+        canv.SaveAs(cname+ext)
+
+    #tfile.Close()
