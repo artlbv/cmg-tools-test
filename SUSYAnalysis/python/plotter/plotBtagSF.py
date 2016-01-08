@@ -42,7 +42,7 @@ if __name__ == "__main__":
     #samp = samp[infile.find("d_")+1:]
     samp = samp.replace(".root","")
     samp = samp.replace("evVarFriend_","")
-    samp = samp[:samp.find("*")]
+    if "*" in samp: samp = samp[:samp.find("*")]
     print "Sample", samp
 
     print tree.GetEntries()
@@ -78,17 +78,19 @@ if __name__ == "__main__":
     hists[0].GetXaxis().SetNdivisions(505)
 
     # show relative variations
-    doRel = True
+    doRel = False
 
     if doRel:
+        for hist in reversed(hists): hist.Divide(hists[0])
         #hists[0].GetYaxis().SetRangeUser(0.81,1.19)
         hists[0].GetYaxis().SetRangeUser(0.51,1.49)
         hists[0].GetYaxis().SetTitle("Variation")
         hists[0].GetYaxis().SetTitleOffset(1.2)
-        for hist in reversed(hists): hist.Divide(hists[0])
     else:
         for hist in reversed(hists): hist.Scale(1/hists[0].Integral())
         hists[0].GetYaxis().SetTitle("Normalised events [a.u.]")
+        hists[0].GetYaxis().SetTitleOffset(1.2)
+        hists[0].GetYaxis().SetLabelSize(0.025)
 
     canv = TCanvas("cNBjetsSF","NBjets with SF",800,800)
     for i,hist in enumerate(hists):
