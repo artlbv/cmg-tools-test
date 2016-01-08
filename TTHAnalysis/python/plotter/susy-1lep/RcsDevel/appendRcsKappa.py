@@ -99,6 +99,7 @@ def getPoissonHist(tfile, sample = "background", band = "CR_MB"):
 
     return hist
 
+
 # Systematic error on F-ratio
 qcdSysts = {
     ('NJ45','HT0') : 0.25,
@@ -261,6 +262,39 @@ def getQCDsubtrHistos(tfile, sample = "background", band = "CR_MB/", isMC = True
 
     return (hQCDpred,hQCDsubtr)
 
+def replaceEmptyDataBinsWithMC(fileList):
+    # hists to make QCD estimation
+    bindirs =  ['CR_MB','SR_SB','CR_SB']
+    print ''
+    print "Replacing empty data bins with MC for CR_MB, SR_SB, CR_SB, 100% error"
+    for fname in fileList:
+        tfile = TFile(fname,"UPDATE")
+        if 1==1:
+            for bindir in bindirs:
+                histData = tfile.Get(bindir+"/data").Clone()
+                histBkg = tfile.Get(bindir+"/background").Clone()
+                
+                #if "TH" not in histData.ClassName() or 'TH' in histBkg.ClassName(): return 0
+
+                ix = 2
+                iy = 2
+                if histData.GetBinContent(ix, iy) == 0:
+                    print '!!! ATTENTION: replacing', fname, bindir, "bin number", ix, iy, "data", histData.GetBinContent(ix, iy), "with MC", histBkg.GetBinContent(ix,iy), 'alsp replacing sorrounding bins e, mu sel !!!'
+                    histData.SetBinContent(ix, iy, histBkg.GetBinContent(ix,iy))
+                    histData.SetBinError(ix, iy, histBkg.GetBinContent(ix,iy))
+                    histData.SetBinContent(ix+1, iy, histBkg.GetBinContent(ix+1,iy))
+                    histData.SetBinError(ix+1, iy, histBkg.GetBinContent(ix+1,iy))
+                    histData.SetBinContent(ix-1, iy, histBkg.GetBinContent(ix-1,iy))
+                    histData.SetBinError(ix-1, iy, histBkg.GetBinContent(ix-1,iy))
+
+                if histData:
+                    tfile.cd(bindir)
+                    # overwrite old hist
+                    histData.Write("",TObject.kOverwrite)
+                tfile.cd()
+        tfile.Close()
+    print ''
+
 def makeQCDsubtraction(fileList, samples):
     # hists to make QCD estimation
     bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
@@ -401,7 +435,12 @@ def makePredictHists(fileList, samples = []):
         # create Rcs/Kappa dir struct
         if not tfile.GetDirectory("SR_MB_predict"):
             tfile.mkdir("SR_MB_predict")
-
+            binString = tfile.Get("SR_MB/BinName").Clone()
+            if binString: binName = binString.GetTitle()
+            else: binName = tfile.GetName()
+            print binString
+            tfile.cd("SR_MB_predict")
+            binString.Write()
             for sample in samples:
 
                 hPredict = getPredHist(tfile,sample)
@@ -410,6 +449,7 @@ def makePredictHists(fileList, samples = []):
                     tfile.cd("SR_MB_predict")
                     hPredict.Write()
                     #print "Wrote prediction of", sample
+                    
                 else:
                     print "Failed to make prediction for", sample
         else:
@@ -494,6 +534,8 @@ if __name__ == "__main__":
     # samples to make full prediciton
     predSamps = allSamps + ["background_poisson","QCD_poisson"]
     #predSaps = [s for s in predSamps if s in allSamps]
+
+    replaceEmptyDataBinsWithMC(fileList)
 
     makePoissonErrors(fileList, poisSamps)
     makeQCDsubtraction(fileList, qcdPredSamps)

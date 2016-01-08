@@ -267,8 +267,9 @@ if __name__ == "__main__":
 
     print 'Using cards from', cardDirName
     inDir = cardDirectory
-    cardFnames = glob.glob(inDir+'/*/*68*.root')
-    cardFnames9 = glob.glob(inDir+'/*/*9i*.root')
+    cardFnames = glob.glob(inDir+'/merged/*68*.root')
+    cardFnames9 = glob.glob(inDir+'/merged/*9i*.root')
+    print cardFnames
 
     for i,cards in enumerate((cardFnames, cardFnames9)):
         dictRcs_MB = getYieldDict(cards,"Rcs_MB","","lep")

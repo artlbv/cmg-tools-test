@@ -73,6 +73,7 @@ if __name__ == "__main__":
             ratio.GetYaxis().SetTitleOffset(0.7)
             ratio.GetYaxis().SetLabelSize(0.06)
             ratio.GetXaxis().SetLabelSize(0.05)
+            ratio.GetXaxis().SetLabelSize(0.04)
 
         ratios.append(ratio)
 
@@ -94,9 +95,10 @@ if __name__ == "__main__":
 
         #print hSyst.GetXaxis().GetBinLabel(bin), sysErrs[bin-1]/100.
 
-    hSyst.SetFillStyle(3013)
-    #hSyst.SetFillColorAlpha(16,0.7)
-    hSyst.SetFillColor(16)
+    #hSyst.SetFillStyle(3013)
+    hSyst.SetFillStyle(3244)
+    hSyst.SetFillColorAlpha(16,0.7)
+    #hSyst.SetFillColor(16)
     hSyst.SetMarkerStyle(0)
     hSyst.SetLineColor(0)
 

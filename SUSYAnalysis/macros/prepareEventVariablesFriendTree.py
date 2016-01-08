@@ -7,21 +7,29 @@ MODULES = []
 
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_base import EventVars1L_base
 MODULES.append( ('1l_Basics', EventVars1L_base()) )
+# triggers
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_triggers import EventVars1L_triggers
 MODULES.append( ('1l_Triggers', EventVars1L_triggers()) )
-# for pileup
-from CMGTools.SUSYAnalysis.tools.eventVars_1l_pileup import EventVars1L_pileup
-MODULES.append( ('1l_Pileup', EventVars1L_pileup()) )
+## DATA only
 # for Filters
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_filters import EventVars1L_filters
 MODULES.append( ('1l_Filters', EventVars1L_filters()) )
+### MC only
+# for pileup
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_pileup import EventVars1L_pileup
+MODULES.append( ('1l_Pileup', EventVars1L_pileup()) )
 # for signal masses
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_signal import EventVars1L_signal
 MODULES.append( ('1l_Signal', EventVars1L_signal()) )
-#
-
-#from CMGTools.SUSYAnalysis.tools.eventVars_1l_WeightsForSystematics import EventVars1LWeightsForSystematics
-#MODULES.append( ('1l_SysWeights', EventVars1LWeightsForSystematics()) )
+# for LeptonSF
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_leptonSF import EventVars1L_leptonSF
+MODULES.append( ('1l_LeptonSF', EventVars1L_leptonSF()) )
+# for BtagSF
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_btagSF import EventVars1L_btagSF
+MODULES.append( ('1l_LeptonSF', EventVars1L_btagSF()) )
+# Top pt reweighting
+from CMGTools.SUSYAnalysis.tools.eventVars_1l_WeightsForSystematics import EventVars1LWeightsForSystematics
+MODULES.append( ('1l_SysWeights', EventVars1LWeightsForSystematics()) )
 
 '''
 from CMGTools.SUSYAnalysis.tools.eventVars_1l_bkgDilep import EventVars1L_bkgDilep
@@ -107,6 +115,8 @@ if len(options.chunks) != 0 and len(options.datasets) != 1:
 if not os.path.isdir(args[1]): os.makedirs(args[1])
 
 jobs = []
+frpref = "evVarFriend_"
+#frpref = ""
 
 for D in glob(args[0]+"/*"):
     treename = options.tree
@@ -129,7 +139,7 @@ for D in glob(args[0]+"/*"):
         entries = t.GetEntries()
         f.Close()
         if options.newOnly:
-            fout = "%s/evVarFriend_%s.root" % (args[1],short)
+            fout = "%s/" % (args[1]) + frpref + "%s.root"%(short)
             if os.path.exists(fout):
                 #f = ROOT.TFile.Open(fname);
                 #t = f.Get(treename)
@@ -144,7 +154,7 @@ for D in glob(args[0]+"/*"):
         chunk = options.chunkSize
         if entries < chunk:
             print "  ",os.path.basename(D),("  DATA" if data else "  MC")," single chunk"
-            jobs.append((short,fname,"%s/evVarFriend_%s.root" % (args[1],short),data,xrange(entries),-1))
+            jobs.append((short,fname,"%s/"  % (args[1]) + frpref + "%s.root" %(short),data,xrange(entries),-1))
         else:
             nchunk = int(ceil(entries/float(chunk)))
             print "  ",os.path.basename(D),("  DATA" if data else "  MC")," %d chunks" % nchunk
@@ -152,7 +162,7 @@ for D in glob(args[0]+"/*"):
                 if options.chunks != []:
                     if i not in options.chunks: continue
                 r = xrange(int(i*chunk),min(int((i+1)*chunk),entries))
-                jobs.append((short,fname,"%s/evVarFriend_%s.chunk%05d.root" % (args[1],short,i),data,r,i))
+                jobs.append((short,fname,"%s/"% (args[1]) + frpref + "%s.chunk%05d.root" %(short,i),data,r,i))
 print "\n"
 
 if len(jobs) != 0:
@@ -230,6 +240,12 @@ if options.naf:
     jobList.close()
     exit()
 
+def getSampName(name, tname):
+    if "/tree.root" in name:
+        samp = name.replace("/"+tname+"/tree.root","")
+        samp = os.path.basename(samp)
+        return samp
+    else: return name
 
 maintimer = ROOT.TStopwatch()
 def _runIt(myargs):
@@ -262,6 +278,10 @@ def _runIt(myargs):
         print "removing filters module"
         modulesToRun.remove( ('1l_Filters', EventVars1L_filters()) )
     '''
+    # Save sample name in module
+    for m,v in MODULES:
+        v.sample = getSampName(fin,options.tree)
+
     if options.modules != []:
         toRun = {}
         for m,v in MODULES:
