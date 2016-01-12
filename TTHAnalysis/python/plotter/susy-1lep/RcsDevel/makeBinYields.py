@@ -152,13 +152,14 @@ def writeYields(options):
     else:
         report = mca.getPlotsRaw("x", options.var, options.bins, cuts.allCuts(), nodata=options.asimov)
 
-    # add sum MC entry
-    totalMC = []; ewkMC = []
-
 #    print mca._backgrounds
 #    print mca.listBackgrounds()
 
     if not options.pretend and not options.systs:
+
+        # add sum MC entry
+        totalMC = []; ewkMC = []
+
         for p in mca.listBackgrounds():
             if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p and 'TTincl' not in p and 'T1ttt' not in p:
             #if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p:
@@ -168,10 +169,39 @@ def writeYields(options):
                     print 'adding for ewk', p
                     ewkMC.append(report[p])
 
-    if len(totalMC) > 0:
-        report['x_background'] = mergePlots("x_background", totalMC)
-    if len(ewkMC) > 0:
-        report['x_EWK'] = mergePlots("x_EWK", ewkMC)
+        if len(totalMC) > 0:
+            report['x_background'] = mergePlots("x_background", totalMC)
+        if len(ewkMC) > 0:
+            report['x_EWK'] = mergePlots("x_EWK", ewkMC)
+
+
+    elif options.systs:
+        names = mca.listBackgrounds()
+
+        cnames = [] # list of all central samples
+        labels = ["Up","up","down","Down","EWK"] # labels to ignore
+        for name in names:
+            for lab in labels:
+                if lab in name: break
+            else:
+                cnames.append(name)
+        print cnames
+
+        if len(cnames) > 0:
+            sumnames = {}; ref = cnames[0]
+            for name in names:
+                if ref in name:
+                    sumnames[name.replace(ref,"EWK")] = []
+
+            print sumnames
+
+            for name in sumnames:
+                varname = name.replace("EWK","")
+                for cname in cnames:
+                    pname = cname + varname
+                    sumnames[name].append(report[pname])
+
+                report['x_'+ name] = mergePlots("x_"+name, sumnames[name])
 
     '''
     if options.asimov:
@@ -193,7 +223,11 @@ def writeYields(options):
         print 'Yields:'
 
     if not options.pretend:
-        for n,h in report.iteritems():
+        #for n,h in report.iteritems():
+        # sort by hist names
+        hlist = sorted(report.values(), key = lambda h: h.GetName())
+
+        for h in hlist:
             makeUpHist(h,options)
 
             if options.verbose > 0 and options.grid:
