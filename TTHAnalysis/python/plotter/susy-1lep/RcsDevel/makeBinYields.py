@@ -153,8 +153,12 @@ def writeYields(options):
         report = mca.getPlotsRaw("x", options.var, options.bins, cuts.allCuts(), nodata=options.asimov)
 
     # add sum MC entry
+    totalMC = []; ewkMC = []
+
+#    print mca._backgrounds
+#    print mca.listBackgrounds()
+
     if not options.pretend and not options.systs:
-        totalMC = []; ewkMC = []
         for p in mca.listBackgrounds():
             if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p and 'TTincl' not in p and 'T1ttt' not in p:
             #if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p:
@@ -168,7 +172,7 @@ def writeYields(options):
         report['x_background'] = mergePlots("x_background", totalMC)
     if len(ewkMC) > 0:
         report['x_EWK'] = mergePlots("x_EWK", ewkMC)
-        
+
     '''
     if options.asimov:
         tomerge = []
@@ -201,6 +205,39 @@ def writeYields(options):
     workspace.Close()
 
     return 1
+
+# dict of Nb cut and corresp. Nb weights
+mcaName = {}
+mcaName["NB1"] = "mca-MC_syst_btag_1b_NB1.txt"
+mcaName["NB2"] = "mca-MC_syst_btag_1b_NB2.txt"
+mcaName["NB2i"] = "mca-MC_syst_btag_1b_NB2p.txt"
+mcaName["NB3i"] = "mca-MC_syst_btag_1b_NB3p.txt"
+
+def getBTagWstring(cuts, var = ""):
+
+    print "Cuts before NB check:", cuts
+
+    nbcut = None
+    mcaname = None
+
+    # find NBcut and remove from cuts
+    for cut in cuts:
+        if "nBJet" in cut[2]:
+            print cut
+            nbcut = cut
+            cuts.remove(cut)
+
+    # make weight string
+    if nbcut == None:
+        return (cuts,bWgt)
+    else:
+        print "Removed NB cut", cuts
+        if nbcut[1] in mcaName: mca = mcaName[nbcut[1]]
+        print "Going to use weights", mca
+
+        mca = "../systs/btag/" + mca
+
+    return (cuts,mca)
 
 def submitJobs(args, nchunks, outdir = "./"):
 
@@ -319,6 +356,8 @@ if __name__ == "__main__":
 
     binList = sorted(cDict.keys())
 
+    doMethod1b = True
+
     if options.batch:
         print "Going to prepare batch jobs..."
         subargs =  sys.argv
@@ -351,6 +390,11 @@ if __name__ == "__main__":
 
         cuts = cDict[bin]
         options.bin = bin
+
+        if doMethod1b == True:
+            (cuts,options.mcaFile) = getBTagWstring(cuts)
+            print cuts,options.mcaFile
+
         options.cutsToAdd = cuts
 
         if options.verbose > 0:
