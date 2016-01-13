@@ -381,8 +381,9 @@ def getSquaredSum(histList):
                 x = sqHist.GetBinContent(bin)
                 new = x*x + hist.GetBinContent(bin)*hist.GetBinContent(bin)
                 sqHist.SetBinContent(bin, math.sqrt(new))
-    sqHist.SetMarkerStyle(31)
-    sqHist.SetMarkerColor(kRed)
+    sqHist.SetMarkerStyle(34)
+    sqHist.SetMarkerSize(2)
+    sqHist.SetMarkerColor(kBlack)
     sqHist.SetTitle("sqSum")
     sqHist.SetName("sqSum")
     return sqHist
@@ -392,11 +393,12 @@ def getHistWithError(hCentral, sqHist):
 
     for bin in range(1,hCentral.GetNbinsX()+1):
         sys = hCentral.GetBinContent(bin)*sqHist.GetBinContent(bin)
-        err = math.sqrt(hCentral.GetBinError(bin)*hCentral.GetBinError(bin) + sys*sys)
+        #err = math.sqrt(hCentral.GetBinError(bin)*hCentral.GetBinError(bin) + sys*sys)
+        err = math.hypot(hCentral.GetBinError(bin),sys)
         histWithError.SetBinError(bin, err)
 
     histWithError.SetFillColor(kBlue)
-    histWithError.SetFillStyle(3002)  
+    histWithError.SetFillStyle(3002)
     return  histWithError
 
 
@@ -521,6 +523,8 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
     ymax = max([h.GetMaximum() for h in histList])
     ymin = min([h.GetMinimum() for h in histList]); ymin = max(0.01,ymin)
 
+    #ymax = min(ymax, 1.5)
+
     # for fractions set min to 0
     if ymax < 1.01 and ymax >= 1: ymax == 1; ymin = 0
     else: ymax *= 1.3; ymin *= 0.8
@@ -568,10 +572,10 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
             leg.AddEntry(hist,"Sum squared uncertainties","p")
         else:
             if len(histList) < 3:
-                hist.Draw(plotOpt+"pE2")
+                hist.Draw(plotOpt+"histE2")
                 leg.AddEntry(hist,hist.GetTitle(),"pf")
             else:
-                hist.Draw(plotOpt+"pE5")
+                hist.Draw(plotOpt+"histE2")
                 leg.AddEntry(hist,hist.GetTitle(),"pf")
 
         # remove axis label with ratio

@@ -243,9 +243,32 @@ def writeYields(options):
 # dict of Nb cut and corresp. Nb weights
 mcaName = {}
 mcaName["NB1"] = "mca-MC_syst_btag_1b_NB1.txt"
+mcaName["NB1i"] = "mca-MC_syst_btag_1b_NB1p.txt"
 mcaName["NB2"] = "mca-MC_syst_btag_1b_NB2.txt"
 mcaName["NB2i"] = "mca-MC_syst_btag_1b_NB2p.txt"
 mcaName["NB3i"] = "mca-MC_syst_btag_1b_NB3p.txt"
+
+nbNames = {"NB0":"0", "NB1":"1", "NB1i":"1p", "NB2":"2", "NB2i":"2p", "NB3":"3", "NB3i":"3p"}
+
+import shutil
+
+def makeBtagMCA(nbbin = "NB1",oldmca = "../systs/btag/mca-MC_syst_btag_1b_NBX.txt"):
+
+    if "NBX" not in oldmca:
+        print("Error! Provided MCA has no wildcard for NBX")
+        return oldmca
+
+    newmca = oldmca.replace("NBX",nbbin)
+
+    if os.path.exists(newmca): return newmca
+
+    # copy old to new mca
+    shutil.copyfile(oldmca,newmca)
+
+    # replace NBX with real bin
+
+
+    return newmca
 
 def getBTagWstring(cuts, var = ""):
 
@@ -387,6 +410,15 @@ if __name__ == "__main__":
     #cDict.update(cutLTbinsCR)
 
     #print cDict.keys(); exit(0)
+
+    '''
+    d = {}
+
+    for bin in cDict:
+        if "NB1i" in bin: d[bin] = cDict[bin]
+    cDict = d
+    print cDict
+    '''
 
     binList = sorted(cDict.keys())
 
