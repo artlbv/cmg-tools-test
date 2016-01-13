@@ -51,11 +51,11 @@ def getSystHist(tfile, hname, syst = "Xsec"):
 
     hSyst = hNorm.Clone(hNorm.GetName() + '_' + syst + '_syst')
 
-    hPlus = hNorm.Clone(hNorm.GetName() + '_' + syst + '_plus')
-    hPlus.Add(hUp,-1)
+    hUpVar = hNorm.Clone(hNorm.GetName() + '_' + syst + '_upVar')
+    hUpVar.Add(hUp,-1)
 
-    hMinus = hNorm.Clone(hNorm.GetName() + '_' + syst + '_minus')
-    hMinus.Add(hDown,-1)
+    hDownVar = hNorm.Clone(hNorm.GetName() + '_' + syst + '_downVar')
+    hDownVar.Add(hDown,-1)
 
     # find maximum deviations
     for xbin in range(1,hSyst.GetNbinsX()+1):
@@ -69,23 +69,27 @@ def getSystHist(tfile, hname, syst = "Xsec"):
             maxErr = 0
 
             # fill maximum deviation
-#            if abs(hPlus.GetBinContent(xbin,ybin)) > abs(hMinus.GetBinContent(xbin,ybin)):
-#                maxDev = abs(hPlus.GetBinContent(xbin,ybin))
+#            if abs(hUpVar.GetBinContent(xbin,ybin)) > abs(hDownVar.GetBinContent(xbin,ybin)):
+#                maxDev = abs(hUpVar.GetBinContent(xbin,ybin))
 #            else:
-#                maxDev = abs(hMinus.GetBinContent(xbin,ybin))
-                
+#                maxDev = abs(hDownVar.GetBinContent(xbin,ybin))
+
             #fill with average deviation
-            maxDev = (math.fabs(hPlus.GetBinContent(xbin,ybin))+math.fabs(hMinus.GetBinContent(xbin,ybin)))/2
+            maxDev = 1/2.*(math.fabs(hUpVar.GetBinContent(xbin,ybin))+math.fabs(hDownVar.GetBinContent(xbin,ybin)))
+            #maxDev = 1/2 * (abs(hUpVar.GetBinContent(xbin,ybin))+ abs(hDownVar.GetBinContent(xbin,ybin)))
+
             if hNorm.GetBinContent(xbin,ybin) > 0:
                 maxDev /= hNorm.GetBinContent(xbin,ybin)
-                #maxErr = hypot(maxErr,hNorm.GetBinError(xbin,ybin))
-            
+            #    maxErr = hypot(maxErr,hNorm.GetBinError(xbin,ybin))
+
+            # limit max deviation to 200%
+            maxDev = min(maxDev,2.0)
 
             hSyst.SetBinContent(xbin,ybin,maxDev)
             hSyst.SetBinError(xbin,ybin,maxErr)
 
-    return hSyst
-
+    #return hSyst
+    return (hSyst,hUpVar,hDownVar)
 
 def makeSystHists(fileList):
 
@@ -93,7 +97,10 @@ def makeSystHists(fileList):
     #fileList = [fname for fname in fileList if 'NB3' not in fname]
 
     #hnames = ["T1tttt_Scan"] # process name
-    hnames = ["EWK"] # process name
+    #hnames = ["EWK"] # process name
+    #hnames = ['T_tWch','TToLeptons_tch','TBar_tWch', 'SiTop', 'TToLeptons_sch'] # process name
+    #hnames = ["TTJets","WJets","SingleTop","DY","TTV"] # process name
+    hnames = ["EWK","TTJets","WJets","SingleTop","DY","TTV"] # process name
     #hnames = getHnames(fileList[0],'SR_MB') # get process names from file
     #print 'Found these hists:', hnames
 
@@ -103,8 +110,8 @@ def makeSystHists(fileList):
     #systNames = ["Wxsec"]
     #systNames = ["JEC"]
     #systNames = ["DLSlope"]
-    systNames = ["DLConst"]
-    #systNames = ["btagHF","btagLF"]
+    #systNames = ["DLConst"]
+    systNames = ["btagHF","btagLF"]
 
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB','Kappa','Rcs_MB','Rcs_SB']
@@ -126,13 +133,15 @@ def makeSystHists(fileList):
             for hname in hnames:
                 for syst in systNames:
 
-                    hSyst = getSystHist(tfile, bindir+'/'+ hname, syst)
+                    (hSyst,hUp,hDown) = getSystHist(tfile, bindir+'/'+ hname, syst)
 
                     if hSyst:
                         tfile.cd(bindir)
                         #sfile.mkdir(bindir)
                         #sfile.cd(bindir)
                         hSyst.Write("",TObject.kOverwrite)
+                        hUp.Write("",TObject.kOverwrite)
+                        hDown.Write("",TObject.kOverwrite)
 
             '''
             # create Syst folder structure
