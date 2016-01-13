@@ -135,7 +135,7 @@ susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
 from CMGTools.TTHAnalysis.analyzers.ttHSTSkimmer import ttHSTSkimmer
 ttHSTSkimmer = cfg.Analyzer(
 	ttHSTSkimmer, name='ttHSTSkimmer',
-	minST = 200,
+	minST = 150,
 	)
 
 ## HT skim
@@ -193,7 +193,7 @@ isData = True # default, but will be overwritten below
 #sample = 'MC'
 #sample = 'data'
 sample = 'Signal'
-test = 1
+test = 0
 
 if sample == "MC":
 
@@ -256,9 +256,12 @@ elif sample == "Signal":
 	#jetAna.mcGT = "MCRUN2_74_V9"
 	jetAna.mcGT = "FastSim_Summer15_25nsV6_MC"
 
+	#### REMOVE JET ID FOR FASTSIM
+	jetAna.relaxJetId = True
+
 	# modify skim
 	anyLepSkim.minLeptons = 0
-	ttHLepSkim.minLeptons = 0
+	ttHLepSkim.minLeptons = 1
 
 	# -- new 74X samples
 	#from CMGTools.RootTools.samples.samples_13TeV_74X import *
@@ -273,7 +276,8 @@ elif sample == "Signal":
 	# Benchmarks
 	#selectedComponents = [ T1tttt_mGo_1475to1500_mLSP_1to1250, T1tttt_mGo_1500to1525_mLSP_50to1125, T1tttt_mGo_1200_mLSP_1to825, T1tttt_mGo_1900to1950_mLSP_0to1450 ]
 	# Rest
-	selectedComponents = mcSamplesT1tttt
+	#selectedComponents = mcSamplesT1tttt
+	selectedComponents = [T1tttt_mGo_1000to1050_mLSP_1to800, T1tttt_mGo_1225to1250_mLSP_1to1025, T1tttt_mGo_1325to1350_mLSP_1to1125, T1tttt_mGo_600to625_mLSP_250to375]
 
 	if test==1:
 		# test a single component, using a single thread.
@@ -389,28 +393,56 @@ hbheFilterAna = cfg.Analyzer(
     hbheAnalyzer, name = 'hbheAnalyzer',IgnoreTS4TS5ifJetInLowBVRegion=False
 )
 
+## SUSY Counter
+## histo counter
+#susyCoreSequence.insert(susyCoreSequence.index(skimAnalyzer),
+susyCoreSequence.insert(susyCoreSequence.index(susyScanAna)+1,
+			susyCounter)
+#susyCoreSequence.append(susyCounter)
+
+
+# change scn mass parameters
+#susyCounter.SMS_mass_1 = "genSusyMGluino"
+#susyCounter.SMS_mass_2 = "genSusyMNeutralino"
+susyCounter.SMS_varying_masses = ['genSusyMGluino','genSusyMNeutralino']
+
 #-------- SEQUENCE
 
 sequence = cfg.Sequence(susyCoreSequence+[
 		LHEAna,
 		ttHEventAna,
-		#ttHSTSkimmer,
+		ttHSTSkimmer,
 		ttHHTSkimmer,
 		hbheFilterAna,
 		treeProducer,
+#		susyCounter
 		])
 
 # remove skimming for Data or Signal
-if isData or isSignal :
+if isData:# or isSignal :
 	sequence.remove(ttHHTSkimmer)
-#	sequence.remove(ttHSTSkimmer)
+	sequence.remove(ttHSTSkimmer)
 
 if isSignal:
 	sequence.remove(eventFlagsAna)
 	sequence.remove(hbheFilterAna)
 
+## output histogram
+outputService=[]
+from PhysicsTools.HeppyCore.framework.services.tfile import TFileService
+output_service = cfg.Service(
+    TFileService,
+    'outputfile',
+    name="outputfile",
+    fname='treeProducerSusySingleLepton/tree.root',
+    #fname='susyCounter/counts.root',
+    option='recreate'
+    )
+outputService.append(output_service)
+
+
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
 		     sequence = sequence,
-		     services = [],
+		     services = outputService,
 		     events_class = Events)
