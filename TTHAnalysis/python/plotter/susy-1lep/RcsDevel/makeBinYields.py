@@ -250,7 +250,7 @@ mcaName["NB3i"] = "mca-MC_syst_btag_1b_NB3p.txt"
 
 nbNames = {"NB0":"0", "NB1":"1", "NB1i":"1p", "NB2":"2", "NB2i":"2p", "NB3":"3", "NB3i":"3p"}
 
-import shutil
+#import shutil
 
 def makeBtagMCA(nbbin = "NB1",oldmca = "../systs/btag/mca-MC_syst_btag_1b_NBX.txt"):
 
@@ -263,19 +263,28 @@ def makeBtagMCA(nbbin = "NB1",oldmca = "../systs/btag/mca-MC_syst_btag_1b_NBX.tx
     if os.path.exists(newmca): return newmca
 
     # copy old to new mca
-    shutil.copyfile(oldmca,newmca)
+    #shutil.copyfile(oldmca,newmca)
+
+    omca = open(oldmca,"r")
+    nmca = open(newmca,"w")
 
     # replace NBX with real bin
+    print "Created new mca for current NB cut:", newmca
 
+    for line in omca.readlines():
+        nline = line.replace("NBX",nbNames[nbbin])
+        nmca.write(nline)
+
+    omca.close()
+    nmca.close()
 
     return newmca
 
-def getBTagWstring(cuts, var = ""):
+def getBTagWstring(cuts, mcaname = ""):
 
     print "Cuts before NB check:", cuts
 
     nbcut = None
-    mcaname = None
 
     # find NBcut and remove from cuts
     for cut in cuts:
@@ -289,10 +298,14 @@ def getBTagWstring(cuts, var = ""):
         return (cuts,bWgt)
     else:
         print "Removed NB cut", cuts
-        if nbcut[1] in mcaName: mca = mcaName[nbcut[1]]
-        print "Going to use weights", mca
 
-        mca = "../systs/btag/" + mca
+        #if nbcut[1] in mcaName: mca = mcaName[nbcut[1]]
+        #print "Going to use weights", mca
+        #mca = "../systs/btag/" + mca
+
+        # auto mca
+        mca =  makeBtagMCA(nbcut[1],"mca/mca-Spring15_MConly_btag1B_NBX.txt")
+        print "Going to use weights", mca
 
     return (cuts,mca)
 
@@ -360,6 +373,9 @@ if __name__ == "__main__":
     parser.add_option("--pretend", dest="pretend",default=False, action="store_true",help="pretend to do it")
     parser.add_option("--systs", dest="systs",default=False, action="store_true",help="run for systs")
 
+    # Btag SF method selection
+    parser.add_option("--btag1B", dest="doBtagMeth1b",default=False, action="store_true",help="use btag SF weight method 1B")
+
     # batch options
     parser.add_option("-c","--chunk", dest="chunk",type="int",default=None,help="Number of chunk")
     parser.add_option("-b","--batch", dest="batch",default=False, action="store_true", help="batch command for submission")
@@ -422,7 +438,7 @@ if __name__ == "__main__":
 
     binList = sorted(cDict.keys())
 
-    doMethod1b = True
+#    doBtagMeth1b = True
 
     if options.batch:
         print "Going to prepare batch jobs..."
@@ -436,7 +452,6 @@ if __name__ == "__main__":
         for idx,bin in enumerate(binList):
             cuts = cDict[bin]
             options.bin = bin
-            options.cutsToAdd = cuts
 
             if options.verbose > 0:
                 print 80*'#'
@@ -447,6 +462,13 @@ if __name__ == "__main__":
                 print
             else:
                 print '.',
+
+            if options.doBtagMeth1b == True:
+                (cuts,options.mcaFile) = getBTagWstring(cuts,options.mcaFile)
+                print cuts,options.mcaFile
+
+            options.cutsToAdd = cuts
+
             writeYields(options)
         print
     elif options.chunk < len(binList):
@@ -457,12 +479,6 @@ if __name__ == "__main__":
         cuts = cDict[bin]
         options.bin = bin
 
-        if doMethod1b == True:
-            (cuts,options.mcaFile) = getBTagWstring(cuts)
-            print cuts,options.mcaFile
-
-        options.cutsToAdd = cuts
-
         if options.verbose > 0:
             print 80*'#'
             print 'Processing chunk #%i/%i' %(idx,len(binList))
@@ -472,6 +488,13 @@ if __name__ == "__main__":
             print
         else:
             print '.',
+
+        if options.doBtagMeth1b == True:
+            (cuts,options.mcaFile) = getBTagWstring(cuts,options.mcaFile)
+            print cuts,options.mcaFile
+
+        options.cutsToAdd = cuts
+
         writeYields(options)
     else:
         print "Nothing to process!"
