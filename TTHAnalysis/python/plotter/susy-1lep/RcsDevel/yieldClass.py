@@ -296,6 +296,24 @@ class YieldStore:
         return 1
 
 
+    def printTable(self, samps, printSamps, label, f):
+        yds = self.getMixDict(samps)
+        ydsNorm = self.getMixDict([('EWK', 'Kappa'),])
+
+        nSource = len(samps)
+        nCol = nSource + 4
+        bins = sorted(yds.keys())
+        precision = 3
+        f.write('bin                |' +  ' %s ' % '     |   '.join(map(str, printSamps)) + ' \n')
+        for i,bin in enumerate(bins):
+            f.write(bin + '')
+            for yd in yds[bin]:
+                val = yd.val
+                f.write(('  |    %.'+str(precision)+'f   ' ) % (1+val))
+            f.write('\n')
+        return 1
+
+
 
 if __name__ == "__main__":
 
