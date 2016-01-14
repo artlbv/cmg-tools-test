@@ -300,8 +300,11 @@ print
 
 def getSampKey(name):
 
-    if "TTJets" in name: return "TTJets"
+    #if "TTJets" in name: return "TTJets"
+    if "TT" in name: return "TTJets"
+    elif "SingleT" in name: return "TTJets"
     elif "WJets" in name: return "WJets"
+    elif "DY" in name: return "WJets"
     else: return "none"
 
 class EventVars1L_btagSF:
