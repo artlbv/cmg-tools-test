@@ -115,8 +115,8 @@ if len(options.chunks) != 0 and len(options.datasets) != 1:
 if not os.path.isdir(args[1]): os.makedirs(args[1])
 
 jobs = []
-#frpref = "evVarFriend_"
-frpref = ""
+frpref = "evVarFriend_"
+#frpref = ""
 
 for D in glob(args[0]+"/*"):
     treename = options.tree
