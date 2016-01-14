@@ -693,7 +693,7 @@ class PlotMaker:
                 # 
                 if not makeCanvas and not self._options.printPlots: continue
                 doRatio = self._options.showRatio and ('data' in pmap or (self._options.plotmode != "stack" and len(pmap) == 4)) and ("TH2" not in total.ClassName())
-                islog = pspec.hasOption('Logy'); 
+                islog = pspec.hasOption('Logy');
                 # define aspect ratio
                 if doRatio: ROOT.gStyle.SetPaperSize(20.,25.)
                 else:       ROOT.gStyle.SetPaperSize(20.,20.)
@@ -717,6 +717,7 @@ class PlotMaker:
                 else:
                     c1.SetWindowSize(600 + (600 - c1.GetWw()), 600 + (600 - c1.GetWh()));
                 p1.SetLogy(islog)
+                p1.SetLogz(pspec.hasOption('Logz'))
                 if pspec.hasOption('Logx'):
                     p1.SetLogx(True)
                     if p2: p2.SetLogx(True)
@@ -863,8 +864,12 @@ class PlotMaker:
                                     if p not in pmap: continue
                                     plot = pmap[p]
                                     c1.SetRightMargin(0.20)
-                                    plot.SetContour(100)
-                                    plot.Draw("COLZ TEXT45")
+                                    if pspec.hasOption('Logz'):
+                                        plot.SetContour(20)
+                                        plot.Draw("CONT0Z")
+                                    else:
+                                        plot.SetContour(100)
+                                        plot.Draw("COLZ TEXT45")
                                     c1.Print("%s/%s_%s.%s" % (fdir, pspec.name, p, ext))
                             else:
                                 c1.Print("%s/%s.%s" % (fdir, pspec.name, ext))
