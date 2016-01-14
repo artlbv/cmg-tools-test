@@ -85,12 +85,13 @@ if __name__ == "__main__":
     yds9 = YieldStore("lepYields")
     yds5 = YieldStore("lepYields")
 
-    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins_noPU/full/*/merged/LT*NJ6*"
+    btagMethod = "meth1b"
+    pattern = "YieldBtag/all/lumi2p1fb_MC1_2fbbins_noPU/full/"+btagMethod+"/merged/LT*NJ6*"
     yds6.addFromFiles(pattern,("lep","sele"))
-    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins_noPU/full/*/merged/LT*NJ9*"
+    pattern = "YieldBtag/all/lumi2p1fb_MC1_2fbbins_noPU/full/"+btagMethod+"/merged/LT*NJ9*"
     yds9.addFromFiles(pattern,("lep","sele"))
 
-    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins_noPU/full/grid/merged/LT*NJ5*"
+    pattern = "YieldBtag/all/lumi2p1fb_MC1_2fbbins_noPU/full/grid/merged/LT*NJ5*"
     yds5.addFromFiles(pattern,("lep","sele")) 
     
 
@@ -98,13 +99,16 @@ if __name__ == "__main__":
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
 
     printSamps = ['TTsemiLep','TTdiLep','TTV','SingleT', 'WJets', 'DY', 'QCD','background','T1t$^4$ 1.5$/$0.1','T1t$^4$ 1.2$/$0.8']
+#    printSamps = ['TTJets','TTV','SingleTop', 'WJets', 'DY','EWK','T1t$^4$ 1.5$/$0.1','T1t$^4$ 1.2$/$0.8']
 
     if 1 ==1:
         cats = ('SR_MB', 'CR_MB', 'SR_SB', 'CR_SB')
         for cat in cats:
-            f =  open('yields' + cat + '.tex','w')
+            f =  open('yields' + cat + '_'+btagMethod+'.tex','w')
             samps = [('TTsemiLep',cat),('TTdiLep',cat),('TTV',cat), ('SingleT',cat), ('WJets',cat), ('DY',cat), ('QCD',cat), ('background',cat),
                      ('T1tttt_Scan_mGo1500_mLSP100',cat),('T1tttt_Scan_mGo1200_mLSP800',cat)]
+#            samps = [('TTJets',cat),('TTV',cat), ('SingleTop',cat), ('WJets',cat), ('DY',cat), ('EWK',cat),
+#                     ('T1tttt_Scan_mGo1500_mLSP100',cat),('T1tttt_Scan_mGo1200_mLSP800',cat)]
             printLatexHeader(len(samps), f, 1)
             srcr = cat.replace('_MB','').replace('_SB','')
             sbmb = cat.replace('SR_','').replace('CR_','')
