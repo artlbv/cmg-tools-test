@@ -55,8 +55,24 @@ def printDataCard(yds, ydsObs, ydsSysSig):
     return 1
 
 
+def readSystFile():
+    systDict = {}
+    with open('sysTable.dat',"r") as xfile:
+        lines = xfile.readlines()
+        systs = lines[0].replace(' ','').replace('\n','').split('|') 
+        print systs
+        for line in lines[1:]:
+            values = line.replace(' ','').replace('\n','').split('|')            
+            bin = values[0]
+            singleSysts = {}
+            for val, syst in zip(values[1:],systs[1:]):
+                singleSysts[syst] = val
+            systDict[bin] =  singleSysts
+
+    return systDict
 
 def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
+    systDict = readSystFile()
     folder = 'datacardsABCD_' + out + '/'
     if not os.path.exists(folder): os.makedirs(folder) 
     bins = sorted(yds.keys())
@@ -110,6 +126,11 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
         before = '       -  ' * (4)
         sys = 'test'
         datacard.write(sys + ' lnN  ' + (' ' * (28))  + before + " ".join([kpatt % numToBar(1 + yd.val) for yd in ydsSigSys[bin]]) +"\n")
+
+        
+        for syst in systDict[bin].keys():
+            datacard.write(syst+'_'+bin+' lnN '+ ( ' ' * 32) +(" ".join(([kpatt % systDict[bin][syst] if ('SR_MB','data') == (x.replace('_predict',''),y) else '    -   ' for (x,y) in zip(catNames,sampNames)])))+"\n")
+
 
     
         params = ('kappa','beta','delta')
@@ -206,11 +227,12 @@ if __name__ == "__main__":
 #    yds6.showStats()
 #    yds9.showStats()
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
+    readSystFile()
+#    for mGo in range(800, 1700, 100):
+#       for mLSP in range(50,1200,50):
 
-    for mGo in range(800, 1700, 100):
-        for mLSP in range(50,1200,50):
-#    for mGo in range(1500, 1600, 50):
-#        for mLSP in range(100,200,50):
+    for mGo in range(1500, 1600, 50):
+        for mLSP in range(100,200,50):
             for ydIn in (yds6, yds9):
                 print "making datacards for "+str(mGo)+ ' '+str(mLSP)
                 signal = 'T1tttt_Scan_mGo'+str(mGo)+'_mLSP'+str(mLSP)
@@ -237,8 +259,8 @@ if __name__ == "__main__":
                 
                 sampsABCDbkg = [('data',cat) for cat in catsNoSR]
                 print sampsABCDbkg
-#                sampsABCDbkg.insert(0,('data','SR_MB_predict'))
-                sampsABCDbkg.insert(0,('background','SR_MB'))
+                sampsABCDbkg.insert(0,('data','SR_MB_predict'))
+#                sampsABCDbkg.insert(0,('background','SR_MB'))
 #                print sampsABCDbkg
                 sampsABCDsig = [('T1tttt_Scan_mGo'+str(mGo)+'_mLSP'+str(mLSP),cat) for cat in cats]
                 sampsABCDSigSys = [('T1tttt_Scan_Xsec_syst_mGo'+str(mGo)+'_mLSP'+str(mLSP),cat) for cat in cats ]
