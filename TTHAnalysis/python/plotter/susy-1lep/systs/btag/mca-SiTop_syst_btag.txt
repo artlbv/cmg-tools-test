@@ -1,0 +1,62 @@
+### CENTRAL
+# Single Top
+SiTop	: TToLeptons_tch_amcatnlo_full	: xsec*puRatio*btagSF ;
+SiTop	: TToLeptons_sch	 	: xsec*puRatio*btagSF ;
+SiTop	: T_tWch	 		: xsec*puRatio*btagSF ;
+SiTop	: TBar_tWch	 		: xsec*puRatio*btagSF ;
+
+TToLeptons_tch  : TToLeptons_tch_amcatnlo_full   : xsec*puRatio*btagSF ;
+TToLeptons_sch  : TToLeptons_sch   		 : xsec*puRatio*btagSF ;
+TBar_tWch 	: TBar_tWch   	    		 : xsec*puRatio*btagSF ;
+T_tWch  	: T_tWch      	    		 : xsec*puRatio*btagSF ;
+
+#### HEAVY FLAVOUR VARIATION
+### UP
+# Single Top
+SiTop_btagHF-Up	: TToLeptons_tch_amcatnlo_full	: xsec*puRatio*btagSF_b_up ;
+SiTop_btagHF-Up	: TToLeptons_sch	 	: xsec*puRatio*btagSF_b_up ;
+SiTop_btagHF-Up	: T_tWch	 		: xsec*puRatio*btagSF_b_up ;
+SiTop_btagHF-Up	: TBar_tWch	 		: xsec*puRatio*btagSF_b_up ;
+
+TToLeptons_tch_btagHF-Up  : TToLeptons_tch_amcatnlo_full   : xsec*puRatio*btagSF_b_up ;
+TToLeptons_sch_btagHF-Up  : TToLeptons_sch   		   : xsec*puRatio*btagSF_b_up ;
+TBar_tWch_btagHF-Up 	  : TBar_tWch   	    	   : xsec*puRatio*btagSF_b_up ;
+T_tWch_btagHF-Up  	  : T_tWch      	    	   : xsec*puRatio*btagSF_b_up ;
+
+### DOWN
+# Single Top
+SiTop_btagHF-Down	: TToLeptons_tch_amcatnlo_full	: xsec*puRatio*btagSF_b_down ;
+SiTop_btagHF-Down	: TToLeptons_sch	 	: xsec*puRatio*btagSF_b_down ;
+SiTop_btagHF-Down	: T_tWch	 		: xsec*puRatio*btagSF_b_down ;
+SiTop_btagHF-Down	: TBar_tWch	 		: xsec*puRatio*btagSF_b_down ;
+
+TToLeptons_tch_btagHF-Down  : TToLeptons_tch_amcatnlo_full   : xsec*puRatio*btagSF_b_down ;
+TToLeptons_sch_btagHF-Down  : TToLeptons_sch   		   : xsec*puRatio*btagSF_b_down ;
+TBar_tWch_btagHF-Down 	  : TBar_tWch   	    	   : xsec*puRatio*btagSF_b_down ;
+T_tWch_btagHF-Down  	  : T_tWch      	    	   : xsec*puRatio*btagSF_b_down ;
+
+
+#### LIGHT FLAVOUR VARIATION
+### UP
+# Single Top
+SiTop_btagLF-Up	: TToLeptons_tch_amcatnlo_full	: xsec*puRatio*btagSF_l_up ;
+SiTop_btagLF-Up	: TToLeptons_sch	 	: xsec*puRatio*btagSF_l_up ;
+SiTop_btagLF-Up	: T_tWch	 		: xsec*puRatio*btagSF_l_up ;
+SiTop_btagLF-Up	: TBar_tWch	 		: xsec*puRatio*btagSF_l_up ;
+
+TToLeptons_tch_btagLF-Up  : TToLeptons_tch_amcatnlo_full   : xsec*puRatio*btagSF_l_up ;
+TToLeptons_sch_btagLF-Up  : TToLeptons_sch   		   : xsec*puRatio*btagSF_l_up ;
+TBar_tWch_btagLF-Up 	  : TBar_tWch   	    	   : xsec*puRatio*btagSF_l_up ;
+T_tWch_btagLF-Up  	  : T_tWch      	    	   : xsec*puRatio*btagSF_l_up ;
+
+### DOWN
+# Single Top
+SiTop_btagLF-Down	: TToLeptons_tch_amcatnlo_full	: xsec*puRatio*btagSF_l_down ;
+SiTop_btagLF-Down	: TToLeptons_sch	 	: xsec*puRatio*btagSF_l_down ;
+SiTop_btagLF-Down	: T_tWch	 		: xsec*puRatio*btagSF_l_down ;
+SiTop_btagLF-Down	: TBar_tWch	 		: xsec*puRatio*btagSF_l_down ;
+
+TToLeptons_tch_btagLF-Down  : TToLeptons_tch_amcatnlo_full   : xsec*puRatio*btagSF_l_down ;
+TToLeptons_sch_btagLF-Down  : TToLeptons_sch   		   : xsec*puRatio*btagSF_l_down ;
+TBar_tWch_btagLF-Down 	  : TBar_tWch   	    	   : xsec*puRatio*btagSF_l_down ;
+T_tWch_btagLF-Down  	  : T_tWch      	    	   : xsec*puRatio*btagSF_l_down ;
