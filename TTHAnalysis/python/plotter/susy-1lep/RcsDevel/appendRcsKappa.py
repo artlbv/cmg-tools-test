@@ -438,7 +438,7 @@ def makePredictHists(fileList, samples = []):
             binString = tfile.Get("SR_MB/BinName").Clone()
             if binString: binName = binString.GetTitle()
             else: binName = tfile.GetName()
-            print binString
+            #print binString
             tfile.cd("SR_MB_predict")
             binString.Write()
             for sample in samples:
@@ -449,7 +449,7 @@ def makePredictHists(fileList, samples = []):
                     tfile.cd("SR_MB_predict")
                     hPredict.Write()
                     #print "Wrote prediction of", sample
-                    
+
                 else:
                     print "Failed to make prediction for", sample
         else:
@@ -529,13 +529,13 @@ if __name__ == "__main__":
     poisSamps = ["background","QCD","EWK"]
     poisSamps = [s for s in poisSamps if s in allSamps]
     # do qcd prediciton for:
-    qcdPredSamps =  ["background","data","QCD", "background_poisson","QCD_poisson"]
+    qcdPredSamps =  ["background","QCD","background_poisson","QCD_poisson"]
     #qcdPredSamps = [s for s in qcdPredSamps if s in allSamps]
     # samples to make full prediciton
     predSamps = allSamps + ["background_poisson","QCD_poisson"]
     #predSaps = [s for s in predSamps if s in allSamps]
 
-    replaceEmptyDataBinsWithMC(fileList)
+    #replaceEmptyDataBinsWithMC(fileList)
 
     makePoissonErrors(fileList, poisSamps)
     makeQCDsubtraction(fileList, qcdPredSamps)
