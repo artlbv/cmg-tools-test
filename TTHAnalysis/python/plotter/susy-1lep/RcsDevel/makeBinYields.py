@@ -220,7 +220,11 @@ def writeYields(options):
     ydir = outdir+"/"
     if not os.path.exists(ydir): os.system("mkdir -p "+ydir)
 
-    foutname = ydir+binname+".yields.root"
+    if not options.plot:
+        foutname = ydir+binname+".yields.root"
+    else:
+        foutname = ydir+binname+".plots.root"
+
     workspace = ROOT.TFile.Open(foutname, "RECREATE")
     if options.verbose > 0:
         print 'Writing', foutname
