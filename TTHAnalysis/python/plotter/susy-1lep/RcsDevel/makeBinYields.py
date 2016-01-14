@@ -74,6 +74,10 @@ def addOptions(options):
             options.bins = "[250,350,450,600,1200]"
         elif options.var == "HT":
             options.bins = "[500,750,1000,1250,1600]"
+        elif options.var == "nTrueInt":
+            options.bins = "20,0,20"
+        elif options.var == "puRatio":
+            options.bins = "200,0,200"
             #options.bins = "25,500,1500"
 
 def makeLepYieldGrid(hist, options):
