@@ -156,7 +156,7 @@ class YieldStore:
 
     def showStats(self):
         print 80*"#"
-        print "Storage contains:"
+        print "Storage %s contains:" %self.name
         print len(self.bins), "Bins:", self.bins
         print len(self.categories), "Categories:", self.categories
         print len(self.samples), "Samples:", self.samples
@@ -347,6 +347,7 @@ if __name__ == "__main__":
     #samps = {"EWK":"CR_MB","QCD":"CR_SB"}
     #samps = {"EWK":"CR_SB","background_QCDsubtr":"CR_SB","background_QCDsubtr":"Closure"}
 
+    '''
     samps = [
         ("QCD","CR_SB"),
         ("QCD_QCDpred","CR_SB"),
@@ -354,7 +355,7 @@ if __name__ == "__main__":
         ]
     #print yds.getMixDict(samps)
     yds.printMixBins(samps)
-    '''
+
     #print yds.yields
 
     cat = "SR_MB"
@@ -369,3 +370,16 @@ if __name__ == "__main__":
 
     print [s for s in yds.samples if "1500" in s]
     '''
+
+    sysClass = "btagHF"
+    samp = "EWK"
+    cat = "Kappa"
+
+    samps = [
+        (samp,cat),
+        (samp+"_" + sysClass + "_syst",cat),
+        (samp+"_" + sysClass + "-Up",cat),
+        (samp+"_" + sysClass + "-Down",cat),
+        ]
+    #print yds.getMixDict(samps)
+    yds.printMixBins(samps)

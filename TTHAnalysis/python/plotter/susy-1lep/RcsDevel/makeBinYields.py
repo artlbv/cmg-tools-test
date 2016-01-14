@@ -74,6 +74,10 @@ def addOptions(options):
             options.bins = "[250,350,450,600,1200]"
         elif options.var == "HT":
             options.bins = "[500,750,1000,1250,1600]"
+        elif options.var == "nTrueInt":
+            options.bins = "20,0,20"
+        elif options.var == "puRatio":
+            options.bins = "200,0,200"
             #options.bins = "25,500,1500"
 
 def makeLepYieldGrid(hist, options):
@@ -152,9 +156,14 @@ def writeYields(options):
     else:
         report = mca.getPlotsRaw("x", options.var, options.bins, cuts.allCuts(), nodata=options.asimov)
 
-    # add sum MC entry
+#    print mca._backgrounds
+#    print mca.listBackgrounds()
+
     if not options.pretend and not options.systs:
+
+        # add sum MC entry
         totalMC = []; ewkMC = []
+
         for p in mca.listBackgrounds():
             if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p and 'TTincl' not in p and 'T1ttt' not in p:
             #if p in report and 'TTdiLep' not in p and 'TTsemiLep' not in p:
@@ -164,11 +173,40 @@ def writeYields(options):
                     print 'adding for ewk', p
                     ewkMC.append(report[p])
 
-    if len(totalMC) > 0:
-        report['x_background'] = mergePlots("x_background", totalMC)
-    if len(ewkMC) > 0:
-        report['x_EWK'] = mergePlots("x_EWK", ewkMC)
-        
+        if len(totalMC) > 0:
+            report['x_background'] = mergePlots("x_background", totalMC)
+        if len(ewkMC) > 0:
+            report['x_EWK'] = mergePlots("x_EWK", ewkMC)
+
+
+    elif options.systs:
+        names = mca.listBackgrounds()
+
+        cnames = [] # list of all central samples
+        labels = ["Up","up","down","Down","EWK"] # labels to ignore
+        for name in names:
+            for lab in labels:
+                if lab in name: break
+            else:
+                cnames.append(name)
+        print cnames
+
+        if len(cnames) > 0:
+            sumnames = {}; ref = cnames[0]
+            for name in names:
+                if ref in name:
+                    sumnames[name.replace(ref,"EWK")] = []
+
+            print sumnames
+
+            for name in sumnames:
+                varname = name.replace("EWK","")
+                for cname in cnames:
+                    pname = cname + varname
+                    sumnames[name].append(report[pname])
+
+                report['x_'+ name] = mergePlots("x_"+name, sumnames[name])
+
     '''
     if options.asimov:
         tomerge = []
@@ -182,14 +220,22 @@ def writeYields(options):
     ydir = outdir+"/"
     if not os.path.exists(ydir): os.system("mkdir -p "+ydir)
 
-    foutname = ydir+binname+".yields.root"
+    if not options.plot:
+        foutname = ydir+binname+".yields.root"
+    else:
+        foutname = ydir+binname+".plots.root"
+
     workspace = ROOT.TFile.Open(foutname, "RECREATE")
     if options.verbose > 0:
         print 'Writing', foutname
         print 'Yields:'
 
     if not options.pretend:
-        for n,h in report.iteritems():
+        #for n,h in report.iteritems():
+        # sort by hist names
+        hlist = sorted(report.values(), key = lambda h: h.GetName())
+
+        for h in hlist:
             makeUpHist(h,options)
 
             if options.verbose > 0 and options.grid:
@@ -201,6 +247,75 @@ def writeYields(options):
     workspace.Close()
 
     return 1
+
+# dict of Nb cut and corresp. Nb weights
+mcaName = {}
+mcaName["NB1"] = "mca-MC_syst_btag_1b_NB1.txt"
+mcaName["NB1i"] = "mca-MC_syst_btag_1b_NB1p.txt"
+mcaName["NB2"] = "mca-MC_syst_btag_1b_NB2.txt"
+mcaName["NB2i"] = "mca-MC_syst_btag_1b_NB2p.txt"
+mcaName["NB3i"] = "mca-MC_syst_btag_1b_NB3p.txt"
+
+nbNames = {"NB0":"0", "NB1":"1", "NB1i":"1p", "NB2":"2", "NB2i":"2p", "NB3":"3", "NB3i":"3p"}
+
+#import shutil
+
+def makeBtagMCA(nbbin = "NB1",oldmca = "../systs/btag/mca-MC_syst_btag_1b_NBX.txt"):
+
+    if "NBX" not in oldmca:
+        print("Error! Provided MCA has no wildcard for NBX")
+        return oldmca
+
+    newmca = oldmca.replace("NBX",nbbin)
+
+    if os.path.exists(newmca): return newmca
+
+    # copy old to new mca
+    #shutil.copyfile(oldmca,newmca)
+
+    omca = open(oldmca,"r")
+    nmca = open(newmca,"w")
+
+    # replace NBX with real bin
+    print "Created new mca for current NB cut:", newmca
+
+    for line in omca.readlines():
+        nline = line.replace("NBX",nbNames[nbbin])
+        nmca.write(nline)
+
+    omca.close()
+    nmca.close()
+
+    return newmca
+
+def getBTagWstring(cuts, mcaname = ""):
+
+    print "Cuts before NB check:", cuts
+
+    nbcut = None
+
+    # find NBcut and remove from cuts
+    for cut in cuts:
+        if "nBJet" in cut[2]:
+            print cut
+            nbcut = cut
+            cuts.remove(cut)
+
+    # make weight string
+    if nbcut == None:
+        return (cuts,bWgt)
+    else:
+        print "Removed NB cut", cuts
+
+        #if nbcut[1] in mcaName: mca = mcaName[nbcut[1]]
+        #print "Going to use weights", mca
+        #mca = "../systs/btag/" + mca
+
+        # auto mca
+        mca =  makeBtagMCA(nbcut[1],mcaname)
+        print "Going to use weights", mca
+
+    return (cuts,mca)
 
 def submitJobs(args, nchunks, outdir = "./"):
 
@@ -266,6 +381,9 @@ if __name__ == "__main__":
     parser.add_option("--pretend", dest="pretend",default=False, action="store_true",help="pretend to do it")
     parser.add_option("--systs", dest="systs",default=False, action="store_true",help="run for systs")
 
+    # Btag SF method selection
+    parser.add_option("--btag1B", dest="doBtagMeth1b",default=False, action="store_true",help="use btag SF weight method 1B")
+
     # batch options
     parser.add_option("-c","--chunk", dest="chunk",type="int",default=None,help="Number of chunk")
     parser.add_option("-b","--batch", dest="batch",default=False, action="store_true", help="batch command for submission")
@@ -317,7 +435,18 @@ if __name__ == "__main__":
 
     #print cDict.keys(); exit(0)
 
+    '''
+    d = {}
+
+    for bin in cDict:
+        if "NB1i" in bin: d[bin] = cDict[bin]
+    cDict = d
+    print cDict
+    '''
+
     binList = sorted(cDict.keys())
+
+#    doBtagMeth1b = True
 
     if options.batch:
         print "Going to prepare batch jobs..."
@@ -331,7 +460,6 @@ if __name__ == "__main__":
         for idx,bin in enumerate(binList):
             cuts = cDict[bin]
             options.bin = bin
-            options.cutsToAdd = cuts
 
             if options.verbose > 0:
                 print 80*'#'
@@ -342,6 +470,13 @@ if __name__ == "__main__":
                 print
             else:
                 print '.',
+
+            if options.doBtagMeth1b == True:
+                (cuts,options.mcaFile) = getBTagWstring(cuts,options.mcaFile)
+                print cuts,options.mcaFile
+
+            options.cutsToAdd = cuts
+
             writeYields(options)
         print
     elif options.chunk < len(binList):
@@ -351,7 +486,6 @@ if __name__ == "__main__":
 
         cuts = cDict[bin]
         options.bin = bin
-        options.cutsToAdd = cuts
 
         if options.verbose > 0:
             print 80*'#'
@@ -362,6 +496,13 @@ if __name__ == "__main__":
             print
         else:
             print '.',
+
+        if options.doBtagMeth1b == True:
+            (cuts,options.mcaFile) = getBTagWstring(cuts,options.mcaFile)
+            print cuts,options.mcaFile
+
+        options.cutsToAdd = cuts
+
         writeYields(options)
     else:
         print "Nothing to process!"

@@ -28,7 +28,8 @@ with open(xsecFile,"r") as xfile:
 cntsSusy = {} # dict for signal counts
 #cntTotal = 0
 
-cntFile = "../python/tools/t1ttt_scan_counts.txt"
+#cntFile = "../python/tools/t1ttt_scan_counts.txt"
+cntFile = "../python/tools/scans/counts_T1tttt_wSkim.txt"
 
 with open(cntFile,"r") as cfile:
     lines = cfile.readlines()
@@ -37,9 +38,10 @@ with open(cntFile,"r") as cfile:
     for line in lines:
         if line[0] == '#': continue
         else:
-            (mGo,mLSP,tot,cnt,wgt) = line.split()
+            (mGo,mLSP,tot,totW,cnt,wgt) = line.split()
             #print 'Importet', mGo, mLSP, cnt, 'from', line
-            cntsSusy[(int(mGo),int(mLSP))] = (int(tot),int(cnt),float(wgt))
+            #cntsSusy[(int(mGo),int(mLSP))] = (int(tot),int(cnt),float(wgt))
+            cntsSusy[(int(mGo),int(mLSP))] = (float(totW),int(cnt),float(wgt))
 
     print 'Filled %i items to dict' % (len(cntsSusy))
     print "Finished signal parameter load"
