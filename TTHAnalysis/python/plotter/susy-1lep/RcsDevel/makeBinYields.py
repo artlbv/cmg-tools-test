@@ -304,7 +304,7 @@ def getBTagWstring(cuts, mcaname = ""):
         #mca = "../systs/btag/" + mca
 
         # auto mca
-        mca =  makeBtagMCA(nbcut[1],"mca/mca-Spring15_MConly_btag1B_NBX.txt")
+        mca =  makeBtagMCA(nbcut[1],mcaname)
         print "Going to use weights", mca
 
     return (cuts,mca)
