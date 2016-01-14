@@ -190,10 +190,10 @@ triggerFlagsAna.triggerBits = {
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-#sample = 'MC'
+sample = 'MC'
 #sample = 'data'
-sample = 'Signal'
-test = 0
+#sample = 'Signal'
+test = 1
 
 if sample == "MC":
 
@@ -212,9 +212,11 @@ if sample == "MC":
 	# MiniAODv1
 	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_74X_desy import *
 	# MiniAODv2
-	from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
+	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
+	from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy_Compact import *
 
-	selectedComponents = WJetsToLNuHT
+	selectedComponents = TTJets_SingleLepton
+
 	if test==1:
 		# test a single component, using a single thread.
 		comp = TTJets_LO
