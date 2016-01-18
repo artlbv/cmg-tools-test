@@ -5,9 +5,7 @@
 #dileptonic
 TT        : TTJets_DiLepton         : xsec*lepSF*btagSF*TopPtWeight*0.94 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} dilept"
 # wrote real xsec because mixed xsec in samples, semileptonic
-TT     : TTJets_SingleLepton_1     : xsec*lepSF*btagSF*TopPtWeight*0.94 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} semilept"
-TT     : TTJets_SingleLepton_2     : xsec*lepSF*btagSF*TopPtWeight*0.94 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} semilept"
-TT     : TTJets_SingleLepton_3     : xsec*lepSF*btagSF*TopPtWeight*0.94 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} semilept"
+TT     : TTJets_SingleLepton     : 2*xsec*lepSF*btagSF*TopPtWeight*0.94 : lheHTIncoming <= 600; FillColor=ROOT.kBlue, Label="t\#bar{t} semilept"
 
 #full hadronic from inclusive sample
 TT 	 : TTJets_LO : xsec*lepSF*btagSF*TopPtWeight*0.94 : ngenTau+ngenLep == 0 && lheHTIncoming <= 600 && HT < 1250; FillColor=ROOT.kBlue, Label="t\#bar{t}"
@@ -25,9 +23,7 @@ TTdiLep 	 : TTJets_LO_HT1200to2500 : xsec*lepSF*btagSF*TopPtWeight*0.94 : ngenTa
 TTdiLep 	 : TTJets_LO_HT2500toInf : xsec*lepSF*btagSF*TopPtWeight*0.94 : ngenTau+ngenLep ==2; FillColor=ROOT.kBlue, Label="t\#bar{t}"
 ###############################
 #semileptonic ttbar
-TTsemiLep      : TTJets_SingleLepton_1     : xsec*lepSF*btagSF*TopPtWeight*0.94 : lheHTIncoming <= 600; FillColor=ROOT.kBlue-4, Label="t\#bar{t} semilept"
-TTsemiLep      : TTJets_SingleLepton_2     : xsec*lepSF*btagSF*TopPtWeight*0.94 : lheHTIncoming <= 600; FillColor=ROOT.kBlue-4, Label="t\#bar{t} semilept"
-TTsemiLep      : TTJets_SingleLepton_3     : xsec*lepSF*btagSF*TopPtWeight*0.94 : lheHTIncoming <= 600; FillColor=ROOT.kBlue-4, Label="t\#bar{t} semilept"
+TTsemiLep      : TTJets_SingleLepton     : 2*xsec*lepSF*btagSF*TopPtWeight*0.94 : lheHTIncoming <= 600; FillColor=ROOT.kBlue-4, Label="t\#bar{t} semilept"
 
 TTsemiLep 	 : TTJets_LO : xsec*lepSF*btagSF*TopPtWeight*0.94 : ngenTau+ngenLep == 0 && lheHTIncoming <= 600  && HT < 1250; FillColor=ROOT.kBlue, Label="t\#bar{t}"
 TTsemiLep 	 : TTJets_LO_HT600to800 : xsec*lepSF*btagSF*TopPtWeight*0.94 : ngenTau+ngenLep <2  ; FillColor=ROOT.kBlue-4, Label="t\#bar{t}"
