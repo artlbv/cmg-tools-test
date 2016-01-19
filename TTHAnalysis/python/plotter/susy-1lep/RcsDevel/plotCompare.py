@@ -33,8 +33,9 @@ if __name__ == "__main__":
     # Define storage
     yds1A = yp.YieldStore("Method1A")
     #btagPath1A = "Yields/btag/test/meth1a/merged"
-    btagPath1A = "Yields/MC/lumi2p24fb/allSF_noPU/btagSF_meth1a/merged"
-    #btagPath1A = "Yields/MC/lumi2p24fb/allSF/btagSF_meth1A/merged/"
+    #btagPath1A = "Yields/MC/lumi2p24fb/allSF_noPU/btagSF_meth1a/merged"
+    #btagPath1A = "Yields/MC/lumi2p24fb_newMC/allSF_noPU/btagSF_meth1a/merged"
+    btagPath1A = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1A/merged/"
     yds1A.addFromFiles(btagPath1A,("lep","sele"))
 
     yds1B = yp.YieldStore("Method1B")
@@ -42,15 +43,13 @@ if __name__ == "__main__":
     #btagPath1B = "Yields/MC/lumi2p24fb/allSF/btagSF_meth1B/merged"
     #btagPath1B = "Yields/btag/test/meth1b/merged"
     #btagPath1B = "Yields/MC/lumi2p24fb/allSF_noPU/btagSF_meth1B/merged"
-    btagPath1B = "Yields/MC/lumi2p24fb/allSF_cutPU/btagSF_meth1a/merged"
+    #btagPath1B = "Yields/MC/lumi2p24fb/allSF_cutPU/btagSF_meth1a/merged"
+    #btagPath1B = "Yields/MC/lumi2p24fb_newMC/allSF_noPU/btagSF_meth1a/merged"
+    #btagPath1B = "Yields/MC/lumi2p24fb_newMC/allSF_noPU/btagSF_meth1B/merged"
+    btagPath1B = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1B/merged/"
     yds1B.addFromFiles(btagPath1B,("lep","sele"))
 
     sysCols = [2,4,7,8,3,9,6] + range(10,50)#[1,2,3] + range(4,10)
-
-    # Sample and variable
-    samp = "EWK"
-    samps = ["TTJets","WJets","SingleTop","DY","TTV"]
-    samp = samps[1]
 
     # canvs and hists
     hists = []
@@ -60,8 +59,11 @@ if __name__ == "__main__":
     yds1B.showStats()
 
     # Samples
-    samps = ["EWK","TT","TTdiLep","TTsemiLep","WJets","TTV","DY","SingleT"]
-    #samps = ["WJets"]
+    #samps = ["EWK","TT","TTdiLep","TTsemiLep","WJets","TTV","DY","SingleT"]
+    #samps = ["TTJets","WJets","TTV","DY","SingleTop"]
+    samps = ["EWK","TTJets","WJets","SingleTop","DY","TTV"]
+    samps = ["EWK"]
+
     cat = "Kappa"
     #cat = "CR_MB"
 
@@ -70,19 +72,23 @@ if __name__ == "__main__":
 
     for samp in samps:
 
+        print "Making plot for", samp, cat
+
         # 1A
         yp.colorDict[samp+"_1A_"+cat] = yp.kBlue
         h1A = yp.makeSampHisto(yds1A,samp,cat,samp+"_1A_"+cat)
-        #h1A.SetTitle(samp+" (Method 1A)")
-        h1A.SetTitle(samp+" (All SF w/o PU)")
+        h1A.SetTitle(samp+" (Method 1A)")
+        #h1A.SetTitle(samp+" (1A mcFlav)")
+        #h1A.SetTitle(samp+" (All SF w/o PU)")
 
         # 1B
         yp.colorDict[samp+"_1B_"+cat] = yp.kRed
         h1B = yp.makeSampHisto(yds1B,samp,cat,samp+"_1B_"+cat)
-        #h1B.SetTitle(samp+" (Method 1B)")
+        h1B.SetTitle(samp+" (Method 1B)")
         #h1B.SetTitle(samp+" (only btagSF 1B)")
         #h1B.SetTitle(samp+" (All but PU)")
-        h1B.SetTitle(samp+" (PUwgt < 4.)")
+        #h1B.SetTitle(samp+" (PUwgt < 4.)")
+        #h1B.SetTitle(samp+" (1A hadrFlav)")
 
         ratio = yp.getRatio(h1A,h1B)
         #ratio.GetYaxis().SetRangeUser(0.75,1.25)
@@ -102,10 +108,10 @@ if __name__ == "__main__":
             if "q" in answ: exit(0)
 
     # Save canvases
-    #exts = [".pdf",".png",".root"]
-    exts = [".pdf"]
+    exts = [".pdf",".png"]#,".root"]
+    #exts = [".pdf"]
 
-    odir = "BinPlots/btag/Compare/1A_allSF_noVscutPU/" + cat + "/"
+    odir = "BinPlots/btag/Compare/hFlav/1Avs1B/allSF_noPU2/" + cat + "/"
     if not os.path.isdir(odir): os.makedirs(odir)
 
     for canv in canvs:
