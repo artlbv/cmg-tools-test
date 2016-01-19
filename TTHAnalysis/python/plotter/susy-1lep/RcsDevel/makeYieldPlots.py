@@ -22,14 +22,14 @@ if( iPos==0 ): CMS_lumi.relPosX = 0.2
 
 
 ## Global vars
-_alpha = 0.35
+_alpha = 0.55
 colorList = [2,4,7,9,8,3,6] + range(10,50)
 _histStore = {}
 _lines = []
 
 _batchMode = True#False
 
-colorDict = {'TTj': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-2,
+colorDict = {'TTJets': kBlue-4,'TTdiLep':kBlue-4,'TTsemiLep':kBlue-2,'WJets':kGreen-2,
              'QCD':kCyan-6,'SingleT':kViolet+5,'DY':kRed-6,'TTV':kOrange-3,'data':1,'background':2,'EWK':3}
 
 def doLegend(pos = "TM",nEntr = None):
@@ -60,6 +60,8 @@ def doLegend(pos = "TM",nEntr = None):
     return leg
 
 def getSampColor(name):
+
+    if "TT_" in name: name = name.replace("TT_","TTJets_")
 
     for samp in sorted(colorDict.keys()):
         if samp == name:
@@ -132,7 +134,7 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
     ydict = yds.getSampDict(samp,cat)
 
     if not ydict:
-        print "Could not read dict"
+        print "Could not read dict", samp, cat
         return 0
 
     # create histo
@@ -212,8 +214,8 @@ def makeSampHisto(yds, samp, cat, hname = "", ind = 0):
             hist.SetFillColor(col)
             hist.SetFillStyle(3001)
 
-    #hist.SetLineColor(col)
-    hist.SetLineColor(1)
+    hist.SetLineColor(col)
+    #hist.SetLineColor(1)
     hist.SetMarkerColor(col)
     hist.SetMarkerStyle(20)
 
@@ -313,6 +315,7 @@ def getRatio(histA,histB, keepStyle = False):
     if not keepStyle:
         ratio.SetLineColor(1)
         ratio.SetMarkerColor(1)
+        ratio.SetMarkerStyle(20)
     ratio.SetFillColor(0)
     ratio.SetFillStyle(0)
 
@@ -393,17 +396,20 @@ def getSquaredSum(histList):
     sqHist.SetName("sqSum")
     return sqHist
 
-def getHistWithError(hCentral, sqHist):
-    histWithError = hCentral.Clone()
+def getHistWithError(hCentral, hSyst, new = True):
+    if new:
+        histWithError = hCentral.Clone()
+        histWithError.SetFillColor(kBlue)
+        histWithError.SetFillStyle(3002)
+    else:
+        histWithError = hCentral
 
     for bin in range(1,hCentral.GetNbinsX()+1):
-        sys = hCentral.GetBinContent(bin)*sqHist.GetBinContent(bin)
+        sys = hCentral.GetBinContent(bin)*hSyst.GetBinContent(bin)
         #err = math.sqrt(hCentral.GetBinError(bin)*hCentral.GetBinError(bin) + sys*sys)
         err = math.hypot(hCentral.GetBinError(bin),sys)
         histWithError.SetBinError(bin, err)
 
-    histWithError.SetFillColor(kBlue)
-    histWithError.SetFillStyle(3002)
     return  histWithError
 
 
@@ -534,7 +540,7 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
         if ymax < 1.01 and ymax >= 1: ymax == 1; ymin = 0
         else: ymax *= 1.5; ymin *= 0.8
     else:
-        ymax *= 10; ymin = max(0.01,0.5*ymin)
+        ymax *= 100; ymin = max(0.01,0.5*ymin)
 
     #ymin = 0
     #ymax = min(ymax, 1.5)
@@ -549,11 +555,13 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
 
     for i,hist in enumerate(histList):
 
-        hist.GetYaxis().SetTitleSize(0.05)
-        hist.GetYaxis().SetTitleOffset(0.6)
+        if not hist.ClassName() == 'THStack':
 
-        if ratio == None: hist.GetYaxis().SetLabelSize(0.4)
-        else: hist.GetYaxis().SetLabelSize(0.05)
+            hist.GetYaxis().SetTitleSize(0.05)
+            hist.GetYaxis().SetTitleOffset(0.6)
+
+            if ratio == None: hist.GetYaxis().SetLabelSize(0.4)
+            else: hist.GetYaxis().SetLabelSize(0.05)
 
         # range
         hist.SetMaximum(ymax)
@@ -573,16 +581,19 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
                 leg.AddEntry(h,h.GetTitle(),"f")
         elif ("data" in hist.GetName()) or ("Data" in hist.GetName()):
             hist.Draw(plotOpt+"pE1")
-            leg.AddEntry(hist,hist.GetTitle(),"p")
+            leg.AddEntry(hist,hist.GetTitle(),"pl")
         elif "total" in hist.GetName():
             hist.Draw(plotOpt+"E2")
             leg.AddEntry(hist,"MC Uncertainty","f")
         elif "Syst" in hist.GetName():
             hist.Draw(plotOpt+"E2")
             leg.AddEntry(hist,hist.GetTitle(),"f")
+        elif "pred" in hist.GetName():
+            hist.Draw(plotOpt+"pE1")
+            leg.AddEntry(hist,hist.GetTitle(),"pl")
         elif "sqSum" in hist.GetName():
             hist.Draw(plotOpt+"p")
-            leg.AddEntry(hist,"Sum squared uncertainties","p")
+            leg.AddEntry(hist,"Sum squared uncertainties","pl")
         else:
             if len(histList) < 3:
                 hist.Draw(plotOpt+"pE2")
