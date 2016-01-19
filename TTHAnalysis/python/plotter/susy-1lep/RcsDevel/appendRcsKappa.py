@@ -110,9 +110,9 @@ qcdSysts = {
     ('NJ68','HT2i') : 0.5,
     ('NJ9','HT01') : 0.75,
     ('NJ9','HT2i') : 0.75,
-#    ('NB2','NB2') : 1.0,
-#    ('NB3','NB3') : 1.0,
-}
+    #    ('NB2','NB2') : 1.0,
+    #    ('NB3','NB3') : 1.0,
+    }
 
 def getQCDsystError(binname):
 
@@ -273,7 +273,7 @@ def replaceEmptyDataBinsWithMC(fileList):
             for bindir in bindirs:
                 histData = tfile.Get(bindir+"/data").Clone()
                 histBkg = tfile.Get(bindir+"/background").Clone()
-                
+
                 #if "TH" not in histData.ClassName() or 'TH' in histBkg.ClassName(): return 0
 
                 ix = 2
@@ -409,14 +409,14 @@ def makeKappaHists(fileList, samples = []):
             pass
             #print 'Already found Rcs and Kappa'
 
-            '''
-            yList = []
-            print 'Yields for', sample
-            for bindir in bindirs:
-                yList.append(getYield(tfile,sample,bindir))
+        '''
+        yList = []
+        print 'Yields for', sample
+        for bindir in bindirs:
+        yList.append(getYield(tfile,sample,bindir))
 
-            print yList
-            '''
+        print yList
+        '''
 
         tfile.Close()
 
@@ -529,13 +529,13 @@ if __name__ == "__main__":
     poisSamps = ["background","QCD","EWK"]
     poisSamps = [s for s in poisSamps if s in allSamps]
     # do qcd prediciton for:
-    qcdPredSamps =  ["background","QCD","background_poisson","QCD_poisson"]
+    qcdPredSamps =  ["background","data","QCD","background_poisson","QCD_poisson"]
     #qcdPredSamps = [s for s in qcdPredSamps if s in allSamps]
     # samples to make full prediciton
     predSamps = allSamps + ["background_poisson","QCD_poisson"]
     #predSaps = [s for s in predSamps if s in allSamps]
 
-    #replaceEmptyDataBinsWithMC(fileList)
+    replaceEmptyDataBinsWithMC(fileList)
 
     makePoissonErrors(fileList, poisSamps)
     makeQCDsubtraction(fileList, qcdPredSamps)
