@@ -756,7 +756,8 @@ class PlotMaker:
                 # 
                 if not makeCanvas and not self._options.printPlots: continue
                 doRatio = self._options.showRatio and ('data' in pmap or (self._options.plotmode != "stack" and len(pmap) == 4)) and ("TH2" not in total.ClassName())
-                islog = pspec.hasOption('Logy'); 
+                # define aspect ratio
+                islog = pspec.hasOption('Logy');
                 if doRatio: ROOT.gStyle.SetPaperSize(20.,sf*(plotformat[1]+150))
                 else:       ROOT.gStyle.SetPaperSize(20.,sf*plotformat[1])
                 # create canvas
@@ -781,6 +782,7 @@ class PlotMaker:
                 else:
                     c1.SetWindowSize(plotformat[0] + (plotformat[0] - c1.GetWw()), plotformat[1] + (plotformat[1] - c1.GetWh()));
                 p1.SetLogy(islog)
+                p1.SetLogz(pspec.hasOption('Logz'))
                 if pspec.hasOption('Logx'):
                     p1.SetLogx(True)
                     if p2: p2.SetLogx(True)
@@ -932,8 +934,17 @@ class PlotMaker:
                                     plot = pmap[p]
                                     if "TGraph" in plot.ClassName(): continue
                                     c1.SetRightMargin(0.20)
+<<<<<<< HEAD
+                                    if pspec.hasOption('Logz'):
+                                        plot.SetContour(20)
+                                        plot.Draw("CONT0Z")
+                                    else:
+                                        plot.SetContour(100)
+                                        plot.Draw("COLZ TEXT45")
+=======
                                     plot.SetContour(100)
                                     plot.Draw(pspec.getOption("PlotMode","COLZ TEXT45"))
+>>>>>>> bd4452842f9b8ea36c56a47adc81692b39d67a12
                                     c1.Print("%s/%s_%s.%s" % (fdir, pspec.name, p, ext))
                                 if "data" in pmap and "TGraph" in pmap["data"].ClassName():
                                     pmap["data"].SetMarkerSize(pspec.getOption("MarkerSize",1.6))
