@@ -21,13 +21,13 @@ dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv
 
 ## Trees -- skimmed with trig_base
 #Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed"
-Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Signal/FullScanSkim/"
+Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/"
 # MC
-mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Friends/MC/pu_69mb"
-sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Signal/FullScanSkim/Friends"
+mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/Friends/MC/pu69mb_JECcentr/"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/Signal/Friends/FullScanSkim"
 
 # new data
-dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Friends/Data/trig_base_skim_2p1fb"
+dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/Friends/Data/trig_skim_2p2fb/"
 
 
 def addOptions(options):
@@ -183,7 +183,7 @@ def writeYields(options):
         names = mca.listBackgrounds()
 
         cnames = [] # list of all central samples
-        labels = ["Up","up","down","Down","EWK"] # labels to ignore
+        labels = ["Up","up","down","Down","EWK","TTdiLep","TTsemiLep","TTincl","T1ttt"] # labels to ignore
         for name in names:
             for lab in labels:
                 if lab in name: break
@@ -260,18 +260,20 @@ nbNames = {"NB0":"0", "NB1":"1", "NB1i":"1p", "NB2":"2", "NB2i":"2p", "NB3":"3",
 
 #import shutil
 
-def makeBtagMCA(nbbin = "NB1",oldmca = "../systs/btag/mca-MC_syst_btag_1b_NBX.txt"):
+def makeBtagMCA(nbbin = "NB1",options = None):#oldmca = "../systs/btag/mca-MC_syst_btag_1b_NBX.txt"):
+
+    oldmca = options.mcaFile
 
     if "NBX" not in oldmca:
         print("Error! Provided MCA has no wildcard for NBX")
         return oldmca
 
-    newmca = oldmca.replace("NBX",nbbin)
+    newmca = options.outdir + "/" + os.path.basename(oldmca)
+    newmca = newmca.replace("NBX",nbbin)
 
     if os.path.exists(newmca): return newmca
 
     # copy old to new mca
-    #shutil.copyfile(oldmca,newmca)
 
     omca = open(oldmca,"r")
     nmca = open(newmca,"w")
@@ -288,7 +290,7 @@ def makeBtagMCA(nbbin = "NB1",oldmca = "../systs/btag/mca-MC_syst_btag_1b_NBX.tx
 
     return newmca
 
-def getBTagWstring(cuts, mcaname = ""):
+def getBTagWstring(cuts, options):
 
     print "Cuts before NB check:", cuts
 
@@ -312,7 +314,7 @@ def getBTagWstring(cuts, mcaname = ""):
         #mca = "../systs/btag/" + mca
 
         # auto mca
-        mca =  makeBtagMCA(nbcut[1],mcaname)
+        mca =  makeBtagMCA(nbcut[1],options)
         print "Going to use weights", mca
 
     return (cuts,mca)
@@ -404,6 +406,8 @@ if __name__ == "__main__":
     if options.verbose > 0 and len(args) > 0:
         print 'Arguments', args
 
+    if not os.path.exists(options.outdir): os.makedirs(options.outdir)
+
     # make cut list
     cDict = {}
 
@@ -417,7 +421,7 @@ if __name__ == "__main__":
         cDict.update(cutDictSRf9)
         cDict.update(cutDictCRf9)
 
-    doNjet5 = False#True
+    doNjet5 = True
     if doNjet5:
         cDict.update(cutDictSRf5)
         cDict.update(cutDictCRf5)
@@ -425,7 +429,7 @@ if __name__ == "__main__":
     #cDict = cutQCDsyst #QCD
 
     #cDict = cutIncl #Inclusive
-    ##rint sorted([k for k in cDict.keys() if "NB0i" in k])
+    #print sorted([k for k in cDict.keys() if "NB0i" in k])
     #print sorted([k for k in cDict.keys() if "NB1" in k])
     #exit(0)
 
@@ -472,7 +476,7 @@ if __name__ == "__main__":
                 print '.',
 
             if options.doBtagMeth1b == True:
-                (cuts,options.mcaFile) = getBTagWstring(cuts,options.mcaFile)
+                (cuts,options.mcaFile) = getBTagWstring(cuts,options)
                 print cuts,options.mcaFile
 
             options.cutsToAdd = cuts
@@ -498,7 +502,7 @@ if __name__ == "__main__":
             print '.',
 
         if options.doBtagMeth1b == True:
-            (cuts,options.mcaFile) = getBTagWstring(cuts,options.mcaFile)
+            (cuts,options.mcaFile) = getBTagWstring(cuts,options)
             print cuts,options.mcaFile
 
         options.cutsToAdd = cuts
