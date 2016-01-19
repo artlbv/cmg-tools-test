@@ -101,7 +101,7 @@ cutIncl = {}
 
 for nj_bin in ['NJ4i']:#,'NJ45']:
     nj_cut = binsNJ[nj_bin][0]
-    ltbins = ['LT1','LT2','LT3','LT4i']
+    ltbins = ['LTi','LT1','LT2','LT3','LT4i']
 
     for lt_bin in ltbins:
         lt_cut = binsLT[lt_bin][0]
