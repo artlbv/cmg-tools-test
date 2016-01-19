@@ -112,15 +112,15 @@ if __name__ == "__main__":
     hTotal = yp.getHistWithError(hTotal, hMCSysts, new = False)
 
     # test MC
-    hDataPred = hMCpred
+    #hDataPred = hMCpred
 
     # Ratio
     ratio = yp.getRatio(hTotal,hDataPred)
 
     logY = True
     #logY = False
-    #canv = yp.plotHists("MC_2p24fb_"+cat+'_'+mask,[mcStack,hTotal,hDataPred,hData],ratio,'TM', 1200, 600, logY = logY)
-    canv = yp.plotHists("MC_2p24fb_"+cat+'_'+mask,[mcStack,hTotal,hDataPred],ratio,'TM', 1200, 600, logY = logY)
+    canv = yp.plotHists("Data_2p24fb_"+cat+'_'+mask,[mcStack,hTotal,hDataPred,hData],ratio,'TM', 1200, 600, logY = logY)
+    #canv = yp.plotHists("MC_2p24fb_"+cat+'_'+mask,[mcStack,hTotal,hDataPred],ratio,'TM', 1200, 600, logY = logY)
 
     if logY: canv.SetName(canv.GetName() + "_log")
     canvs.append(canv)
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     exts = [".pdf",".png",".root"]
     #exts = [".pdf"]
 
-    odir = "BinPlots/Data/Pred/test/allSF_noPU/Method1B/"
+    odir = "BinPlots/Data/Pred/test/allSF_noPU/Method1A/"
     #odir = "BinPlots/Syst/btag/hadronFlavour/allSF_noPU/Method1B/"
     if not os.path.isdir(odir): os.makedirs(odir)
 
