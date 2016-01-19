@@ -4,6 +4,7 @@ import sys,os
 import makeYieldPlots as yp
 
 yp._batchMode = False
+yp._alpha = 0.75
 
 if __name__ == "__main__":
 
@@ -35,12 +36,25 @@ if __name__ == "__main__":
     paths = []
 
     # Add files
-    btagPath = "Yields/systs/btag/test/merged/"; paths.append(btagPath)
-    puPath = "Yields/systs/PU/test/merged/"; paths.append(puPath)
-    wxsecPath = "Yields/systs/wXsec/test/merged/"; paths.append(wxsecPath)
-    tptPath = "Yields/systs/topPt/test/merged"; paths.append(tptPath)
+    #btagPath = "Yields/systs/btag/test/merged/"; paths.append(btagPath)
+    #btagPath = "Yields/systs/btag/EWK/allflavour/full/merged/"; paths.append(btagPath)
+    #btagPath = "Yields/systs/btag/MC/oldall/merged/"; paths.append(btagPath)
+    #btagPath = "Yields/systs/btag/fixEff/MC/merged/"; paths.append(btagPath)
+    #btagPath = "Yields/systs/btag/fixEff/EWK/merged/"; paths.append(btagPath)
+    #btagPath = "Yields/systs/btag/fixEff/SingleTop/merged/"; paths.append(btagPath)
+    #btagPath = "Yields/systs/btag/method1b/sepMC/merged/"; paths.append(btagPath)
+    #btagPath = "Yields/systs/btag/SingleTop/allSF/meth1B/merged/"; paths.append(btagPath)
+    tptPath = "Yields/systs/topPt/MC/allSF_noPU/meth1A/merged/"; paths.append(tptPath)
+    puPath = "Yields/systs/PU/MC/allSF/meth1A/merged/"; paths.append(puPath)
+    wxsecPath = "Yields/systs/wXsec/MC/allSF_noPU/meth1A/merged/"; paths.append(wxsecPath)
+
+    btagPath = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1B/merged/"; paths.append(btagPath)
+    jecPath = "Yields/systs/JEC/MC/allSF_noPU/meth1A/merged/"; paths.append(jecPath)
+
+    '''
     dlConstPath = "Yields/systs/dilepConst/test/merged"; paths.append(dlConstPath)
     dlSlopePath = "Yields/systs/dilepSlope/test/merged"; paths.append(dlSlopePath)
+    '''
 
     #jecPath = "Yields/systs/JEC/EWK/full/merged/"; paths.append(jecPath)
 
@@ -48,14 +62,33 @@ if __name__ == "__main__":
         yds.addFromFiles(path,("lep","sele"))
 
     # Sys types
+#    systs = ["btagHF","btagLF","Wxsec","PU"]#,"topPt"]#,"JEC"]
 #    systs = ["btagHF","btagLF","Wxsec","PU","topPt"]#,"JEC"]
-    systs = ["btagHF","Wxsec","topPt","PU","DLSlope","DLConst"]#,"JEC"]
-#    systs = ["topPt"]#,"JEC"]
-    sysCols = [1,2,4,7,8,3,9,6] + range(10,50)#[1,2,3] + range(4,10)
+#    systs = ["btagHF","Wxsec","topPt","PU","DLSlope","DLConst"]#,"JEC"]
+#    systs = ["JEC"]
+#    systs = ["btagHF","btagLF"]
+#    systs = ["btagLF","btagHF"]
+    systs = ["Wxsec","PU","JEC","btagHF","btagLF","topPt"]
+
+    systNames = {
+        "btagLF" : "b-mistag (light)",
+        "btagHF" : "b-tag (b/c)",
+        "JEC" : "JEC",
+        "topPt" : "Top p_{T}",
+        "PU" : "PU",
+        "Wxsec" : "#sigma_{W}",
+        }
+
+    sysCols = [2,4,7,8,3,9,6] + range(10,50)#[1,2,3] + range(4,10)
 
     # Sample and variable
     samp = "EWK"
+    #samps = ["TTJets","WJets","SingleTop","DY","TTV"]
+    #samps = ['T_tWch','TToLeptons_tch','TBar_tWch', 'TToLeptons_sch',"EWK"]
+    #samp = samps[4]
+
     var = "Kappa"
+    #var = "SR_SB"
 
     # canvs and hists
     hists = []
@@ -74,14 +107,18 @@ if __name__ == "__main__":
         print "Making hist for", sname
 
         hist = yp.makeSampHisto(yds,sname,var,syst+"_syst")
-        hist.SetTitle(syst)
+        if syst in systNames: hist.SetTitle(systNames[syst])
+        else: hist.SetTitle(syst)
+
         hist.GetYaxis().SetTitle("Relative uncertainty")
+        hist.GetYaxis().SetTitleSize(0.04)
+        hist.GetYaxis().SetTitleOffset(0.8)
 
         #yp.prepKappaHist(hist)
         #yp.prepRatio(hist)
 
         # normalize to central value
-        hist.Divide(hCentral)
+        #hist.Divide(hCentral)
 
         hists.append(hist)
 
@@ -92,6 +129,7 @@ if __name__ == "__main__":
 
     hCentralUncert = yp.getHistWithError(hCentral, sqHist)
     canv = yp.plotHists(var+"_"+samp+"_Syst",[stack,sqHist],[hCentral,hCentralUncert],"TM", 1200, 600)
+#    canv = yp.plotHists(var+"_"+samp+"_Syst",[sqHist]+hists,[hCentral,hCentralUncert],"TM", 1200, 600)
 #    canv = yp.plotHists(var+"_"+samp+"_Stat",[stack,sqHist],hCentral,"TM", 1200, 600)
     canvs.append(canv)
     if not yp._batchMode: raw_input("Enter any key to exit")
@@ -100,7 +138,9 @@ if __name__ == "__main__":
     exts = [".pdf",".png",".root"]
     #exts = [".pdf"]
 
-    odir = "BinPlots/Syst/test/"
+    odir = "BinPlots/Syst/Combine/test/allSF_noPU/Method1B/"
+    #odir = "BinPlots/Syst/btag/hadronFlavour/allSF_noPU/Method1B/"
+    if not os.path.isdir(odir): os.makedirs(odir)
 
     for canv in canvs:
         for ext in exts:
