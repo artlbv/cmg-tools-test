@@ -45,16 +45,19 @@ if __name__ == "__main__":
     tptPath = "Yields/systs/topPt/MC/allSF_noPU/meth1A/merged/"; paths.append(tptPath)
     puPath = "Yields/systs/PU/MC/allSF/meth1A/merged/"; paths.append(puPath)
     wxsecPath = "Yields/systs/wXsec/MC/allSF_noPU/meth1A/merged/"; paths.append(wxsecPath)
-    btagPath = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1A/merged/"; paths.append(btagPath)
+    dlConstPath = "Yields/systs/DLConst/merged/"; paths.append(dlConstPath)
+    dlSlopePath = "Yields/systs/DLSlope/merged/"; paths.append(dlSlopePath)
+    #jerPath = "Yields/systs/JER/merged/"; paths.append(jerPath)
+    jerNoPath = "Yields/systs/JER_YesNo/merged/"; paths.append(jerNoPath)
+    btagPath = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1B/merged/"; paths.append(btagPath)
     jecPath = "Yields/systs/JEC/MC/allSF_noPU/meth1A/merged/"; paths.append(jecPath)
-    #dlConstPath = "Yields/systs/dilepConst/test/merged"; paths.append(dlConstPath)
-    #dlSlopePath = "Yields/systs/dilepSlope/test/merged"; paths.append(dlSlopePath)
 
     for path in paths: ydsSyst.addFromFiles(path+basename,("lep","sele"))
 
     # Sys types
 #    systs = ["btagHF","Wxsec","topPt","PU","DLSlope","DLConst"]#,"JEC"]
-    systs = ["Wxsec","PU","JEC","btagHF","btagLF","topPt"]
+#    systs = ["Wxsec","PU","JEC","btagHF","btagLF","topPt"]
+    systs = ["Wxsec","PU","JEC","btagHF","btagLF","topPt","DLConst","DLSlope","JER"]
 
     # Kappa systematics
     samp = "EWK";    var = "Kappa"
@@ -115,7 +118,8 @@ if __name__ == "__main__":
     #hDataPred = hMCpred
 
     # Ratio
-    ratio = yp.getRatio(hTotal,hDataPred)
+    #ratio = yp.getRatio(hTotal,hDataPred)
+    ratio = yp.getRatio(hData,hDataPred)
 
     logY = True
     #logY = False
@@ -131,7 +135,7 @@ if __name__ == "__main__":
     exts = [".pdf",".png",".root"]
     #exts = [".pdf"]
 
-    odir = "BinPlots/Data/Pred/test/allSF_noPU/Method1A/"
+    odir = "BinPlots/Data/Pred/unbld/allSF_noPU/Method1A/"
     #odir = "BinPlots/Syst/btag/hadronFlavour/allSF_noPU/Method1B/"
     if not os.path.isdir(odir): os.makedirs(odir)
 
