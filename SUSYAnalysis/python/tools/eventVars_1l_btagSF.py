@@ -116,7 +116,11 @@ def getMCEfficiencyForBTagSF(event, mcEff, onlyLightJetSystem = False, isFastSim
     for jet in cjets30:
        jPt     = jet.pt
        jEta    = jet.eta
-       jParton = jet.mcFlavour
+       # hadronFlavour is recommended by BTAG POG
+       jParton = jet.hadronFlavour if hasattr(jet,"hadronFlavour") else jet.mcFlavour
+       #if hasattr(jet,"hadronFlavour"):
+       #    print jParton, jet.hadronFlavour, jet.mcFlavour
+       #jParton = jet.mcFlavour
 
        if jPt <= minJpt or abs(jEta) >=maxJeta or (not jet.id): continue
 
@@ -213,14 +217,14 @@ def getBTagWeight(event, mcEff, isFastSim = False):
     for jet in cjets30:
        jPt     = jet.pt
        jEta    = jet.eta
-       jParton = jet.mcFlavour
+       jParton = jet.hadronFlavour if hasattr(jet,"hadronFlavour") else jet.mcFlavour
 
        if jPt <= minJpt or abs(jEta) >=maxJeta or (not jet.id): continue
 
        isBtagged = False
        jPt     = jet.pt
        jEta    = jet.eta
-       jParton = jet.mcFlavour
+       jParton = jet.hadronFlavour if hasattr(jet,"hadronFlavour") else jet.mcFlavour
        jBTagCSV = jet.btagCSV
 
        if jBTagCSV > btagWP: isBtagged = True
@@ -305,6 +309,7 @@ def getSampKey(name):
     elif "SingleT" in name: return "TTJets"
     elif "WJets" in name: return "WJets"
     elif "DY" in name: return "WJets"
+    elif "T1tttt" in name: return "TTJets"
     else: return "none"
 
 class EventVars1L_btagSF:
@@ -324,6 +329,9 @@ class EventVars1L_btagSF:
 
         # don't run on data
         if event.isData: return ret
+
+        # for signal use FastSim corrections
+        if "T1tttt" in self.sample: isFastSim == True
 
         ################################################################
         ######### METHOD 1A ### ~SFs ###################################
