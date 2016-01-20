@@ -426,7 +426,7 @@ def getTotal(histList):
 
     total.SetLineColor(0)
     total.SetFillColor(kGray)
-    total.SetFillStyle(3144)
+    total.SetFillStyle(3244)
     total.SetMarkerStyle(0)
     total.SetMarkerColor(0)
 
@@ -533,14 +533,20 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
 
     # get Y-maximum/minimum
     ymax = max([h.GetMaximum() for h in histList])
-    ymin = min([h.GetMinimum() for h in histList]);
+#    ymin = min([h.GetMinimum() for h in histList]);
+
+    for h in histList:
+        if h.ClassName() == "THStack":
+            extHistList = histList + [h for h in h.GetHists()]
+
+    ymin = min([h.GetMinimum() for h in extHistList]);
 
     # for fractions set min to 0
     if not logY:
         if ymax < 1.01 and ymax >= 1: ymax == 1; ymin = 0
         else: ymax *= 1.5; ymin *= 0.8
     else:
-        ymax *= 100; ymin = max(0.01,0.5*ymin)
+        ymax *= 100; ymin = max(0.05,0.5*ymin)
 
     #ymin = 0
     #ymax = min(ymax, 1.5)
@@ -593,7 +599,7 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
             leg.AddEntry(hist,hist.GetTitle(),"pl")
         elif "sqSum" in hist.GetName():
             hist.Draw(plotOpt+"p")
-            leg.AddEntry(hist,"Sum squared uncertainties","pl")
+            leg.AddEntry(hist,"Sum squared uncertainties","p")
         else:
             if len(histList) < 3:
                 hist.Draw(plotOpt+"pE2")
