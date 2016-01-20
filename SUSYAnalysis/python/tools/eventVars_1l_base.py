@@ -22,8 +22,8 @@ eleEta = 2.4
 # Jets
 ###########
 
-#corrJEC = "central" # can be "central","up","down
 corrJEC = "central" # can be "central","up","down
+#corrJEC = "up" # can be "central","up","down
 #corrJEC = "down" # can be "central","up","down
 
 print
