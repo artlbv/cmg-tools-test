@@ -83,20 +83,21 @@ def getGenTopWLepton(event):
     elif len(lFromW) == 2:
         match = False
 
-        leadLep = Collection(event,"LepGood","nLepGood")[0]
+        if event.nLepGood > 0:
+            leadLep = Collection(event,"LepGood","nLepGood")[0]
 
-        for genLep in lFromW:
-            if leadLep.charge == genLep.charge:
-                match == True
+            for genLep in lFromW:
+                if leadLep.charge == genLep.charge:
+                    match == True
 
-                genW = genParts[genLep.motherIndex]
-                genTop = genParts[genW.motherIndex]
+                    genW = genParts[genLep.motherIndex]
+                    genTop = genParts[genW.motherIndex]
 
-                topP4 = getLV(genTop.p4())
-                wP4 = getLV(genW.p4())
-                lepP4 = getLV(genLep.p4())
+                    topP4 = getLV(genTop.p4())
+                    wP4 = getLV(genW.p4())
+                    lepP4 = getLV(genLep.p4())
 
-                return topP4, wP4, lepP4
+                    return topP4, wP4, lepP4
 
         if not match:
             print 'No match at all!'
@@ -109,7 +110,7 @@ def getWPolWeights(event, sample):
     wUp = 1
     wDown = 1
 
-    if "TT" in sample: #W polarization in TTbar
+    if "TTJets" in sample: #W polarization in TTbar
         topP4, wP4, lepP4 = getGenTopWLepton(event)
 
         if topP4 != None:
