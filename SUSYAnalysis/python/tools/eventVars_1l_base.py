@@ -25,7 +25,7 @@ eleEta = 2.4
 corrJEC = "central" # can be "central","up","down"
 #corrJEC = "down" # can be "central","up","down"
 
-smearJER = "central"# can be "None","central","up","down"
+smearJER = "None"# can be "None","central","up","down"
 JERAllowedValues = ["None","central","up","down"]
 assert any(val==smearJER for val in JERAllowedValues)
 
