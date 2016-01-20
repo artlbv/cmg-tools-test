@@ -193,7 +193,7 @@ isData = True # default, but will be overwritten below
 sample = 'MC'
 #sample = 'data'
 #sample = 'Signal'
-test = 1
+test = 0
 
 if sample == "MC":
 
@@ -215,7 +215,7 @@ if sample == "MC":
 	#from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy import *
 	from CMGTools.SUSYAnalysis.samples.samples_13TeV_RunIISpring15MiniAODv2_desy_Compact import *
 
-	selectedComponents = TTJets_SingleLepton
+	selectedComponents = TTs + SingleTop #TTJets_SingleLepton
 
 	if test==1:
 		# test a single component, using a single thread.
@@ -240,7 +240,7 @@ if sample == "MC":
 
 		#selectedComponents =  [TTJets_LO , TTJets_LO_HT600to800, TTJets_LO_HT800to1200, TTJets_LO_HT1200to2500, TTJets_LO_HT2500toInf] + QCDHT + WJetsToLNuHT + SingleTop + DYJetsM50HT + TTV
 		#selectedComponents =  #SingleTop + DYJetsM50HT + TTV
-		selectedComponents = [TTJets_SingleLeptonFromTbar, TTJets_SingleLeptonFromTbar_ext, TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromT_ext, TTJets_DiLepton, TTJets_DiLepton_ext]
+		#selectedComponents = [TTJets_SingleLeptonFromTbar, TTJets_SingleLeptonFromTbar_ext, TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromT_ext, TTJets_DiLepton, TTJets_DiLepton_ext]
 
 		for comp in selectedComponents:
 			comp.fineSplitFactor = 1
@@ -413,7 +413,7 @@ susyCounter.SMS_varying_masses = ['genSusyMGluino','genSusyMNeutralino']
 sequence = cfg.Sequence(susyCoreSequence+[
 		LHEAna,
 		ttHEventAna,
-		ttHSTSkimmer,
+#		ttHSTSkimmer,
 		ttHHTSkimmer,
 		hbheFilterAna,
 		treeProducer,
