@@ -36,30 +36,15 @@ if __name__ == "__main__":
     paths = []
 
     # Add files
-    #btagPath = "Yields/systs/btag/test/merged/"; paths.append(btagPath)
-    #btagPath = "Yields/systs/btag/EWK/allflavour/full/merged/"; paths.append(btagPath)
-    #btagPath = "Yields/systs/btag/MC/oldall/merged/"; paths.append(btagPath)
-    #btagPath = "Yields/systs/btag/fixEff/MC/merged/"; paths.append(btagPath)
-    #btagPath = "Yields/systs/btag/fixEff/EWK/merged/"; paths.append(btagPath)
-    #btagPath = "Yields/systs/btag/fixEff/SingleTop/merged/"; paths.append(btagPath)
-    #btagPath = "Yields/systs/btag/method1b/sepMC/merged/"; paths.append(btagPath)
-    #btagPath = "Yields/systs/btag/SingleTop/allSF/meth1B/merged/"; paths.append(btagPath)
-
     tptPath = "Yields/systs/topPt/MC/allSF_noPU/meth1A/merged/"; paths.append(tptPath)
     puPath = "Yields/systs/PU/MC/allSF/meth1A/merged/"; paths.append(puPath)
     wxsecPath = "Yields/systs/wXsec/MC/allSF_noPU/meth1A/merged/"; paths.append(wxsecPath)
-
-
     dlConstPath = "Yields/systs/DLConst/merged"; paths.append(dlConstPath)
     dlSlopePath = "Yields/systs/DLSlope/merged"; paths.append(dlSlopePath)
     #jerPath = "Yields/systs/JER/merged"; paths.append(jerPath)
     jerNoPath = "Yields/systs/JER_YesNo/merged"; paths.append(jerNoPath)
-
-
-    btagPath = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1B/merged/"; paths.append(btagPath)
+    btagPath = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1A/merged/"; paths.append(btagPath)
     jecPath = "Yields/systs/JEC/MC/allSF_noPU/meth1A/merged/"; paths.append(jecPath)
-
-    #jecPath = "Yields/systs/JEC/EWK/full/merged/"; paths.append(jecPath)
 
     for path in paths:
         yds.addFromFiles(path,("lep","sele"))

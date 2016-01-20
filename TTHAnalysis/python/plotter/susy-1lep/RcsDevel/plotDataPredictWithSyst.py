@@ -49,7 +49,7 @@ if __name__ == "__main__":
     dlSlopePath = "Yields/systs/DLSlope/merged/"; paths.append(dlSlopePath)
     #jerPath = "Yields/systs/JER/merged/"; paths.append(jerPath)
     jerNoPath = "Yields/systs/JER_YesNo/merged/"; paths.append(jerNoPath)
-    btagPath = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1B/merged/"; paths.append(btagPath)
+    btagPath = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1A/merged/"; paths.append(btagPath)
     jecPath = "Yields/systs/JEC/MC/allSF_noPU/meth1A/merged/"; paths.append(jecPath)
 
     for path in paths: ydsSyst.addFromFiles(path+basename,("lep","sele"))
