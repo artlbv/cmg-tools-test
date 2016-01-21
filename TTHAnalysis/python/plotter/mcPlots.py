@@ -763,7 +763,8 @@ class PlotMaker:
                 # create canvas
                 #c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, 600, (750 if doRatio else 600))
                 #c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, 600,600)
-                c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, plotformat[0], (plotformat[1]+150 if doRatio else plotformat[1]))
+                #c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, plotformat[0], (plotformat[1]+150 if doRatio else plotformat[1]))
+                c1 = ROOT.TCanvas(pspec.name+"_canvas", pspec.name, plotformat[0], (plotformat[1] if doRatio else plotformat[1]))
                 c1.SetTopMargin(c1.GetTopMargin()*options.topSpamSize);
                 c1.Draw()
                 p1, p2 = c1, None # high and low panes
@@ -934,17 +935,12 @@ class PlotMaker:
                                     plot = pmap[p]
                                     if "TGraph" in plot.ClassName(): continue
                                     c1.SetRightMargin(0.20)
-<<<<<<< HEAD
                                     if pspec.hasOption('Logz'):
                                         plot.SetContour(20)
                                         plot.Draw("CONT0Z")
                                     else:
                                         plot.SetContour(100)
-                                        plot.Draw("COLZ TEXT45")
-=======
-                                    plot.SetContour(100)
-                                    plot.Draw(pspec.getOption("PlotMode","COLZ TEXT45"))
->>>>>>> bd4452842f9b8ea36c56a47adc81692b39d67a12
+                                        plot.Draw(pspec.getOption("PlotMode","COLZ TEXT45"))
                                     c1.Print("%s/%s_%s.%s" % (fdir, pspec.name, p, ext))
                                 if "data" in pmap and "TGraph" in pmap["data"].ClassName():
                                     pmap["data"].SetMarkerSize(pspec.getOption("MarkerSize",1.6))
@@ -966,7 +962,7 @@ def addPlotMakerOptions(parser):
     #parser.add_option("--lspam", dest="lspam",   type="string", default="CMS Simulation", help="Spam text on the right hand side");
     parser.add_option("--lspam", dest="lspam",   type="string", default="#bf{CMS} #it{Preliminary}", help="Spam text on the right hand side");
     parser.add_option("--rspam", dest="rspam",   type="string", default="%(lumi) (13 TeV)", help="Spam text on the right hand side");
-    parser.add_option("--topSpamSize", dest="topSpamSize",   type="float", default=1.2, help="Zoom factor for the top spam");
+    parser.add_option("--topSpamSize", dest="topSpamSize",   type="float", default=1., help="Zoom factor for the top spam");
     parser.add_option("--print", dest="printPlots", type="string", default="png,pdf,txt", help="print out plots in this format or formats (e.g. 'png,pdf,txt')");
     parser.add_option("--pdir", "--print-dir", dest="printDir", type="string", default="plots", help="print out plots in this directory");
     parser.add_option("--showSigShape", dest="showSigShape", action="store_true", default=False, help="Superimpose a normalized signal shape")
