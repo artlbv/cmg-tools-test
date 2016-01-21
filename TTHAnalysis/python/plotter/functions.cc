@@ -244,6 +244,7 @@ float DR_for_ST_PT(float ST, float PT)
   double par[2] = {81.0};
   float DR = myFuncDROfPandPT(x,par);
   return DR;
+}
 
 int regroupSignalRegions_RA5(int SR){
 
