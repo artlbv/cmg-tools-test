@@ -98,8 +98,8 @@ if __name__ == "__main__":
         "Wpol" : "W polar.",
         "JER" : "JER",
         "JERYesNo" : "JER Yes/No",
-        "DLSlope" : "DL (Slope)",
-        "DLConst" : "DL (Const)",
+        "DLSlope" : "DiLep (N_{j} Slope)",
+        "DLConst" : "DiLep (N_{j} Const)",
         }
 
     #sysCols = [2,4,7,8,3,9,6] + range(40,50)#[1,2,3] + range(4,10)
