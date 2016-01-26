@@ -21,13 +21,16 @@ dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv
 
 ## Trees -- skimmed with trig_base
 #Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed"
-Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Signal/FullScanSkim/"
+#Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/25ns/MiniAODv2/Signal/HT350_LT150_1lep_noJetID/T1tttt_JECfFS/Done/Skims/HT350_1nLep_LT200_noGenPartAll/Skims/trig_base_JECcentr/Merge/"
+#Tdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/25ns/MiniAODv2/Signal/HT350_LT150_1lep_noJetID/T1tttt_JECfFS/Done/Skims/HT350_1nLep_LT200_noGenPartAll/"
+Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/"
 # MC
-mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Friends/MC/pu_69mb"
-sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Signal/FullScanSkim/Friends"
+mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/Friends/MC/pu69mb_JECcentr/"
+#sigFTdir = "/nfs/dust/cms/group/susy-desy/Run2/ACDV/CMGtuples/MC/SPRING15/25ns/MiniAODv2/Signal/HT350_LT150_1lep_noJetID/T1tttt_JECfFS/Done/Skims/HT350_1nLep_LT200_noGenPartAll/Skims/trig_base_JECcentr/Merge/Friends/pu69_JECcentr/"
+sigFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/Friends/MCandSignal/pu69mb_JECcentr_wSig/"
 
 # new data
-dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed/Friends/Data/trig_base_skim_2p1fb"
+dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/Friends/Data/trig_skim_2p2fb/"
 
 
 def addOptions(options):
@@ -422,6 +425,14 @@ if __name__ == "__main__":
         cDict.update(cutDictSRf5)
         cDict.update(cutDictCRf5)
 
+    doFew =  True
+    if doFew:
+        cDict.update(cutDictSRf68Few)
+        cDict.update(cutDictCRf68Few)
+        cDict.update(cutDictSRf9Few)
+        cDict.update(cutDictCRf9Few)
+
+#    print cutDict
     #cDict = cutQCDsyst #QCD
 
     #cDict = cutIncl #Inclusive
