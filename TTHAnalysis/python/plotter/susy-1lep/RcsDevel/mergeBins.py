@@ -22,7 +22,15 @@ def matchSB(bname):
 
     name = bname+'_'
 
-    if 'NJ68' in name:
+    if 'Few' in name:
+        #name = name.replace('SR','SR_Few')
+        #name = name.replace('CR','CR_Few')
+        if 'NJ68' in name:
+            name = name.replace('NJ68','NJ45f6')
+        if 'NJ9i' in name:
+            name = name.replace('NJ9i','NJ45f9')
+
+    elif 'NJ68' in name:
         # match for NJ68
         name = name.replace('NJ68','NJ45f6')
         if 'HT2i' in name:
@@ -54,6 +62,8 @@ def matchSB(bname):
         else:
             name = name.replace('NB2_','NB2i_')
             name = name.replace('NB3i','NB2i')
+
+
 
     name = name[:-1]
 
@@ -104,6 +114,9 @@ def findMatchBins(binname):
     SR_SBname = SBname + '_SR'
     CR_SBname = SBname + '_CR'
 
+    if 'Few' in binname:
+        SR_SBname = SR_SBname + '_Few'
+        CR_SBname = CR_SBname + '_Few'
     ## collect files
     if options.verbose > 1:
         print 'Found these bins matching to', binname
