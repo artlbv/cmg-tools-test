@@ -529,6 +529,7 @@ if __name__ == "__main__":
     poisSamps = ["background","QCD","EWK"]
     poisSamps = [s for s in poisSamps if s in allSamps]
     # do qcd prediciton for:
+
     qcdPredSamps =  ["background","data","QCD","background_poisson","QCD_poisson"]
     #qcdPredSamps = [s for s in qcdPredSamps if s in allSamps]
     # samples to make full prediciton
@@ -541,6 +542,6 @@ if __name__ == "__main__":
     makeQCDsubtraction(fileList, qcdPredSamps)
     makeKappaHists(fileList)#, predSamps)
     makePredictHists(fileList)#, predSamps)
-    #makeClosureHists(fileList, predSamps)
+    makeClosureHists(fileList, predSamps)
 
     print 'Finished'
