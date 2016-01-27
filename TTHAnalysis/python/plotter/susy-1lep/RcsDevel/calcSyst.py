@@ -98,7 +98,7 @@ def makeSystHists(fileList):
 
     #hnames = ["T1tttt_Scan"] # process name
     #hnames = ["EWK"] # process name
-    #hnames = ['T_tWch','TToLeptons_tch','TBar_tWch', 'SiTop', 'TToLeptons_sch'] # process name
+    #hnames = ['T_tWch','TToLeptons_tch','TBar_tWch', 'EWK', 'TToLeptons_sch'] # process name
     #hnames = ["TTJets","WJets","SingleTop","DY","TTV"] # process name
     hnames = ["EWK","TTJets","WJets","SingleTop","DY","TTV"] # process name
     #hnames = getHnames(fileList[0],'SR_MB') # get process names from file
@@ -107,11 +107,11 @@ def makeSystHists(fileList):
     #systNames = ["Xsec"]
     #systNames = ["PU"]
     #systNames = ["topPt"]
-    #systNames = ["Wxsec"]
+    systNames = ["Wxsec"]
     #systNames = ["JEC"]
     #systNames = ["DLSlope"]
     #systNames = ["DLConst"]
-    systNames = ["btagHF","btagLF"]
+    #systNames = ["btagHF","btagLF"]
 
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB','Kappa','Rcs_MB','Rcs_SB']
@@ -140,8 +140,8 @@ def makeSystHists(fileList):
                         #sfile.mkdir(bindir)
                         #sfile.cd(bindir)
                         hSyst.Write("",TObject.kOverwrite)
-                        hUp.Write("",TObject.kOverwrite)
-                        hDown.Write("",TObject.kOverwrite)
+                        #hUp.Write("",TObject.kOverwrite)
+                        #hDown.Write("",TObject.kOverwrite)
 
             '''
             # create Syst folder structure
