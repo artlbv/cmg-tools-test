@@ -27,6 +27,7 @@ def matchSB(bname):
         #name = name.replace('CR','CR_Few')
         if 'NJ68' in name:
             name = name.replace('NJ68','NJ45f6')
+            name = name.replace('NB3i_','NB2i_')
         if 'NJ9i' in name:
             name = name.replace('NJ9i','NJ45f9')
 
@@ -208,8 +209,11 @@ def mergeBins(fileList, pattern = 'NJ68', outdir = None):
             print 'Matching bins are:', matchbins
 
         # strip off "SR" ending
-        binname = binname[:binname.find("_SR")]
-
+        if 'Few' in binname:
+            binname = binname[:binname.find("_SR")] + '_Few'
+        else:
+            binname = binname[:binname.find("_SR")]
+        
         ofname = outdir+'/'+binname+'.merge.root'
 
         writeBins(ofname, srcdir, matchbins)
