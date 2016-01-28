@@ -44,7 +44,13 @@ def getSystHist(tfile, hname, syst = "Xsec"):
     hUp = tfile.Get(upName)
     hDown = tfile.Get(dnName)
 
-    if not hUp or not hDown:
+    if not hUp and hDown:
+        # Replace missing Up with Down
+        hUp = hDown
+    elif not hDown and hUp:
+        # Replace missing Down with Up
+        hDown = hUp
+    elif not hUp or not hDown:
         print 'No systematics found!'
         print tfile, hname, upName, dnName
         return 0
@@ -96,22 +102,26 @@ def makeSystHists(fileList):
     # filter
     #fileList = [fname for fname in fileList if 'NB3' not in fname]
 
-    #hnames = ["T1tttt_Scan"] # process name
+    hnames = ["T1tttt_Scan"] # process name
     #hnames = ["EWK"] # process name
     #hnames = ['T_tWch','TToLeptons_tch','TBar_tWch', 'EWK', 'TToLeptons_sch'] # process name
     #hnames = ["TTJets","WJets","SingleTop","DY","TTV"] # process name
-    hnames = ["EWK","TTJets","WJets","SingleTop","DY","TTV"] # process name
+    #hnames = ["EWK","TTJets","WJets","SingleTop","DY","TTV"] # process name
     #hnames = getHnames(fileList[0],'SR_MB') # get process names from file
     #print 'Found these hists:', hnames
 
     #systNames = ["Xsec"]
     #systNames = ["PU"]
     #systNames = ["topPt"]
-    systNames = ["Wxsec"]
+    #systNames = ["Wxsec"]
+    #systNames = ["TTVxsec"]
     #systNames = ["JEC"]
     #systNames = ["DLSlope"]
     #systNames = ["DLConst"]
+    #systNames = ["JER"]
+    #systNames = ["Wpol"]
     #systNames = ["btagHF","btagLF"]
+    systNames = ["ISR"]
 
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB']
     #bindirs =  ['SR_MB','CR_MB','SR_SB','CR_SB','Kappa','Rcs_MB','Rcs_SB']
