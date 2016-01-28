@@ -69,7 +69,7 @@ if __name__ == "__main__":
         btagPath = "Yields/systs/btag/hadFlavour/fixXsec/allSF_noPU/meth1A/merged/"; paths.append(btagPath)
         jecPath = "Yields/systs/JEC/MC/allSF_noPU/meth1A/merged/"; paths.append(jecPath)
 
-        for path in paths: ydsSystSyst.addFromFiles(path+basename,("lep","sele"))
+        for path in paths: ydsSyst.addFromFiles(path+basename,("lep","sele"))
 
         ydsSyst.showStats()
 
