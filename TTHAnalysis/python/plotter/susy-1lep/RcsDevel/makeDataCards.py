@@ -1,6 +1,8 @@
 
 #!/usr/bin/env python
 import sys
+import numpy as np
+import random as rd
 out = ''
 from yieldClass import *
 from ROOT import *
@@ -55,25 +57,46 @@ def printDataCard(yds, ydsObs, ydsSysSig):
     return 1
 
 
+def readSystFile():
+    systDict = {}
+    with open('sysTable.dat',"r") as xfile:
+        lines = xfile.readlines()
+        systs = lines[0].replace(' ','').replace('\n','').split('|') 
+        print systs
+        for line in lines[1:]:
+            values = line.replace(' ','').replace('\n','').split('|')            
+            binMB = values[0]
+            binSB = values[1]
+            singleSysts = {}
+            for val, syst in zip(values[2:],systs[2:]):
+                singleSysts[(binSB,syst)] = val
+            systDict[binMB] =  singleSysts
+
+    return systDict
 
 def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
+    systDict = readSystFile()
     folder = 'datacardsABCD_' + out + '/'
     if not os.path.exists(folder): os.makedirs(folder) 
     bins = sorted(yds.keys())
-
+    
     catNames = [x.cat for x in yds[bins[0]] ]
     sampNames = [x.name.replace('background','data') for x in (yds[bins[0]]) ]
     sampUniqueNames = list(set(sampNames))
     for x in sampNames:
         if "Scan_m" in x: signalName = x
-
+     
+    mGlu = signalName[signalName.find('_mGo') + 4:signalName.find('_mLSP')]
+    factor = 1.0
+    if float(mGlu) < 1000:
+        factor = 10.0
     catUniqueNames = [x.cat for x in ydsObs[bins[0]] ]
     nSamps = len(sampNames)
 
     precision = 4
     
     
-    try:                                                                                                                     
+    try:                                                                                                              
         os.stat(folder + signalName )                                                                                
     except:                                                                                                                  
         os.mkdir(folder + signalName ) 
@@ -82,7 +105,11 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
     iproc = { key: i+1 for (i,key) in enumerate(sorted(reversed(sampUniqueNames)))}
     iproc.update({signalName: 0})
     #print iproc
+    rd.seed(5)
     for i,bin in enumerate(bins):
+        obs0 = False
+        if 'LT1_HT2i_NB2_NJ9i' in bin:
+            obs0 = True
         datacard = open(folder+ signalName+ '/' +bin + '.card.txt', 'w'); 
         datacard.write("## Datacard for bin %s (signal %s)\n"%(bin,signalName))
         datacard.write("imax 4  number of channels \n")
@@ -96,20 +123,35 @@ def printABCDCard(yds, ydsObs, ydsKappa, ydsSigSys):
         #observation
 
         datacard.write('bin'+ ( ' ' * 32) +(" ".join([kpatt % cat.replace('_predict','')     for cat in catUniqueNames]))+"\n")
-        datacard.write('observation'+ ( ' ' * 32) +(" ".join([kpatt % round(yd.val)  for yd in ydsObs[bin]]))+"\n")
+        np.random.seed(42546)
+        ##########ATTENENTION###############
+        #####Randomly adding 0.3 to the observation remove for real data#############
+#        datacard.write('observation'+ ( ' ' * 32) +(" ".join([kpatt % str(round(yd.val+rd.choice([0.3,0]))) if 'SR_MB' in yd.cat else str(round(yd.val))  for yd in ydsObs[bin]]))+"\n")
+        datacard.write('observation'+ ( ' ' * 32) +(" ".join([kpatt % str(0.1) if obs0 and 'CR_MB' in yd.cat else str(round(yd.val))   for yd in ydsObs[bin]]))+"\n")
+
+
         datacard.write('##----------------------------------\n')
         datacard.write('##----------------------------------\n')
         datacard.write('bin'+ ( ' ' * 32) +(" ".join(([kpatt % (cat.replace('_predict',''))     for cat in catNames])))+"\n")
         datacard.write('process'+ ( ' ' * 30)  +(" ".join([kpatt % p          for p in sampNames]))+"\n")
         datacard.write('process'+ ( ' ' * 30)  +(" ".join([kpatt % iproc[p]    for p in sampNames]))+"\n")
 
-        datacard.write('rate'+ ( ' ' * 37)  +(" ".join([fpatt % yd.val if type(yd) != int and 'Scan' in yd.name else '   1     '  for yd in yds[bin]]))+"\n")
+        datacard.write('rate'+ ( ' ' * 37)  +(" ".join([fpatt % float(yd.val/factor) if type(yd) != int and 'Scan' in yd.name else '   1     '  for yd in yds[bin]]))+"\n")
         #            datacard.write('##----------------------------------\n')
 #        datacard.write('Lumi lnN' + (' ' * 33) +  " ".join([kpatt % numToBar(1.0+0.05) for yd in yds[bin]]) + '\n')
 
         before = '       -  ' * (4)
         sys = 'test'
         datacard.write(sys + ' lnN  ' + (' ' * (28))  + before + " ".join([kpatt % numToBar(1 + yd.val) for yd in ydsSigSys[bin]]) +"\n")
+
+        ##for bin LT1_HT2i_NB2_NJ9i write out additonal uncertaintuy
+        if obs0:
+            datacard.write('LT1_HT2i_NB2_NJ9i_100percent lnN '+ ( ' ' * 32) +(" ".join(([kpatt % 1.98 if ('CR_MB','data') == (x.replace('_predict',''),y) else '    -   ' for (x,y) in zip(catNames,sampNames)])))+"\n")
+        
+        for syst in systDict[bin]:
+#            datacard.write(syst[1]+'_'+syst[0]+' lnN '+ ( ' ' * 32) +(" ".join(([kpatt % systDict[bin][syst] if ('SR_MB','data') == (x.replace('_predict',''),y) else '    -   ' for (x,y) in zip(catNames,sampNames)])))+"\n")
+            datacard.write(syst[1]+' lnN '+ ( ' ' * 32) +(" ".join(([kpatt % systDict[bin][syst] if ('SR_MB','data') == (x.replace('_predict',''),y) else '    -   ' for (x,y) in zip(catNames,sampNames)])))+"\n")
+
 
     
         params = ('kappa','beta','delta')
@@ -197,20 +239,21 @@ if __name__ == "__main__":
 
     yds6 = YieldStore("lepYields")
     yds9 = YieldStore("lepYields")
-    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins_noPU/full/*/merged/LT*NJ6*"
+    pattern = "YieldsJan15/unblind/lumi2p24fb/allSF_noPU/*/merged/LT*NJ6*"
     yds6.addFromFiles(pattern,("lep","sele")) 
-    pattern = "Yields/all/lumi2p1fb_MC1_2fbbins_noPU/full/*/merged/LT*NJ9*"
+    pattern = "YieldsJan15/unblind/lumi2p24fb/allSF_noPU/*/merged/LT*NJ9*"
     yds9.addFromFiles(pattern,("lep","sele"))
     
 
 #    yds6.showStats()
 #    yds9.showStats()
     #pattern = 'arturstuff/grid/merged/LT\*NJ6\*'
+    readSystFile()
+#    for mGo in range(800, 1700, 25):
+#       for mLSP in range(50,1200,25):
 
-    for mGo in range(800, 1700, 100):
-        for mLSP in range(50,1200,50):
-#    for mGo in range(1500, 1600, 50):
-#        for mLSP in range(100,200,50):
+    for mGo in range(1500, 1600, 50):
+        for mLSP in range(100,200,50):
             for ydIn in (yds6, yds9):
                 print "making datacards for "+str(mGo)+ ' '+str(mLSP)
                 signal = 'T1tttt_Scan_mGo'+str(mGo)+'_mLSP'+str(mLSP)
@@ -230,15 +273,18 @@ if __name__ == "__main__":
                 yds = ydIn.getMixDict(samps)
                 ydsSigSys = ydIn.getMixDict(sampsSys)
                 
-                printDataCard(yds, ydsObs, ydsSigSys)
+                #printDataCard(yds, ydsObs, ydsSigSys)
                 
                 cats = ('SR_MB', 'CR_MB', 'SR_SB','CR_SB')
                 catsNoSR = ('CR_MB', 'SR_SB','CR_SB')
                 
                 sampsABCDbkg = [('data',cat) for cat in catsNoSR]
                 print sampsABCDbkg
-#                sampsABCDbkg.insert(0,('data','SR_MB_predict'))
-                sampsABCDbkg.insert(0,('background','SR_MB'))
+                ######ATTENTION#####
+                ##at the moment randomly adding 0.3 to the observation, same seed to sequenz is the same####
+
+                sampsABCDbkg.insert(0,('data','SR_MB'))
+#                sampsABCDbkg.insert(0,('background','SR_MB'))
 #                print sampsABCDbkg
                 sampsABCDsig = [('T1tttt_Scan_mGo'+str(mGo)+'_mLSP'+str(mLSP),cat) for cat in cats]
                 sampsABCDSigSys = [('T1tttt_Scan_Xsec_syst_mGo'+str(mGo)+'_mLSP'+str(mLSP),cat) for cat in cats ]

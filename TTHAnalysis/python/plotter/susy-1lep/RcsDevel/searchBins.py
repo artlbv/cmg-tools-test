@@ -4,6 +4,7 @@ binsLT['LTi'] = ('250 < LT','$\geq$ 250')
 binsLT['LT1'] = ('250 < LT && LT < 350','[250, 350]')
 binsLT['LT2'] = ('350 < LT && LT < 450','[350, 450]')
 binsLT['LT3'] = ('450 < LT && LT < 600','[450, 600]')
+binsLT['LT2i'] = ('350 < LT','$\geq$ 350')
 binsLT['LT3i'] = ('450 < LT','$\geq$ 450')
 binsLT['LT4i'] = ('600 < LT','$\geq$ 600')
 
@@ -41,7 +42,9 @@ binsNJ['NJ4f5'] = ('nJets30Clean == 4','[4]')
 
 ## Signal/Control region (wrt dPhi)
 binsSR = {}
+# blind data
 #binsSR['SR'] = ('isSR == 1','$\delta \phi > $ x')
+#unblind now
 binsSR['SR'] = ('abs(isSR) == 1','$\delta \phi > $ x')
 binsCR = {}
 binsCR['CR'] = ('isSR == 0','$\delta \phi < $ x')
@@ -378,3 +381,90 @@ for nj_bin in ['NJ4f5','NJ5']:#binsNJ.iteritems():
                     cutDictCRf5[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut),("base",cr_bin,cr_cut)]
 
 
+
+
+#####Few bins for illustration
+cutDictf68Few = {}
+cutDictSRf68Few = {}
+cutDictCRf68Few = {}
+
+cutDictf9Few = {}
+cutDictSRf9Few = {}
+cutDictCRf9Few = {}
+
+for nj_bin in ['NJ45f6','NJ68']:#binsNJ.iteritems():
+    nj_cut = binsNJ[nj_bin][0]
+
+    ltbins = ['LT1','LT2','LT3','LT4i']
+
+    for lt_bin in ltbins:#binsLT.iteritems():
+        lt_cut = binsLT[lt_bin][0]
+
+        htbins = ['HT0i']
+        #for ht_bin,ht_cut in binsHT.iteritems():
+        for ht_bin in htbins:
+            ht_cut = binsHT[ht_bin][0]
+
+            nbbins = []
+            if lt_bin in ['LT4i']:
+                nbbins = ['NB1i']
+            elif lt_bin in ['LT1']:
+                if nj_bin in ['NJ45f6']:
+                    nbbins = ['NB2i']
+                else:
+                    nbbins = ['NB3i']
+            else:
+                nbbins = ['NB2i']
+            
+            for nb_bin in nbbins:
+                nb_cut = binsNB[nb_bin][0]
+                binname = "%s_%s_%s_%s_Few" %(lt_bin,ht_bin,nb_bin,nj_bin)
+                cutDictf68Few[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
+                print binname
+                # split to SR/CR
+                for sr_bin in ['SR']:
+                    sr_cut = binsSR[sr_bin][0]
+
+                    binname = "%s_%s_%s_%s_%s_Few" %(lt_bin,ht_bin,nb_bin,nj_bin,sr_bin)
+                    cutDictSRf68Few[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut),("base",sr_bin,sr_cut)]
+
+                for cr_bin in ['CR']:
+                    cr_cut = binsCR[cr_bin][0]
+
+                    binname = "%s_%s_%s_%s_%s_Few" %(lt_bin,ht_bin,nb_bin,nj_bin,cr_bin)
+                    cutDictCRf68Few[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut),("base",cr_bin,cr_cut)]
+
+
+for nj_bin in ['NJ45f9','NJ9i']:#binsNJ.iteritems():
+    nj_cut = binsNJ[nj_bin][0]
+
+    ltbins = ['LT1','LT2i']
+
+    for lt_bin in ltbins:#binsLT.iteritems():
+        lt_cut = binsLT[lt_bin][0]
+
+        htbins = ['HT0i']
+        #for ht_bin,ht_cut in binsHT.iteritems():
+        for ht_bin in htbins:
+            ht_cut = binsHT[ht_bin][0]
+
+            nbbins = []
+            nbbins = ['NB1i']
+            
+            for nb_bin in nbbins:
+                nb_cut = binsNB[nb_bin][0]
+                binname = "%s_%s_%s_%s_Few" %(lt_bin,ht_bin,nb_bin,nj_bin)
+                cutDictf9Few[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
+
+                # split to SR/CR
+                for sr_bin in ['SR']:
+                    sr_cut = binsSR[sr_bin][0]
+
+                    binname = "%s_%s_%s_%s_%s_Few" %(lt_bin,ht_bin,nb_bin,nj_bin,sr_bin)
+                    cutDictSRf9Few[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut),("base",sr_bin,sr_cut)]
+
+                for cr_bin in ['CR']:
+                    cr_cut = binsCR[cr_bin][0]
+
+                    binname = "%s_%s_%s_%s_%s_Few" %(lt_bin,ht_bin,nb_bin,nj_bin,cr_bin)
+                    cutDictCRf9Few[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut),("base",cr_bin,cr_cut)]

@@ -21,6 +21,7 @@ dataFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv
 
 ## Trees -- skimmed with trig_base
 #Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/SampLinks_MiniAODv2_skimmed"
+
 Tdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/"
 # MC
 mcFTdir = "/afs/desy.de/user/l/lobanov/public/CMG/SampLinks/MiniAODv2_hadrFlav_2p2fb/Friends/MC/pu69mb_JECcentr/"
@@ -426,6 +427,14 @@ if __name__ == "__main__":
         cDict.update(cutDictSRf5)
         cDict.update(cutDictCRf5)
 
+    doFew =  True
+    if doFew:
+        cDict.update(cutDictSRf68Few)
+        cDict.update(cutDictCRf68Few)
+        cDict.update(cutDictSRf9Few)
+        cDict.update(cutDictCRf9Few)
+
+#    print cutDict
     #cDict = cutQCDsyst #QCD
 
     #cDict = cutIncl #Inclusive
