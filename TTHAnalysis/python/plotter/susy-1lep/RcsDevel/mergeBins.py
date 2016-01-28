@@ -172,7 +172,7 @@ def mergeBins(fileList, pattern = 'NJ68', outdir = None):
 
     # filter out MB_SR files
     srList = [fname for fname in fileList if pattern in fname]
-    srList = [fname for fname in srList if 'SR' in fname]
+    srList = [fname for fname in srList if '_SR' in fname]
 
     if len(srList) == 0:
         print "No files found matching pattern", pattern , "+ SR"
@@ -186,7 +186,6 @@ def mergeBins(fileList, pattern = 'NJ68', outdir = None):
 
     # Loop over files
     for fname in srList:
-
         binname = getBinName(fname, pattern)
         matchbins = findMatchBins(binname)
 
@@ -195,7 +194,8 @@ def mergeBins(fileList, pattern = 'NJ68', outdir = None):
             print 'Matching bins are:', matchbins
 
         # strip off "SR" ending
-        binname = binname[:binname.find("_SR")]
+        #binname = binname[:binname.find("_SR")]
+        binname = binname.replace("_SR","")
 
         ofname = outdir+'/'+binname+'.merge.root'
 

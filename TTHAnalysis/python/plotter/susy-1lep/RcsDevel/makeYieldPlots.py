@@ -276,7 +276,7 @@ def prepRatio(hist, keepStyle = False):
     hist.GetYaxis().SetTitleSize(0.08)
     hist.GetYaxis().SetTitleOffset(0.3)
     hist.GetYaxis().SetLabelSize(0.1)
-    hist.GetYaxis().SetRangeUser(0.05,2.1)
+    #hist.GetYaxis().SetRangeUser(0.05,2.1)
 
     hist.GetXaxis().SetLabelSize(0.1)
 
@@ -498,11 +498,12 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
         elif "ratio" in ratio.GetName():
             line = TLine(0,1,ratio.GetNbinsX(),1)
         else:
-            line = TLine(0,1,ratio.GetNbinsX(),1)
+            line = None#TLine(0,0,ratio.GetNbinsX(),0)
 
-        line.SetLineWidth(1)
-        line.Draw()
-        SetOwnership(line,0)
+        if line != None:
+            line.SetLineWidth(1)
+            line.Draw()
+            SetOwnership(line,0)
 
         # plot bins separator
         marks = getMarks(ratio)
