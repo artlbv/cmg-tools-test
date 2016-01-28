@@ -103,8 +103,11 @@ class YieldStore:
             for hist in histList:
 
                 if "TH" not in hist.ClassName(): continue
-
                 sample = hist.GetName()
+
+                ## Ignore Up/Down variations:
+                if "syst" in sample and ("Up" in sample or "Down" in sample): continue
+                if "syst" in sample and ("up" in sample or "down" in sample): continue
 
                 if ('Scan' not in sample) and ('scan' not in sample):
                     # get normal sample yield
@@ -353,8 +356,8 @@ if __name__ == "__main__":
     print [s for s in yds.samples if "1500" in s]
     '''
 
-    sysClass = "btagHF"
-    samp = "EWK"
+    sysClass = "JEC"
+    samp = "TT"
     cat = "Kappa"
 
     samps = [
