@@ -13,7 +13,7 @@ veto: nVeto == 0
 
 #### Jets ####
 nJets30Clean = 4,5: 4 <= nJets30Clean && nJets30Clean <= 5
-#nJets30Clean >= 4: nJets30Clean >= 4
+#nJets30Clean >= 2: nJets30Clean >= 2
 2.JetPt > 80: Jet2_pt > 80
 
 HT > 500: HT > 500

@@ -529,8 +529,6 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
     else:
         canv.SetBottomMargin(0.1)
 
-    plotOpt = ""
-
     # get Y-maximum/minimum
     ymax = max([h.GetMaximum() for h in histList])
 #    ymin = min([h.GetMinimum() for h in histList]);
@@ -543,13 +541,16 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
 
     # for fractions set min to 0
     if not logY:
-        if ymax < 1.01 and ymax >= 1: ymax == 1; ymin = 0
-        else: ymax *= 1.5; ymin *= 0.8
+        if ymax < 1.01 and ymax >= 1: ymax == 1; ymin = 0 # for fractions
+        else: ymax *= 1.5; ymin *= 0.5
     else:
         ymax *= 100; ymin = max(0.05,0.5*ymin)
 
     #ymin = 0
     #ymax = min(ymax, 1.5)
+
+    # Common plot option
+    plotOpt = ""#X+Y+"
 
     # make dummy for stack
     if histList[0].ClassName() == "THStack":
@@ -574,10 +575,10 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
         hist.SetMinimum(ymin)
         #print hist.GetName()
         if "dummy" == hist.GetName():
-            hist.Draw()
+            hist.Draw(plotOpt)
         elif  hist.ClassName() == 'THStack':
             #continue
-            hist.Draw("HISTsame")
+            hist.Draw("HISTsame"+plotOpt)
             hist.GetXaxis().LabelsOption("h")
             hist.GetYaxis().SetTitle("Events")
             hist.GetYaxis().SetTitleSize(0.1)
@@ -633,13 +634,34 @@ def plotHists(cname, histList, ratio = None, legPos = "TM", width = 800, height 
     leg.Draw()
     SetOwnership(leg,0)
 
+    '''
+    # Add right axis
+    raxis = TGaxis(gPad.GetUxmax(),gPad.GetUymin(),gPad.GetUxmax(), gPad.GetUymax(),0,ymax,510,"+L")
+    #axis.SetLineColor(kRed);
+    #axis.SetTextColor(kRed);
+    raxis.SetTitleSize(0.05)
+    raxis.SetTitleOffset(0.6)
+
+    if ratio == None: raxis().SetLabelSize(0.4)
+    else: raxis.SetLabelSize(0.05)
+    raxis.Draw();
+    '''
+
+    # Add ticks
+    p1.SetTicks()
+    p1.Update()
+
     if logY: p1.SetLogy()
 
     # draw CMS lumi
     if ratio != None:
         CMS_lumi.CMS_lumi(p1, 4, iPos)
+        p2.SetTicks()
+        p2.Update()
     else:
         CMS_lumi.CMS_lumi(canv, 4, iPos)
+
+    #gPad.RedrawAxis()
 
     return canv
 
