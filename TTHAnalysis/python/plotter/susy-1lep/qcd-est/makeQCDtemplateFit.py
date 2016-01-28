@@ -511,8 +511,8 @@ if __name__ == "__main__":
     #binNames = ['NJ34']
     #binNames = ['NJ34','LT1_NJ34']
 
-    #binNames = ['LTi_NJ34','LT1_NJ34','LT2_NJ34','LT3_NJ34','LT4_NJ34']
-    binNames = ['LTi_NJ34','LT1_NJ34','LT1i_NJ34','LT2_NJ34','LT2i_NJ34','LT3_NJ34','LT3i_NJ34','LT4_NJ34']
+    binNames = ['LTi_NJ34','LT1_NJ34','LT2_NJ34','LT3_NJ34','LT4_NJ34']
+    #binNames = ['LTi_NJ34','LT1_NJ34','LT1i_NJ34','LT2_NJ34','LT2i_NJ34','LT3_NJ34','LT3i_NJ34','LT4_NJ34']
 
     #binNames += ['NJ45','LT0_NJ45','LT1_NJ45','LT2_NJ45','LT3_NJ45','LT4_NJ45']
     #binNames += ['NJ68','LT0_NJ68','LT1_NJ68','LT2_NJ68','LT3_NJ68','LT4_NJ68']
