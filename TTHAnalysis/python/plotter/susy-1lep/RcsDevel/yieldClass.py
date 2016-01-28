@@ -3,8 +3,8 @@
 import os, glob, sys, math
 
 from ROOT import *
-#from searchBins import *
-from searchBins_few import *
+from searchBins import *
+#from searchBins_few import *
 from readYields import getLepYield, getScanYields
 #helper function maybe move somewhere else
 

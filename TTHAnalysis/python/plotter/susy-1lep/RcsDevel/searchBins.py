@@ -137,17 +137,17 @@ for nj_bin in ['NJ45f6','NJ68']:
         '''
         # Match NB bins
         if lt_bin in ['LT1','LT2','LT3','LT4i']:
-            nbbins += ['NB1'] # NB1 present in all NJ,LT bins
+        nbbins += ['NB1'] # NB1 present in all NJ,LT bins
         if lt_bin in ['LT4i']:
-            nbbins += ['NB2i'] # NB2i present in all NJ,LT bins
+        nbbins += ['NB2i'] # NB2i present in all NJ,LT bins
 
         if lt_bin in ['LT1','LT2','LT3']:
-            # Signal region binning
-            if nj_bin in ['NJ68']:
-                nbbins += ['NB2','NB3i']
-            # Side band  binning
-            if nj_bin in ['NJ45f6']:
-                nbbins += ['NB2i']
+        # Signal region binning
+        if nj_bin in ['NJ68']:
+        nbbins += ['NB2','NB3i']
+        # Side band  binning
+        if nj_bin in ['NJ45f6']:
+        nbbins += ['NB2i']
         '''
 
         for nb_bin in nbbins:
@@ -282,7 +282,7 @@ for nj_bin in ['NJ45f9','NJ9i']:#binsNJ.iteritems():
             if nj_bin in ['NJ9i']:
                 if lt_bin in ['LT1'] and not ht_bin in['HT0i']:
                     nbbins += ['NB1','NB2']
-                    
+
 
                 if lt_bin in ['LT1'] and ht_bin in ['HT0i']:
                     nbbins += ['NB3i']
@@ -308,7 +308,7 @@ for nj_bin in ['NJ45f9','NJ9i']:#binsNJ.iteritems():
 
                 cutDictf9[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
 
-                                # split to SR/CR
+# split to SR/CR
 
                 for sr_bin in ['SR']:
                     sr_cut = binsSR[sr_bin][0]
@@ -415,12 +415,12 @@ for nj_bin in ['NJ45f6','NJ68']:#binsNJ.iteritems():
                     nbbins = ['NB3i']
             else:
                 nbbins = ['NB2i']
-            
+
             for nb_bin in nbbins:
                 nb_cut = binsNB[nb_bin][0]
                 binname = "%s_%s_%s_%s_Few" %(lt_bin,ht_bin,nb_bin,nj_bin)
                 cutDictf68Few[binname] = [("base",lt_bin,lt_cut),("base",ht_bin,ht_cut),("base",nb_bin,nb_cut),("base",nj_bin,nj_cut)]
-                print binname
+                #print binname
                 # split to SR/CR
                 for sr_bin in ['SR']:
                     sr_cut = binsSR[sr_bin][0]
@@ -450,7 +450,7 @@ for nj_bin in ['NJ45f9','NJ9i']:#binsNJ.iteritems():
 
             nbbins = []
             nbbins = ['NB1i']
-            
+
             for nb_bin in nbbins:
                 nb_cut = binsNB[nb_bin][0]
                 binname = "%s_%s_%s_%s_Few" %(lt_bin,ht_bin,nb_bin,nj_bin)
