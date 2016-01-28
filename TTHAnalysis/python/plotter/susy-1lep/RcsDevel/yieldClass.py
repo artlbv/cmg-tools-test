@@ -201,6 +201,14 @@ class YieldStore:
     def getSampDict(self,samp,cat):
 
         if samp in self.samples and cat in self.categories:
+            # fill empty bins
+            '''
+            dct = self.yields[samp][cat]
+            for bin in self.bins:
+                if bin not in dct:
+                    dct[bin] = BinYield(samp, cat, (0, 0))
+            return dct
+            '''
             return self.yields[samp][cat]
         else: return 0
 
@@ -371,8 +379,10 @@ if __name__ == "__main__":
     yds.addFromFiles(pattern,("lep","sele"))
     #yds.addFromFiles(pattern,("ele","anti"))
 
-    yds.showStats()
+    #yds.showStats()
 
+    yds.printBins("T1tttt_Scan_ISR_syst_mGo1200_mLSP800","SR_MB")
+    #yds.printBins("T1tttt_Scan_PU_syst_mGo1200_mLSP800","SR_MB")
     #yds.printBins("QCD","CR_SB")
     #yds.printBins("EWK","Kappa")
 
@@ -406,7 +416,6 @@ if __name__ == "__main__":
     yds.printMixBins(samps)
 
     print [s for s in yds.samples if "1500" in s]
-    '''
 
     sysClass = "JEC"
     samp = "TT"
@@ -420,3 +429,4 @@ if __name__ == "__main__":
         ]
     #print yds.getMixDict(samps)
     yds.printMixBins(samps)
+    '''

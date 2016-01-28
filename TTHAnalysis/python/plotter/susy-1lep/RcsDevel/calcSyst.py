@@ -67,6 +67,9 @@ def getSystHist(tfile, hname, syst = "Xsec"):
     for xbin in range(1,hSyst.GetNbinsX()+1):
         for ybin in range(1,hSyst.GetNbinsY()+1):
 
+            # check point has some content
+            if hSyst.GetBinContent(xbin,ybin) == 0: continue
+
             # reset bins
             hSyst.SetBinContent(xbin,ybin,0)
             hSyst.SetBinError(xbin,ybin,0)
@@ -90,6 +93,8 @@ def getSystHist(tfile, hname, syst = "Xsec"):
 
             # limit max deviation to 200%
             maxDev = min(maxDev,2.0)
+            # put at least 0.00001 as dummy
+            maxDev = max(maxDev,0.00001)
 
             hSyst.SetBinContent(xbin,ybin,maxDev)
             hSyst.SetBinError(xbin,ybin,maxErr)
@@ -104,9 +109,9 @@ def makeSystHists(fileList):
 
     hnames = ["T1tttt_Scan"] # process name
     #hnames = ["EWK"] # process name
+    #hnames = ["EWK","TTJets","WJets","SingleTop","DY","TTV"] # process name
     #hnames = ['T_tWch','TToLeptons_tch','TBar_tWch', 'EWK', 'TToLeptons_sch'] # process name
     #hnames = ["TTJets","WJets","SingleTop","DY","TTV"] # process name
-    #hnames = ["EWK","TTJets","WJets","SingleTop","DY","TTV"] # process name
     #hnames = getHnames(fileList[0],'SR_MB') # get process names from file
     #print 'Found these hists:', hnames
 
