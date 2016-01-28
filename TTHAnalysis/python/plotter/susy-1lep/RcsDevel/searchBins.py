@@ -41,7 +41,8 @@ binsNJ['NJ4f5'] = ('nJets30Clean == 4','[4]')
 
 ## Signal/Control region (wrt dPhi)
 binsSR = {}
-binsSR['SR'] = ('isSR == 1','$\delta \phi > $ x')
+#binsSR['SR'] = ('isSR == 1','$\delta \phi > $ x')
+binsSR['SR'] = ('abs(isSR) == 1','$\delta \phi > $ x')
 binsCR = {}
 binsCR['CR'] = ('isSR == 0','$\delta \phi < $ x')
 

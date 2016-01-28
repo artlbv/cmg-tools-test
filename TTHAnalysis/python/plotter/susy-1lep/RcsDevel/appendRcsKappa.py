@@ -530,6 +530,7 @@ if __name__ == "__main__":
     poisSamps = [s for s in poisSamps if s in allSamps]
     # do qcd prediciton for:
     qcdPredSamps =  ["background","data","QCD","background_poisson","QCD_poisson"]
+    #qcdPredSamps =  ["background","QCD","background_poisson","QCD_poisson"]
     #qcdPredSamps = [s for s in qcdPredSamps if s in allSamps]
     # samples to make full prediciton
     predSamps = allSamps + ["background_poisson","QCD_poisson"]
