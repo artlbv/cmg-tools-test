@@ -27,8 +27,8 @@ if __name__ == "__main__":
     mask = basename.replace("*","X_")
 
         ## Create Yield Storage
-    #ydsAntiEle = yp.YieldStore("EleAnti")
-    #ydsAntiEle.addFromFiles(pattern,("ele","anti"))
+        #ydsAntiEle = yp.YieldStore("EleAnti")
+        #ydsAntiEle.addFromFiles(pattern,("ele","anti"))
 
     ydsSele = yp.YieldStore("Sele")
     ydsSele.addFromFiles(pattern,("lep","sele"))
@@ -54,11 +54,15 @@ if __name__ == "__main__":
 
         # muons
         yp.colorDict["Data_QCD_Mu_"+cat] = yp.kBlue
-        hMuAnti = yp.makeSampHisto(ydsAntiMu,"data",cat,"Data_QCD_Mu_"+cat)
-        hMuAnti.SetTitle("Anti-Sele (#mu)")
+        hMuQCDpred = yp.makeSampHisto(ydsSeleMu,"data_QCDpred",cat,"Data_QCD_Mu_"+cat)
+        hMuQCDpred.SetTitle("QCD pred. (#mu)")
+
+
+        #hMuAnti = yp.makeSampHisto(ydsAntiMu,"data",cat,"Data_QCD_Mu_"+cat)
+        #hMuAnti.SetTitle("Anti-Sele (#mu)")
 
         # apply "F-ratio" = 10%
-        hMuAnti.Scale(1/10.); hMuAnti.SetTitle("Anti-Sele (#mu) x0.1")
+        #hMuAnti.Scale(1/10.); hMuAnti.SetTitle("Anti-Sele (#mu) x0.1")
 
         # Data
         yp.colorDict["Data_"+cat] = yp.kBlack
@@ -85,14 +89,19 @@ if __name__ == "__main__":
         #yp.hMCmu.SetTitle("MC (#mu)")
 
         #ratio = yp.getRatio(hMuAnti,hEleQCDpred)
-        ratio = yp.getRatio(hMuAnti,hDataMu)
+        #ratio = yp.getRatio(hMuAnti,hDataMu)
+
+        ratioEle = yp.getRatio(hEleQCDpred,hDataEle)
+        ratioMu = yp.getRatio(hMuQCDpred,hDataMu)
         #ratio.GetYaxis().SetRangeUser(-0.45,0.45)
         #ratio.GetYaxis().SetRangeUser(0,0.95)
-        ratio.GetYaxis().SetRangeUser(0,0.105)
+        #ratio.GetYaxis().SetRangeUser(0,0.105)
+        ratioEle.GetYaxis().SetRangeUser(0,0.105)
+        ratioMu.GetYaxis().SetRangeUser(0,0.105)
 
         #canv = yp.plotHists("Sele_QCDvsMC_Lep_"+cat,[hMCele,hMCmu,hEle,hMu])
-        #canv = yp.plotHists("Data_vs_QCD_"+cat,[hDataEle,hDataMu,hEleQCDpred,hMuAnti],ratio)
-        canv = yp.plotHists("Data_vs_QCD_Mu_"+cat,[hDataMu,hMuAnti],ratio)
+        canv = yp.plotHists("Data_vs_QCD_"+cat,[hDataEle,hDataMu,hEleQCDpred,hMuQCDpred],[ratioEle,ratioMu])
+        #canv = yp.plotHists("Data_vs_QCD_Mu_"+cat,[hDataMu,hMuQCDpred],ratio)
 
         if not yp._batchMode: raw_input("Enter any key to exit")
 
@@ -100,4 +109,3 @@ if __name__ == "__main__":
         #exts = [".pdf"]
         for ext in exts:
             canv.SaveAs("BinPlots/QCD/lumi2p1/DataCompare/"+mask+canv.GetName()+ext)
-
